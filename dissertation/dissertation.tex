@@ -1,0 +1,51 @@
+\documentclass{article}
+
+\usepackage[UKenglish]{babel}
+\usepackage[UKenglish]{isodate}
+\usepackage[backend=bibtex]{biblatex}
+
+\bibliography{references.bib}
+
+\author{Paulius Dilkas}
+\title{Algorithm Selection for Maximum Common Subgraph}
+
+\begin{document}
+\maketitle
+
+\section{Algorithms}
+Describe how each algorithm works. Cite them.
+
+\section{Features}
+Features are based on the algorithm selection paper for the subgraph isomorphism
+problem \cite{DBLP:conf/lion/KotthoffMS16}. Simple features:
+
+\begin{itemize}
+\item number of vertices,
+\item number of edges,
+\item density,
+\item number of loops,
+\item mean degree,
+\item maximum degree,
+\item whether every vertex has the same degree (?),
+\item whether the graph is connected,
+\item mean distance between all pairs of vertices,
+\item maximum distance between all pairs of vertices,
+\item proportion of vertex pairs that are at least 2, 3 and 4 apart (?).
+\end{itemize}
+
+Features that could be computed if we end up using a presolver:
+
+\begin{itemize}
+\item uniformity of the distribution of edges,
+\item how many candidate pairs were removed,
+\item proportion of candidate pairs removed over all pairs,
+\item min values removed per variable,
+\item max values removed per variable,
+\item CPU time taken to compute all this.
+\end{itemize}
+
+\section{Selection Model}
+We're using llama \cite{kotthoff_llama_2013}. Describe k-folding.
+
+\printbibliography
+\end{document}
