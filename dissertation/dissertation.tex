@@ -12,13 +12,22 @@
 \begin{document}
 \maketitle
 
+\section{The Problem}
+Labeled and unlabeled maximum common induced subgraph.
+
 \section{Algorithms}
 Clique encoding \cite{DBLP:conf/cp/McCreeshNPS16}
 $k\downarrow$ \cite{DBLP:conf/aaai/HoffmannMR17}
 \textsc{McSplit} \cite{DBLP:conf/ijcai/McCreeshPT17}
 
 \section{Problem Instances}
+
+\subsection{ARG database}
 MCS data is from \cite{DeSanto2003}\cite{foggia2001-2}.
+
+\subsection{Benchmarks for the Subgraph Isomorphism Problem}
+SIP instances are taken from \cite{solnon} (with the biochemical reaction
+dataset excluded since we are not dealing with directed graphs).
 
 \section{Features}
 Features are based on the algorithm selection paper for the subgraph isomorphism
@@ -31,11 +40,14 @@ problem \cite{DBLP:conf/lion/KotthoffMS16}. Simple features:
 \item number of loops,
 \item mean degree,
 \item maximum degree,
+\item standard deviation of degrees,
 \item whether every vertex has the same degree (?),
 \item whether the graph is connected,
 \item mean distance between all pairs of vertices,
 \item maximum distance between all pairs of vertices,
-\item proportion of vertex pairs that are at least 2, 3 and 4 apart (?).
+\item proportion of vertex pairs that are at least 2, 3 and 4 apart (?),
+\item number of labels,
+\item number of distinct labels.
 \end{itemize}
 
 Features that could be computed if we end up using a presolver:

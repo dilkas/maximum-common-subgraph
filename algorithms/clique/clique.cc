@@ -10,6 +10,11 @@
 #include <atomic>
 #include <mutex>
 #include <numeric>
+#include <chrono>
+
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+using std::chrono::steady_clock;
 
 namespace
 {
@@ -61,6 +66,8 @@ namespace
         std::mutex mutex;
         std::vector<unsigned> c;
 
+        std::chrono::time_point<std::chrono::steady_clock> start_time;
+
         void update(const std::vector<unsigned> & new_c)
         {
             while (true) {
@@ -70,7 +77,8 @@ namespace
                     if (value.compare_exchange_strong(current_value, new_c_size)) {
                         std::unique_lock<std::mutex> lock(mutex);
                         c = new_c;
-                        std::cerr << "-- " << new_c.size() << std::endl;
+                        std::cerr << "-- " << (duration_cast<milliseconds>(steady_clock::now() - start_time)).count()
+                            << " " << new_c.size() << std::endl;
                         break;
                     }
                 }
@@ -94,17 +102,17 @@ namespace
 
         std::vector<FixedBitSet<n_words_> > vertices_adjacent_to_by_g1;
 
-        std::vector<std::pair<bool, FixedBitSet<n_words_> > > unsets;
-
         CliqueConnectedMCS(const std::pair<Association, AssociatedEdges> & g, const Params & q, const VFGraph & g1) :
             association(g.first),
             params(q),
             order(g.first.size()),
             invorder(g.first.size()),
             nodes(0),
-            vertices_adjacent_to_by_g1(g1.size),
-            unsets(g.first.size())
+            vertices_adjacent_to_by_g1(g1.size)
         {
+            incumbent.start_time = params.start_time;
+            incumbent.value = params.prime;
+
             // populate our order with every vertex initially
             std::iota(order.begin(), order.end(), 0);
 
@@ -128,6 +136,15 @@ namespace
 
             for (auto & f : g.second)
                 graph.add_edge(invorder[f.first], invorder[f.second]);
+
+            if (params.connected) {
+
+                for (unsigned i = 0 ; i < g1.size ; ++i) {
+                    for (int j = 0 ; j < graph.size() ; ++j)
+                        if (0 != g1.edges.at(i).at(unproduct(association, order[j]).first))
+                            vertices_adjacent_to_by_g1.at(i).set(j);
+                }
+            }
         }
 
         auto colour_class_order(
@@ -161,6 +178,119 @@ namespace
                     p_order[i] = v;
                     ++i;
                 }
+            }
+        }
+
+        auto connected_colour_class_order(
+                const FixedBitSet<n_words_> & p,
+                const FixedBitSet<n_words_> & a,
+                std::array<unsigned, n_words_ * bits_per_word> & p_order,
+                std::array<unsigned, n_words_ * bits_per_word> & p_bounds) -> void
+        {
+            unsigned colour = 0;         // current colour
+            unsigned i = 0;              // position in p_bounds
+
+            FixedBitSet<n_words_> p_left = p; // not coloured yet
+            p_left.intersect_with_complement(a);
+
+            // while we've things left to colour
+            while (! p_left.empty()) {
+                // next colour
+                ++colour;
+                // things that can still be given this colour
+                FixedBitSet<n_words_> q = p_left;
+
+                // while we can still give something this colour
+                while (! q.empty()) {
+                    // first thing we can colour
+                    int v = q.first_set_bit();
+                    p_left.unset(v);
+                    q.unset(v);
+
+                    // can't give anything adjacent to this the same colour
+                    graph.intersect_with_row_complement(v, q);
+
+                    // record in result
+                    p_bounds[i] = colour;
+                    p_order[i] = v;
+                    ++i;
+                }
+            }
+
+            p_left = p;
+            p_left.intersect_with(a);
+
+            // while we've things left to colour
+            while (! p_left.empty()) {
+                // next colour
+                ++colour;
+                // things that can still be given this colour
+                FixedBitSet<n_words_> q = p_left;
+
+                // while we can still give something this colour
+                while (! q.empty()) {
+                    // first thing we can colour
+                    int v = q.first_set_bit();
+                    p_left.unset(v);
+                    q.unset(v);
+
+                    // can't give anything adjacent to this the same colour
+                    graph.intersect_with_row_complement(v, q);
+
+                    // record in result
+                    p_bounds[i] = colour;
+                    p_order[i] = v;
+                    ++i;
+                }
+            }
+        }
+
+        auto expand_connected(
+                std::vector<unsigned> & c,
+                FixedBitSet<n_words_> & p,
+                const FixedBitSet<n_words_> & a
+                ) -> void
+        {
+            ++nodes;
+
+            // initial colouring
+            std::array<unsigned, n_words_ * bits_per_word> p_order;
+            std::array<unsigned, n_words_ * bits_per_word> p_bounds;
+
+            if (! c.empty())
+                connected_colour_class_order(p, a, p_order, p_bounds);
+            else
+                colour_class_order(p, p_order, p_bounds);
+
+            // for each v in p... (v comes later)
+            for (int n = p.popcount() - 1 ; n >= 0 ; --n) {
+                // bound, timeout or early exit?
+                if (c.size() + p_bounds[n] <= incumbent.value || params.abort->load())
+                    return;
+
+                auto v = p_order[n];
+
+                if (! c.empty() && ! a.test(v))
+                    break;
+
+                // consider taking v
+                c.push_back(v);
+
+                incumbent.update(c);
+
+                // filter p to contain vertices adjacent to v
+                FixedBitSet<n_words_> new_p = p;
+                graph.intersect_with_row(v, new_p);
+
+                if (! new_p.empty()) {
+                    FixedBitSet<n_words_> new_a = a;
+                    new_a.union_with(vertices_adjacent_to_by_g1.at(unproduct(association, order[v]).first));
+                    expand_connected(c, new_p, new_a);
+                }
+
+                // now consider not taking v
+                c.pop_back();
+                p.unset(v);
             }
         }
 
@@ -212,7 +342,12 @@ namespace
             p.set_up_to(graph.size());
 
             // go!
-            expand(c, p);
+            if (params.connected) {
+                FixedBitSet<n_words_> a;
+                expand_connected(c, p, a);
+            }
+            else
+                expand(c, p);
 
             Result result;
             result.nodes = nodes;
@@ -226,7 +361,7 @@ namespace
     template <template <unsigned> class SGI_>
     struct Apply
     {
-        template <unsigned n_words_, typename> using Type = SGI_<n_words_>;
+        template <unsigned size_, typename> using Type = SGI_<size_>;
     };
 }
 

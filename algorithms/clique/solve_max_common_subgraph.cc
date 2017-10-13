@@ -3,7 +3,6 @@
 #include "clique.hh"
 
 #include <boost/program_options.hpp>
-#include <boost/regex.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -47,12 +46,13 @@ namespace
 
     auto read_word(std::ifstream & infile) -> unsigned
     {
-        unsigned x;
-        infile >> x;
-        return x;
+        unsigned char a, b;
+        a = static_cast<unsigned char>(infile.get());
+        b = static_cast<unsigned char>(infile.get());
+        return unsigned(a) | (unsigned(b) << 8);
     }
 
-    auto read_lad(const std::string & filename) -> VFGraph
+    auto read_vf(const std::string & filename, bool unlabelled, bool no_edge_labels, bool undirected) -> VFGraph
     {
         VFGraph result;
 
@@ -64,37 +64,70 @@ namespace
         if (! infile)
             throw GraphFileError{ filename, "error reading size" };
 
-        result.vertices_by_label.resize(1);
-        result.vertex_labels.resize(result.size);
+        // to be like the CP 2011 labelling scheme...
+        int m = result.size * 33 / 100;
+        int p = 1, k1 = 0, k2 = 0;
+        while (p < m && k1 < 16) {
+            p *= 2;
+            k1 = k2;
+            k2++;
+        }
 
+        if (unlabelled)
+            result.vertices_by_label.resize(1);
+        else
+            result.vertices_by_label.resize(0x10000 >> (16 - k1));
+
+        result.vertex_labels.resize(result.size);
         result.edges.resize(result.size);
         for (auto & e : result.edges)
             e.resize(result.size);
 
         for (unsigned r = 0 ; r < result.size ; ++r) {
-            result.vertex_labels.at(r) = 0;
-            result.vertices_by_label.at(0).push_back(r);
+            unsigned l = read_word(infile) >> (16 - k1);
+            if (unlabelled)
+                l = 0;
+            result.vertex_labels.at(r) = l;
+            result.vertices_by_label.at(l).push_back(r);
         }
 
+        if (! infile)
+            throw GraphFileError{ filename, "error reading attributes" };
+
         for (unsigned r = 0 ; r < result.size ; ++r) {
-            unsigned c_end = read_word(infile);
+            int c_end = read_word(infile);
             if (! infile)
                 throw GraphFileError{ filename, "error reading edges count" };
 
-            for (unsigned c = 0 ; c < c_end ; ++c) {
+            for (int c = 0 ; c < c_end ; ++c) {
                 unsigned e = read_word(infile);
 
                 if (e >= result.size)
-                    throw GraphFileError{ filename, "edge index out of bounds" };
+                    throw GraphFileError{ filename, "edge index " + std::to_string(e) + " out of bounds" };
 
-                result.edges[r][e] = 1;
-                result.edges[e][r] = 1;
+                if (unlabelled) {
+                    result.edges[r][e] = 1;
+                    read_word(infile);
+                }
+                else {
+                    unsigned l = (read_word(infile) >> (16 - k1)) + 1;
+//                     if (result.edges[r][e] != 0 && result.edges[r][e] != l)
+//                         throw GraphFileError{ filename, "contradicting labels on " + std::to_string(r) + " and " + std::to_string(e) };
+
+                    if (no_edge_labels)
+                        l = 1;
+                    result.edges[r][e] = l;
+                }
+
+                if (undirected) {
+//                    if (result.edges[e][r] != 0 && result.edges[e][r] != result.edges[r][e])
+//                        throw GraphFileError{ filename, "contradicting labels on " + std::to_string(r) + " and " + std::to_string(e) };
+                    result.edges.at(e).at(r) = result.edges.at(r).at(e);
+                }
             }
         }
 
-        std::string rest;
-        if (infile >> rest)
-            throw GraphFileError{ filename, "EOF not reached, next text is \"" + rest + "\"" };
+        infile.peek();
         if (! infile.eof())
             throw GraphFileError{ filename, "EOF not reached" };
 
@@ -169,6 +202,11 @@ auto main(int argc, char * argv[]) -> int
         display_options.add_options()
             ("help",                                  "Display help information")
             ("timeout",            po::value<int>(),  "Abort after this many seconds")
+            ("unlabelled",                            "Make the graph unlabelled)")
+            ("no-edge-labels",                        "Get rid of edge labels, but keep vertex labels")
+            ("undirected",                            "Make the graph undirected")
+            ("connected",                             "Only find connected subgraphs")
+            ("prime",              po::value<int>(),  "Set initial incumbent size")
             ;
 
         po::options_description all_options{ "All options" };
@@ -209,10 +247,20 @@ auto main(int argc, char * argv[]) -> int
         /* Figure out what our options should be. */
         Params params;
 
+        params.connected = options_vars.count("connected");
+
+        if (options_vars.count("prime"))
+            params.prime = options_vars["prime"].as<int>();
+
+        if (params.connected && ! options_vars.count("undirected")) {
+            std::cerr << "Currently --connected requires --undirected" << std::endl;
+            return EXIT_FAILURE;
+        }
+
         /* Create graphs */
         auto graphs = std::make_pair(
-                read_lad(options_vars["pattern-file"].as<std::string>()),
-                read_lad(options_vars["target-file"].as<std::string>()));
+                read_vf(options_vars["pattern-file"].as<std::string>(), options_vars.count("unlabelled"), options_vars.count("no-edge-labels"), options_vars.count("undirected")),
+                read_vf(options_vars["target-file"].as<std::string>(), options_vars.count("unlabelled"), options_vars.count("no-edge-labels"), options_vars.count("undirected")));
 
         unsigned e1 = 0, e2 = 0;
         for (unsigned v = 0 ; v < graphs.first.size ; ++v)
@@ -273,6 +321,29 @@ auto main(int argc, char * argv[]) -> int
                         << graphs.second.edges[p.second][q.second] << ")" << std::endl;
                     return EXIT_FAILURE;
                 }
+            }
+        }
+
+        if (params.connected) {
+            std::set<unsigned> seen, queue;
+            if (! result.isomorphism.empty()) {
+                queue.insert(result.isomorphism.begin()->first);
+                while (! queue.empty()) {
+                    unsigned v = *queue.begin();
+                    queue.erase(queue.begin());
+                    seen.insert(v);
+
+                    for (auto & i : result.isomorphism)
+                        if (graphs.first.edges.at(v).at(i.first))
+                            if (! seen.count(i.first))
+                                queue.insert(i.first);
+                }
+
+                for (auto & p : result.isomorphism)
+                    if (! seen.count(p.first)) {
+                        std::cerr << "Oops! not connected" << std::endl;
+                        return EXIT_FAILURE;
+                    }
             }
         }
 

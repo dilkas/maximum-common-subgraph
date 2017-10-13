@@ -5,7 +5,7 @@ HOW_MANY := 10
 # add -a to mcsplit to make it use vertex and edge labels
 define run_algorithms
 #echo $1, `./algorithms/mcsplit/mcsp --timeout=$(TIMEOUT)$2 -q $(MCSPLIT_HEURISTIC)$1` >> results/mcsplit.csv
-#echo $1, `./algorithms/kdown/solve_subgraph_isomorphism sequentialix --timeout $(TIMEOUT) --format $3 $1` >> results/kdown.csv
+#echo $1, `./algorithms/kdown/solve_subgraph_isomorphism sequentialix --timeout $(TIMEOUT) --format $3 --induced $1` >> results/kdown.csv
 echo $1, `./algorithms/clique/solve_max_common_subgraph --timeout $(TIMEOUT) $1` >> results/clique.csv
 endef
 
@@ -21,8 +21,8 @@ define generate_pairs
 $(foreach p,$(wildcard $(1)),$(foreach t,$(wildcard $(2)),$(subst /,_,$(3).$p.$t)))
 endef
 
-main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/si/*/*))
-main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/scalefree/*))
+#main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/si/*/*))
+#main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/scalefree/*))
 main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/phase/*-target))
 main: $(call generate_pairs,data/sip-instances/meshes-CVIU11/patterns/*,data/sip-instances/meshes-CVIU11/targets/*,MESH)
 main: $(call generate_pairs,data/sip-instances/LV/*,data/sip-instances/LV/*,LV)
@@ -34,7 +34,7 @@ main: $(call generate_pairs,data/sip-instances/images-CVIU11/patterns/*,data/sip
 #main: $(addsuffix /TRGT,$(foreach f,$(foreach s,10 30 50,$(wildcard data/mcs-instances/mcs$s/*/*)),$(wordlist 1,$(HOW_MANY),$(wildcard $f/*A*))))
 
 # column names: nodes, time, size
-main:
+parse:
 	#sed -i 's/^\([^,]\+,\)[^0-9]\+\([0-9]\+\)[^:]\+:\s\([0-9]\+\)[^0-9]\+\([0-9]\+\).*/\1\3,\4,\2/g' results/mcsplit.csv
 	sed -i 's/^\([^,]\+,\)[^0-9]\+\([0-9]\+\)[^0-9]\+\([0-9]\+\)\(\s([^)]\+)\)*\s\([0-9]\+\)/\1\2,\5,\3/g' results/clique.csv
 	#sed -i 's/^\([^,]\+,\)[^0-9]\+\([0-9]\+\)\(\s([^)]\+)\)*[^0-9]\+\([0-9]\+\)[^S]\+\(SIZE=\)\?/\1\2,\4,/g' results/kdown.csv

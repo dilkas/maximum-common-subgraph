@@ -13,6 +13,11 @@ struct Params
 
     /// The start time of the algorithm.
     std::chrono::time_point<std::chrono::steady_clock> start_time;
+
+    /// Connected only?
+    bool connected = false;
+
+    int prime = 0;
 };
 
 #endif
