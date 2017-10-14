@@ -6,24 +6,24 @@ HOW_MANY := 10
 define run_algorithms
 #echo $1, `./algorithms/mcsplit/mcsp --timeout=$(TIMEOUT)$2 -q $(MCSPLIT_HEURISTIC)$1` >> results/mcsplit.csv
 #echo $1, `./algorithms/kdown/solve_subgraph_isomorphism sequentialix --timeout $(TIMEOUT) --format $3 --induced $1` >> results/kdown.csv
-echo $1, `./algorithms/clique/solve_max_common_subgraph --timeout $(TIMEOUT) $1` >> results/clique.csv
+echo $1, `./algorithms/clique/solve_max_common_subgraph --unlabelled --undirected $4 --timeout $(TIMEOUT) $1` >> results/clique.csv
 endef
 
 define run_sip
-$(call run_algorithms,$(1), -l,lad)
+$(call run_algorithms,$(1), -l,lad,--lad)
 endef
 
 define run_mcs
-$(call run_algorithms,$(1),,vf)
+$(call run_algorithms,$(1),,vf,)
 endef
 
 define generate_pairs
 $(foreach p,$(wildcard $(1)),$(foreach t,$(wildcard $(2)),$(subst /,_,$(3).$p.$t)))
 endef
 
-#main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/si/*/*))
-#main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/scalefree/*))
-main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/phase/*-target))
+main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/si/*/*))
+main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/scalefree/*))
+#main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/phase/*-target))
 main: $(call generate_pairs,data/sip-instances/meshes-CVIU11/patterns/*,data/sip-instances/meshes-CVIU11/targets/*,MESH)
 main: $(call generate_pairs,data/sip-instances/LV/*,data/sip-instances/LV/*,LV)
 main: $(call generate_pairs,data/sip-instances/largerGraphs/*,data/sip-instances/largerGraphs/*,LARGER)
