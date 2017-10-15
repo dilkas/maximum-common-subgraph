@@ -6,7 +6,9 @@ HOW_MANY := 10
 define run_algorithms
 #echo $1, `./algorithms/mcsplit/mcsp --timeout=$(TIMEOUT)$2 -q $(MCSPLIT_HEURISTIC)$1` >> results/mcsplit.csv
 #echo $1, `./algorithms/kdown/solve_subgraph_isomorphism sequentialix --timeout $(TIMEOUT) --format $3 --induced $1` >> results/kdown.csv
-echo $1, `./algorithms/clique/solve_max_common_subgraph --unlabelled --undirected $4 --timeout $(TIMEOUT) $1` >> results/clique.csv
+if [ $(shell echo $(shell head -n 1 $(firstword $1)) \* $(shell head -n 1 $(word 2,$1)) | bc) -lt 128000 ] ; then \
+	echo $1, `./algorithms/clique/solve_max_common_subgraph --unlabelled --undirected $4 --timeout $(TIMEOUT) $1` >> results/clique.csv ;\
+fi
 endef
 
 define run_sip
