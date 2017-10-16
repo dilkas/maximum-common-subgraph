@@ -1,8 +1,8 @@
 library(lattice)
 library(latticeExtra)
 
-mcsplit <- read.csv("results/mcsplit.si-scalefree.csv", header = FALSE)
-kdown <- read.csv("results/kdown.si-scalefree.csv", header = FALSE)
+mcsplit <- read.csv("results/mcsplit.sip.csv", header = FALSE)
+kdown <- read.csv("results/kdown.sip.csv", header = FALSE)
 colnames(mcsplit) <- c("instance", "nodes", "time", "size")
 colnames(kdown) <- c("instance", "nodes", "time", "size")
 
