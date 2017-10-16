@@ -1,61 +1,133 @@
 import os
 import numpy
 
-# This script extracts various features from graphs represented in the LAD format (the SIP instances) and writes them
-# to a CSV file for each relevant (pattern, target) pair
+# This script extracts various features from graphs represented in the LAD format (the SIP instances) and creates a CSV
+# file that has a row for each pair of pattern and target graphs
 
 MAIN_DIRECTORY = 'data/sip-instances/'
 OUTPUT_FILENAME = 'results/sip_features.csv'
 
-# ========== Functions to extract features from the adjacency matrix ==========
+# ========== Functions to extract features from the adjacency matrix and other (already computed) features ==========
 
-def num_vertices(matrix):
+def num_vertices(matrix, data):
     return len(matrix)
 
-def num_edges(matrix):
-    return num_loops(matrix) + sum(matrix[i][j] for i in range(len(matrix)) for j in range(len(matrix[i])) if i != j)/2
-
-def density(matrix):
-    n = num_vertices(matrix)
-    return num_edges(matrix)/(n*(n-1)/2+n)
-
-def num_loops(matrix):
+def num_loops(matrix, data):
     return sum(matrix[i][i] for i in range(len(matrix)))
 
-def degs(matrix):
-    '''A helper function that returns a list of deg v for all vertices v.'''
-    return [2 * matrix[v][v] + sum(matrix[v][w] for w in range(len(matrix[v])) if v != w) for v in range(num_vertices(matrix))]
+def num_edges(matrix, data):
+    n = len(matrix)
+    return data['number of loops'] + sum(matrix[i][j] for i in range(n) for j in range(i + 1, n))
 
-def mean_deg(matrix):
-    return sum(degs(matrix)) / num_vertices(matrix)
+def density(matrix, data):
+    n = len(matrix)
+    return data['number of edges']/(n*(n-1)/2+n)
 
-def max_deg(matrix):
-    return max(degs(matrix))
+def degs(matrix, data):
+    '''A helper function that computes a list of deg v for all vertices v.'''
+    n = len(matrix)
+    data['degrees'] = [2 * matrix[v][v] + sum(matrix[v][w] for w in range(n) if v != w) for v in range(n)]
 
-def std_deg(matrix):
-    return numpy.std(degs(matrix))
+def mean_deg(matrix, data):
+    degs(matrix, data)
+    return sum(data['degrees']) / len(matrix)
 
-def connected(matrix):
-    pass
+def max_deg(matrix, data):
+    return max(data['degrees'])
 
-def mean_distance(matrix):
-    pass
+def std_deg(matrix, data):
+    return numpy.std(data['degrees'])
 
-def max_distance(matrix):
-    pass
+def connected(matrix, data):
+    visited = [False] * len(matrix)
+    def dfs(vertex):
+        '''Depth first search'''
+        if visited[vertex]:
+            return
+        visited[vertex] = True
+        for neighbour in range(len(matrix)):
+            if matrix[vertex][neighbour] > 0:
+                dfs(neighbour)
+    dfs(0)
+    return 1 if all(visited) else 0
 
-def dist_apart(n, matrix):
-    def dist_n_apart(matrix):
-        pass
+def floyd_warshall(matrix, data):
+    '''Calculates distance between all pairs of vertices'''
+    n = len(matrix)
+    dist = []
+    for _ in range(n):
+        dist.append([float('inf')] * n)
+    for v in range(n):
+        dist[v][v] = 0
+    for u in range(n):
+        for v in range(n):
+            if matrix[u][v]:
+                dist[u][v] = 1
+    for k in range(n):
+        for i in range(n):
+            for j in range(n):
+                if dist[i][j] > dist[i][k] + dist[k][j]:
+                    dist[i][j] = dist[i][k] + dist[k][j]
+    data['distances'] = dist
+
+def mean_distance(matrix, data):
+    floyd_warshall(matrix, data)
+    n = len(matrix)
+    return numpy.mean(data['distances'][i][j] for i in range(n) for j in range(i, n))
+
+def max_distance(matrix, data):
+    n = len(matrix)
+    return max(data['distances'][i][j] for i in range(n) for j in range(i + 1, n))
+
+def dist_apart(n):
+    def dist_n_apart(matrix, data):
+        total = 0
+        far = 0
+        for i in range(n):
+            for j in range(i + 1, n):
+                total += 1
+                if data['distances'] >= n:
+                    far += 1
+        return far / total
     return dist_n_apart
 
-features = [('number of vertices', num_vertices), ('number of edges', num_edges), ('density', density),
-            ('number of loops', num_loops), ('mean degree', mean_deg), ('maximum degree', max_deg),
-            ('standard deviation of degrees', std_deg)]
+features = [('number of vertices', num_vertices), ('number of loops', num_loops), ('number of edges', num_edges),
+            ('density', density), ('mean degree', mean_deg), ('maximum degree', max_deg),
+            ('standard deviation of degrees', std_deg), ('connected', connected), ('mean distance', mean_distance),
+            ('max distance', max_distance)] + [('proportion of pairs of vertices with distance at least ' + n, dist_apart(n)) for n in range(2, 5)]
+
+# ========== Functions to iterate over all pairs of pattern and target graphs ==========
+
+def for_each_pair1(dataset, output_file, data):
+    for root, dirs, files in os.walk(dataset, topdown=False):
+        if len(dirs) == 0:
+            write_line(output_file, os.path.join(root, 'pattern'), os.path.join(root, 'target'), data)
+
+def for_each_pair2(dataset, output_file, data):
+    for root, dirs, files in os.walk(dataset, topdown=False):
+        for filename in filter(lambda f: f.endswith('pattern'), files):
+            write_line(output_file, os.path.join(root, filename), os.path.join(root, filename.replace('pattern', 'target')), data)
+
+def for_each_pair3(dataset, output_file, data):
+    pattern_directory = os.path.join(dataset, 'patterns')
+    target_directory = os.path.join(dataset, 'targets')
+    for pattern in list_directory(pattern_directory):
+        for target in list_directory(target_directory):
+            write_line(output_file, pattern, target, data)
+
+def for_each_pair4(dataset, output_file, data):
+    files = list(list_directory(dataset))
+    for pattern in files:
+        for target in files:
+            write_line(output_file, pattern, target, data)
+
+def for_each_pair5(dataset, output_file, data):
+    for pattern in filter(lambda s: 'pattern' in s, list_directory(dataset)):
+        write_line(output_file, pattern, os.path.join(dataset, 'target'), data)
 
 # ========== The rest of the code ==========
 
-def extract_features(filename):
+def extract_features(filename, data):
     '''Reads the file, builds an adjacency matrix, calls all the feature functions on it, and returns a dictionary
     mapping feature names to the numbers returned by their corresponding functions'''
     with open(filename) as graph:
@@ -66,7 +138,8 @@ def extract_features(filename):
         for i, line in enumerate(graph):
             for j in list(map(int, line.split()))[1:]:
                 adjacency_matrix[i][j] += 1
-    return dict((name, function(adjacency_matrix)) for name, function in features)
+    for name, function in features:
+        data[filename][name] = function(adjacency_matrix, data[filename])
 
 def write_line(output_file, pattern_file, target_file, data):
     '''Writes a single line to the output_file in the CSV format. Also takes two filenames (to identify the instance)
@@ -75,15 +148,9 @@ def write_line(output_file, pattern_file, target_file, data):
                                [str(data[filename][feature]) for filename in [pattern_file, target_file]
                                 for feature, _ in features]) + '\n')
 
-def for_each_pair1(dataset, output_file, data):
-    for root, dirs, files in os.walk(MAIN_DIRECTORY + dataset, topdown=False):
-        if len(dirs) == 0:
-            write_line(output_file, os.path.join(root, 'pattern'), os.path.join(root, 'target'), data)
-
-def for_each_pair2(dataset, output_file, data):
-    for root, dirs, files in os.walk(MAIN_DIRECTORY + dataset, topdown=False):
-        for filename in filter(lambda f: f.endswith('pattern'), files):
-            write_line(output_file, os.path.join(root, filename), os.path.join(root, filename.replace('pattern', 'target')), data)
+def list_directory(directory):
+    '''Returns a directory listing with the directory prefixed to each file '''
+    return map(lambda s: os.path.join(directory, s), os.listdir(directory))
 
 def process_dataset(dataset, output_file, for_each_pair):
     '''Takes a name of a dataset we want to extract features from, an already opened output file, and a function that
@@ -95,13 +162,18 @@ def process_dataset(dataset, output_file, for_each_pair):
         for name in files:
             filename = os.path.join(root, name)
             print(filename)
-            data[filename] = extract_features(filename)
+            extract_features(filename, data)
 
     # Write the data about each relevant pair of graphs
-    for_each_pair(dataset, output_file, data)
+    for_each_pair(MAIN_DIRECTORY + dataset, output_file, data)
 
 with open(OUTPUT_FILENAME, 'w') as output_file:
     output_file.write(','.join(['ID'] + [graph + ' ' + name for graph in ['pattern', 'target'] for name, _ in features]) + '\n')
     #process_dataset('si', output_file, for_each_pair1)
     #process_dataset('scalefree', output_file, for_each_pair1)
-    process_dataset('phase', output_file, for_each_pair2)
+    #process_dataset('phase', output_file, for_each_pair2)
+    #process_dataset('meshes-CVIU11', output_file, for_each_pair3)
+    #process_dataset('LV', output_file, for_each_pair4)
+    #process_dataset('largerGraphs', output_file, for_each_pair4)
+    #process_dataset('images-PR15', output_file, for_each_pair5)
+    process_dataset('images-CVIU11', output_file, for_each_pair3)
