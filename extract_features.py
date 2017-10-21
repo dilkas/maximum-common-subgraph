@@ -1,12 +1,12 @@
 from collections import defaultdict
 import os
+import sys
 import numpy
 
 # This script extracts various features from graphs represented in the LAD format (the SIP instances) and creates a CSV
 # file that has a row for each pair of pattern and target graphs
 
 MAIN_DIRECTORY = 'data/sip-instances/'
-OUTPUT_FILENAME = 'results/sip_features.csv'
 
 # ========== Functions to extract features from the adjacency matrix and other (already computed) features ==========
 
@@ -47,7 +47,7 @@ def connected(matrix, data):
         vertex = frontier.pop(0)
         visited[vertex] = True
         for neighbour in range(n):
-            if matrix[vertex][neighbour] > 0:
+            if matrix[vertex][neighbour] > 0 and not visited[neighbour]:
                 frontier.append(neighbour)
     return 1 if all(visited) else 0
 
@@ -96,7 +96,9 @@ def dist_apart(k):
 features = [('number of vertices', num_vertices), ('number of loops', num_loops), ('number of edges', num_edges),
             ('density', density), ('mean degree', mean_deg), ('maximum degree', max_deg),
             ('standard deviation of degrees', std_deg), ('connected', connected), ('mean distance', mean_distance),
-            ('max distance', max_distance)] + [('proportion of pairs of vertices with distance at least ' + str(n), dist_apart(n)) for n in range(2, 5)]
+            ('max distance', max_distance), ('number of labels', lambda x, y: 0),
+            ('number of distinct labels', lambda x, y: 0)] + [('proportion of pairs of vertices with distance at least ' +
+                                                               str(n), dist_apart(n)) for n in range(2, 5)]
 
 # ========== Functions to iterate over all pairs of pattern and target graphs ==========
 
@@ -169,7 +171,7 @@ def process_dataset(dataset, output_file, for_each_pair):
     # Write the data about each relevant pair of graphs
     for_each_pair(MAIN_DIRECTORY + dataset, output_file, data)
 
-with open(OUTPUT_FILENAME, 'w') as output_file:
+with open(sys.argv[1], 'w') as output_file:
     output_file.write(','.join(['ID'] + [graph + ' ' + name for graph in ['pattern', 'target'] for name, _ in features]) + '\n')
     process_dataset('si', output_file, for_each_pair1)
     process_dataset('scalefree', output_file, for_each_pair1)
