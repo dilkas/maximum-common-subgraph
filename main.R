@@ -1,6 +1,6 @@
 require(llama)
 
-features <- read.csv("results/sip_features.csv", header = FALSE)
+features <- read.csv("results/sip_features.csv")
 #data = input(read.csv("features.csv"), read.csv("times.csv"))
 data(satsolvers)
 data = satsolvers

@@ -20,6 +20,8 @@ using std::chrono::steady_clock;
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 
+const int SIZE_LIMIT = 16000; // limits the product of the orders of graphs to avoid running out of memory
+
 namespace
 {
   class GraphFileError :
@@ -322,6 +324,11 @@ auto main(int argc, char * argv[]) -> int
                              options_vars.count("no_edge_labels"), options_vars.count("undirected")),
                      read_vf(options_vars["target-file"].as<std::string>(), options_vars.count("unlabelled"),
                              options_vars.count("no_edge_labels"), options_vars.count("undirected")));
+
+    if (graphs.first.size * graphs.second.size >= SIZE_LIMIT) {
+      std::cerr << "The graphs are too big to fit into memory" << std::endl;
+      return EXIT_FAILURE;
+    }
 
     unsigned e1 = 0, e2 = 0;
     for (unsigned v = 0 ; v < graphs.first.size ; ++v)

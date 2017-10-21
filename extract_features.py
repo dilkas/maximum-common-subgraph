@@ -1,3 +1,4 @@
+from collections import defaultdict
 import os
 import numpy
 
@@ -39,16 +40,15 @@ def std_deg(matrix, data):
     return numpy.std(data['degrees'])
 
 def connected(matrix, data):
-    visited = [False] * len(matrix)
-    def dfs(vertex):
-        '''Depth first search'''
-        if visited[vertex]:
-            return
+    n = len(matrix)
+    visited = [False] * n
+    frontier = [0]
+    while len(frontier) > 0:
+        vertex = frontier.pop(0)
         visited[vertex] = True
-        for neighbour in range(len(matrix)):
+        for neighbour in range(n):
             if matrix[vertex][neighbour] > 0:
-                dfs(neighbour)
-    dfs(0)
+                frontier.append(neighbour)
     return 1 if all(visited) else 0
 
 def floyd_warshall(matrix, data):
@@ -61,7 +61,7 @@ def floyd_warshall(matrix, data):
         dist[v][v] = 0
     for u in range(n):
         for v in range(n):
-            if matrix[u][v]:
+            if matrix[u][v] == 1:
                 dist[u][v] = 1
     for k in range(n):
         for i in range(n):
@@ -73,20 +73,22 @@ def floyd_warshall(matrix, data):
 def mean_distance(matrix, data):
     floyd_warshall(matrix, data)
     n = len(matrix)
-    return numpy.mean(data['distances'][i][j] for i in range(n) for j in range(i, n))
+    distances = [data['distances'][i][j] for i in range(n) for j in range(i, n)]
+    return sum(distances) / len(distances)
 
 def max_distance(matrix, data):
     n = len(matrix)
     return max(data['distances'][i][j] for i in range(n) for j in range(i + 1, n))
 
-def dist_apart(n):
+def dist_apart(k):
     def dist_n_apart(matrix, data):
         total = 0
         far = 0
+        n = len(matrix)
         for i in range(n):
             for j in range(i + 1, n):
                 total += 1
-                if data['distances'] >= n:
+                if data['distances'][i][j] >= k:
                     far += 1
         return far / total
     return dist_n_apart
@@ -94,7 +96,7 @@ def dist_apart(n):
 features = [('number of vertices', num_vertices), ('number of loops', num_loops), ('number of edges', num_edges),
             ('density', density), ('mean degree', mean_deg), ('maximum degree', max_deg),
             ('standard deviation of degrees', std_deg), ('connected', connected), ('mean distance', mean_distance),
-            ('max distance', max_distance)] + [('proportion of pairs of vertices with distance at least ' + n, dist_apart(n)) for n in range(2, 5)]
+            ('max distance', max_distance)] + [('proportion of pairs of vertices with distance at least ' + str(n), dist_apart(n)) for n in range(2, 5)]
 
 # ========== Functions to iterate over all pairs of pattern and target graphs ==========
 
@@ -157,7 +159,7 @@ def process_dataset(dataset, output_file, for_each_pair):
     iterates over all pairs of pattern and target graphs and calls write_line() for each pair. Creates a dictionary
     mapping instance name to the dictionary returned by extract_features() and calls for_each_pair().'''
     # Collect the date about each graph
-    data = {}
+    data = defaultdict(dict)
     for root, dirs, files in os.walk(MAIN_DIRECTORY + dataset, topdown=False):
         for name in files:
             filename = os.path.join(root, name)
@@ -169,11 +171,11 @@ def process_dataset(dataset, output_file, for_each_pair):
 
 with open(OUTPUT_FILENAME, 'w') as output_file:
     output_file.write(','.join(['ID'] + [graph + ' ' + name for graph in ['pattern', 'target'] for name, _ in features]) + '\n')
-    #process_dataset('si', output_file, for_each_pair1)
-    #process_dataset('scalefree', output_file, for_each_pair1)
-    #process_dataset('phase', output_file, for_each_pair2)
-    #process_dataset('meshes-CVIU11', output_file, for_each_pair3)
-    #process_dataset('LV', output_file, for_each_pair4)
-    #process_dataset('largerGraphs', output_file, for_each_pair4)
-    #process_dataset('images-PR15', output_file, for_each_pair5)
+    process_dataset('si', output_file, for_each_pair1)
+    process_dataset('scalefree', output_file, for_each_pair1)
+    process_dataset('phase', output_file, for_each_pair2)
+    process_dataset('meshes-CVIU11', output_file, for_each_pair3)
+    process_dataset('LV', output_file, for_each_pair4)
+    process_dataset('largerGraphs', output_file, for_each_pair4)
+    process_dataset('images-PR15', output_file, for_each_pair5)
     process_dataset('images-CVIU11', output_file, for_each_pair3)
