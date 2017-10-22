@@ -53,6 +53,10 @@ problem \cite{DBLP:conf/lion/KotthoffMS16}. Simple features:
 \item number of distinct labels.
 \end{itemize}
 
+The last two were later rethought to be unnecessary and replaced by a boolean
+feature ``labelled'' because if labelling is enabled, the number of labels is equal
+to the number of vertices and the number of distinct labels is equal to 33\% of that.
+
 Features that could be computed if we end up using a presolver:
 
 \begin{itemize}
@@ -63,6 +67,9 @@ Features that could be computed if we end up using a presolver:
 \item max values removed per variable,
 \item CPU time taken to compute all this.
 \end{itemize}
+
+Number (distinct or not) of labels includes the label of not having a label (so
+it's always at least 1).
 
 \section{Selection Model}
 We're using \textsc{Llama} \cite{kotthoff_llama_2013}. Describe k-folding.

@@ -5,8 +5,8 @@ CLIQUE_LIMIT := 16000
 
 # add -a to mcsplit to make it use vertex and edge labels
 define run_sip
-echo $1, `./algorithms/mcsplit/mcsp --timeout=$(TIMEOUT) -l -q $(MCSPLIT_HEURISTIC)$1` >> results/mcsplit.csv
-echo $1, `./algorithms/kdown/solve_subgraph_isomorphism sequentialix --timeout $(TIMEOUT) --format lad --induced $1` >> results/kdown.csv
+#echo $1, `./algorithms/mcsplit/mcsp --timeout=$(TIMEOUT) -l -q $(MCSPLIT_HEURISTIC)$1` >> results/mcsplit.csv
+#echo $1, `./algorithms/kdown/solve_subgraph_isomorphism sequentialix --timeout $(TIMEOUT) --format lad --induced $1` >> results/kdown.csv
 if [ $(shell echo $(shell head -n 1 $(firstword $1)) \* $(shell head -n 1 $(word 2,$1)) | bc) -lt $(CLIQUE_LIMIT) ] ; then \
 	echo $1, `./algorithms/clique/solve_max_common_subgraph --unlabelled --undirected --lad --timeout $(TIMEOUT) $1` >> results/clique.csv ;\
 fi
@@ -27,11 +27,11 @@ endef
 #main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/phase/*-target))
 #main: $(call generate_pairs,data/sip-instances/meshes-CVIU11/patterns/*,data/sip-instances/meshes-CVIU11/targets/*,MESH)
 #main: $(call generate_pairs,data/sip-instances/LV/*,data/sip-instances/LV/*,LV)
-#main: $(call generate_pairs,data/sip-instances/largerGraphs/*,data/sip-instances/largerGraphs/*,LARGER)
+main: $(call generate_pairs,data/sip-instances/largerGraphs/*,data/sip-instances/largerGraphs/*,LARGER)
 #main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/images-PR15/pattern*))
 #main: $(call generate_pairs,data/sip-instances/images-CVIU11/patterns/*,data/sip-instances/images-CVIU11/targets/*,IMAGE)
 
-main: $(addsuffix /TRGT,$(foreach f,$(wildcard data/mcs-instances/*/*/*),$(wildcard $f/*A*)))
+#main: $(addsuffix /TRGT,$(foreach f,$(wildcard data/mcs-instances/*/*/*),$(wildcard $f/*A*)))
 #main: $(addsuffix /TRGT,$(foreach f,$(foreach s,10 30 50,$(wildcard data/mcs-instances/mcs$s/*/*)),$(wordlist 1,$(HOW_MANY),$(wildcard $f/*A*))))
 
 # column names: nodes, time, size
