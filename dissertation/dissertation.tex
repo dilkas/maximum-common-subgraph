@@ -13,8 +13,13 @@
 \maketitle
 
 \section{The Problem}
-Labeled and unlabeled (undireced) maximum common induced subgraph. NB: we are
-allowing loops. Update formulas accordingly.
+Maximum common induced subgraph for undirected graphs. We are considering three
+types of labelling: no labelling, labels on vertices, and labels on both
+vertices and edges. When labelling is used, every vertex (and possibly edge)
+gets assigned a random label (are they uniformly distributed?). The number of
+distinct labels is approximately equal to 33\% of the number of vertices.
+
+NB: we are allowing loops. Update formulas accordingly.
 
 \section{Algorithms}
 Clique encoding \cite{DBLP:conf/cp/McCreeshNPS16}
