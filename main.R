@@ -14,7 +14,16 @@ feature_names <- c("vertices", "edges", "loops", "meandeg", "maxdeg", "stddeg", 
 features <- read.csv("results/sip_features.csv", header = FALSE)
 colnames(features) <- c("ID", paste("pattern", feature_names, sep = "."), paste("target", feature_names, sep = "."))
 
-# Construct the performance (running time) data frame
+# Check if the answers match
+answers <- data.frame(ID = features[1])
+answers <- merge(answers, kdown[kdown$time < 1000000, c("ID", "size")], by = "ID", all.x = TRUE)
+colnames(performance) <- c("ID", "kdown")
+answers <- merge(answers, mcsplit[mcsplit$time < 1000000, c("ID", "size")], by = "ID", all.x = TRUE)
+colnames(answers) <- c("ID", "kdown", "mcsplit")
+answers$equal = answers$mcsplit == answers$kdown
+all(answers[complete.cases(answers),"equal"])
+
+#Construct the performance (running time) data frame
 performance <- data.frame(ID = features[1])
 performance <- merge(performance, clique[, c("ID", "time")], by = "ID", all.x = TRUE)
 colnames(performance) <- c("ID", "clique")

@@ -13,15 +13,15 @@
  * graph file.
  */
 class GraphFileError :
-    public std::exception
+  public std::exception
 {
-    private:
-        std::string _what;
+private:
+  std::string _what;
 
-    public:
-        GraphFileError(const std::string & filename, const std::string & message) throw ();
+public:
+  GraphFileError(const std::string & filename, const std::string & message) throw ();
 
-        auto what() const throw () -> const char *;
+  auto what() const throw () -> const char *;
 };
 
 /**
@@ -32,59 +32,61 @@ class GraphFileError :
  */
 class Graph
 {
-    public:
-        /**
-         * The adjaceny matrix type. Shouldn't really be public, but we
-         * snoop around inside it when doing message passing.
-         */
-        using AdjacencyMatrix = std::vector<std::uint8_t>;
+public:
+  /**
+   * The adjaceny matrix type. Shouldn't really be public, but we
+   * snoop around inside it when doing message passing.
+   */
+  using AdjacencyMatrix = std::vector<std::uint8_t>;
 
-    private:
-        unsigned _size = 0;
-        AdjacencyMatrix _adjacency;
-        bool _add_one_for_output;
+private:
+  unsigned _size = 0;
+  AdjacencyMatrix _adjacency;
+  bool _add_one_for_output;
 
-        /**
-         * Return the appropriate offset into _adjacency for the edge (a,
-         * b).
-         */
-        auto _position(unsigned a, unsigned b) const -> AdjacencyMatrix::size_type;
+  /**
+   * Return the appropriate offset into _adjacency for the edge (a,
+   * b).
+   */
+  auto _position(unsigned a, unsigned b) const -> AdjacencyMatrix::size_type;
 
-    public:
-        /**
-         * \param initial_size can be 0, if resize() is called afterwards.
-         */
-        Graph(unsigned initial_size);
+public:
+  /**
+   * \param initial_size can be 0, if resize() is called afterwards.
+   */
+  Graph(unsigned initial_size);
 
-        Graph(const Graph &) = default;
+  Graph(const Graph &) = default;
 
-        explicit Graph() = default;
+  explicit Graph() = default;
 
-        /**
-         * Number of vertices.
-         */
-        auto size() const -> unsigned;
+  /**
+   * Number of vertices.
+   */
+  auto size() const -> unsigned;
 
-        /**
-         * Change our size. Must be called before adding an edge, and must
-         * not be called afterwards.
-         */
-        auto resize(unsigned size) -> void;
+  /**
+   * Change our size. Must be called before adding an edge, and must
+   * not be called afterwards.
+   */
+  auto resize(unsigned size) -> void;
 
-        /**
-         * Add an edge from a to b (and from b to a).
-         */
-        auto add_edge(unsigned a, unsigned b) -> void;
+  /**
+   * Add an edge from a to b (and from b to a).
+   */
+  auto add_edge(unsigned a, unsigned b) -> void;
 
-        /**
-         * Are vertices a and b adjacent?
-         */
-        auto adjacent(unsigned a, unsigned b) const -> bool;
+  /**
+   * Are vertices a and b adjacent?
+   */
+  auto adjacent(unsigned a, unsigned b) const -> bool;
 
-        /**
-         * What is the degree of a given vertex?
-         */
-        auto degree(unsigned a) const -> unsigned;
+  /**
+   * What is the degree of a given vertex?
+   */
+  auto degree(unsigned a) const -> unsigned;
+
+  std::vector<unsigned> vertex_labels;
 };
 
 #endif

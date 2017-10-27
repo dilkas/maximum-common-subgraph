@@ -1,5 +1,5 @@
 MCSPLIT_HEURISTIC := min_max # min_max or min_product
-TIMEOUT := 1
+TIMEOUT := 100
 HOW_MANY := 10
 CLIQUE_LIMIT := 16000
 
@@ -18,7 +18,7 @@ define run_mcs
 #echo $1, `./algorithms/mcsplit/mcsp --timeout=$(TIMEOUT) -q $(MCSPLIT_HEURISTIC)$1` >> results/mcsplit.csv
 #echo $1, `./algorithms/kdown/solve_subgraph_isomorphism sequentialix --timeout $(TIMEOUT) --format vf --induced $1` >> results/kdown.csv
 #echo $1, `./algorithms/clique/solve_max_common_subgraph --unlabelled --undirected --timeout $(TIMEOUT) $1` >> results/clique.csv
-#echo $1 `./graph_stats/graph_stats --vf --distances $(firstword $1)` `./graph_stats/graph_stats --distances $(word 2,$1)` >> results/features.csv
+echo $1 `./graph_stats/graph_stats --vf --distances $(firstword $1)` `./graph_stats/graph_stats --distances $(word 2,$1)` >> results/features.csv
 #echo $1 >> results/mcs_instances
 endef
 
@@ -30,21 +30,22 @@ endef
 #main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/scalefree/*))
 #main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/phase/*-target))
 #main: $(call generate_pairs,data/sip-instances/meshes-CVIU11/patterns/*,data/sip-instances/meshes-CVIU11/targets/*,MESH)
-main: $(call generate_pairs,data/sip-instances/LV/*,data/sip-instances/LV/*,LV)
+#main: $(call generate_pairs,data/sip-instances/LV/*,data/sip-instances/LV/*,LV)
 #main: $(call generate_pairs,data/sip-instances/largerGraphs/*,data/sip-instances/largerGraphs/*,LARGER)
 #main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/images-PR15/pattern*))
 #main: $(call generate_pairs,data/sip-instances/images-CVIU11/patterns/*,data/sip-instances/images-CVIU11/targets/*,IMAGE)
 
 #main: $(addsuffix /TRGT,$(foreach f,$(wildcard data/mcs-instances/*/*/*),$(wildcard $f/*A*)))
+main: $(addsuffix /TRGT,$(wildcard data/mcs-instances/*/*/*/*))
 #main: $(addsuffix /TRGT,$(foreach f,$(foreach s,10 30 50,$(wildcard data/mcs-instances/mcs$s/*/*)),$(wordlist 1,$(HOW_MANY),$(wildcard $f/*A*))))
 
 # column names: nodes, time, size
 parse:
 	#sed -i 's/^\([^,]\+,\)[^0-9]\+\([0-9]\+\)[^:]\+:\s\([0-9]\+\)[^0-9]\+\([0-9]\+\).*/\1\3,\4,\2/g' results/mcsplit.csv
-	sed -i 's/^\([^,]\+,\)[^0-9]\+\([0-9]\+\)[^0-9]\+\([0-9]\+\)\(\s([^)]\+)\)*\s\([0-9]\+\)/\1\2,\5,\3/g' results/clique.csv
+	#sed -i 's/^\([^,]\+,\)[^0-9]\+\([0-9]\+\)[^0-9]\+\([0-9]\+\)\(\s([^)]\+)\)*\s\([0-9]\+\)/\1\2,\5,\3/g' results/clique.csv
 	#sed -i 's/^\([^,]\+,\)[^0-9]\+\([0-9]\+\)\(\s([^)]\+)\)*[^0-9]\+\([0-9]\+\)[^S]\+\(SIZE=\)\?/\1\2,\4,/g' results/kdown.csv
 	#sed -i 's/,$$/,0/g' results/kdown.csv
-	#sed -i 's/ [a-z0-9]\+ = /,/g' results/features.csv
+	sed -i 's/ [a-z0-9]\+ = /,/g' results/features.csv
 
 data/sip-instances/si/%/MAKE_TARGET: data/sip-instances/si/%/pattern data/sip-instances/si/%/target
 	$(call run_sip,$^)
@@ -61,5 +62,8 @@ data/sip-instances/images-PR15/%/MAKE_TARGET: data/sip-instances/images-PR15/% d
 MESH% LV% LARGER% IMAGE%:
 	$(call run_sip,$(subst _,/,$(word 2,$(subst ., ,$@)) $(word 3,$(subst ., ,$@))))
 
+#data/mcs-instances/%/TRGT:
+#	$(call run_mcs,$(subst /TRGT,,$@ $(subst A,B,$@)))
+
 data/mcs-instances/%/TRGT:
-	$(call run_mcs,$(subst /TRGT,,$@ $(subst A,B,$@)))
+	echo $(subst /TRGT,,$@)`./graph_stats/graph_stats --vf --distances $(subst /TRGT,,$@)` >> results/features.csv

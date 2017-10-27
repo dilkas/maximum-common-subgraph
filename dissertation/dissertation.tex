@@ -3,6 +3,11 @@
 \usepackage[UKenglish]{babel}
 \usepackage[UKenglish]{isodate}
 \usepackage[backend=bibtex]{biblatex}
+\usepackage[hidelinks]{hyperref}
+\usepackage{amsthm}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
 
 \bibliography{references.bib}
 
@@ -16,31 +21,94 @@
 Maximum common induced subgraph for undirected graphs. We are considering three
 types of labelling: no labelling, labels on vertices, and labels on both
 vertices and edges. When labelling is used, every vertex (and possibly edge)
-gets assigned a random label (are they uniformly distributed?). The number of
-distinct labels is approximately equal to 33\% of the number of vertices.
-
-NB: we are allowing loops. Update formulas accordingly.
+gets assigned a random (?) label (are they uniformly distributed?). The number of
+distinct labels is approximately equal to 33\% of the number of vertices, just
+like in what studies? Some of the graphs also contain loops, but no multiple
+edges (confirm!).
 
 \section{Algorithms}
 Clique encoding \cite{DBLP:conf/cp/McCreeshNPS16}
 $k\downarrow$ \cite{DBLP:conf/aaai/HoffmannMR17}
-\textsc{McSplit} \cite{DBLP:conf/ijcai/McCreeshPT17}
+\textsc{McSplit} and $\textsc{McSplit}\downarrow$ \cite{DBLP:conf/ijcai/McCreeshPT17}
+
+\section{Problem Instances}
+In order to determine which algorithm should be used for which problem instance,
+we run all algorithms on two databases that contain a large variety of graphs
+differing in size, various characteristics, and the way they were generated.
+
+The \textsc{McSplit} paper \cite{DBLP:conf/ijcai/McCreeshPT17} used the same
+datasets to compare these (and a few constraint programming) algorithms and
+found \textsc{McSplit} to win with unlabelled graphs, the clique encoding to
+win with labelled graphs, and $\textsc{McSplit}\downarrow$ to win with the
+\texttt{largerGraphs} dataset. However, in some cases the difference in
+performance between \textsc{McSplit} and the clique encoding or between
+$\textsc{McSplit}\downarrow$ and $k\downarrow$ was very small.
 
 (Somewhere) 1000 s limit, 512 GB limit (clique becomes impossible for some
 instances), insert CPU specs.
 
-\section{Problem Instances}
+\subsection{Labelled graphs}
+All of the labelled graphs are taken from the ARG Database \cite{DeSanto2003,
+  foggia2001-2}, which is a large collection of graphs for benchmarking various
+graph-matching algorithms. The graphs are generated using several algorithms:
 
-\subsection{ARG database}
-MCS data is from \cite{DeSanto2003}\cite{foggia2001-2}.
+\begin{itemize}
+\item randomly generated,
+\item 2D, 3D, and 4D meshes,
+\item and bounded valence graphs.
+\end{itemize}
 
-\subsection{Benchmarks for the Subgraph Isomorphism Problem}
-SIP instances are taken from \cite{solnon} (with the biochemical reaction
-dataset excluded since we are not dealing with directed graphs).
+Furthermore, each algorithm is executed with several (3--5) different parameter
+values. The database includes 81400 pairs of labelled graphs. Their unlabelled
+versions are used as well.
+
+\subsubsection{Characteristics of Graph Labelling}
+\begin{definition}
+  A \emph{(vertex) labelled graph}
+\end{definition}
+
+\subsection{Unlabelled graphs}
+We also include a collection of benchmark instances for the subgraph isomorphism
+problem\footnote{\url{http://liris.cnrs.fr/csolnon/SIP.html}} (with the
+biochemical reactions dataset excluded since we are not dealing with directed
+graphs). It contains only unlabelled graphs and consists of the following sets:
+
+\begin{description}
+\item[images-CVIU11] Graphs generated from segmented images. 43 pattern graphs
+  and 146 target graphs, giving a total of 6278 instances.
+\item[meshes-CVIU11] Graphs generated from meshes modelling 3D
+  objects. 6 pattern graphs and 503 target graphs, giving a total of 3018
+  instances. Both \texttt{images-CVIU11} and \texttt{meshes-CVIU11} datasets are
+  described in \cite{DBLP:journals/cviu/DamiandSHJS11}.
+\item[images-PR15] Graphs generated from segmented images
+  \cite{DBLP:journals/pr/SolnonDHJ15}. 24 pattern graphs and a single target
+  graph, giving 24 instances.
+\item[LV] Graphs with various properties (connected, biconnected, triconnected,
+  bipartite, planar, etc.). 49 graphs are paired up in all possible ways, giving
+  $49^2=2401$ instances.
+\item[scalefree] Scale-free networks generated using a power law distribution of
+  degrees (100 instances).
+\item[si] Bounded valence graphs, 4D meshes, and randomly generated graphs (1170
+  instances). This is the unlabelled part of the ARG database. \texttt{LV},
+  \texttt{scalefree}, and \texttt{si} datasets are described in
+  \cite{DBLP:journals/ai/Solnon10, DBLP:journals/constraints/ZampelliDS10}.
+\item[phase] Random graphs generated to be close to the
+  satisfiable-unsatisfiable phase transition (200 instances)
+  \cite{DBLP:conf/ijcai/McCreeshPT16}.
+\item[largerGraphs] Large random and real-world graphs. There are 70 graphs,
+  giving $70^2=4900$ instances. This set is not actually part of the main
+  collection of benchmark instances, but is used in
+  \cite{DBLP:conf/aaai/HoffmannMR17, DBLP:conf/lion/KotthoffMS16,
+    DBLP:conf/ijcai/McCreeshPT17}.
+\end{description}
+
+Note that this set of instances was taken from the repository of
+\cite{DBLP:conf/ijcai/McCreeshPT17} and has some minor differences from the
+version on Christine Solnon's website.
 
 \section{Features}
-Features are based on the algorithm selection paper for the subgraph isomorphism
-problem \cite{DBLP:conf/lion/KotthoffMS16}. Simple features:
+The initial set of features was based on the algorithm selection paper for the subgraph isomorphism
+problem \cite{DBLP:conf/lion/KotthoffMS16}:
 
 \begin{itemize}
 \item number of vertices,
@@ -53,14 +121,15 @@ problem \cite{DBLP:conf/lion/KotthoffMS16}. Simple features:
 \item whether the graph is connected,
 \item mean distance between all pairs of vertices,
 \item maximum distance between all pairs of vertices,
-\item proportion of vertex pairs that are at least 2, 3 and 4 apart (?),
-\item number of labels,
-\item number of distinct labels.
+\item proportion of all vertex pairs that have a distance of at least 2, 3, and 4.
 \end{itemize}
 
-The last two were later rethought to be unnecessary and replaced by a boolean
-feature ``labelled'' because if labelling is enabled, the number of labels is equal
-to the number of vertices and the number of distinct labels is equal to 33\% of that.
+We excluded feature extraction running time as a viable feature by itself since it would
+not provide any insight into what properties of the graph affect
+Counting the number of (distinct and not) labels was later rethought to be
+unnecessary and replaced by a boolean feature ``labelled'' because if labelling
+is enabled, the number of labels is equal to the number of vertices and the
+number of distinct labels is equal to 33\% of that.
 
 Features that could be computed if we end up using a presolver:
 
@@ -73,8 +142,8 @@ Features that could be computed if we end up using a presolver:
 \item CPU time taken to compute all this.
 \end{itemize}
 
-Number (distinct or not) of labels includes the label of not having a label (so
-it's always at least 1).
+\subsection{Distributions of Features}
+In this section we plot and discuss how the selected features are distributed...
 
 \section{Selection Model}
 We're using \textsc{Llama} \cite{kotthoff_llama_2013}. Describe k-folding.

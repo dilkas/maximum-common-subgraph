@@ -28,8 +28,20 @@ auto read_vf(const std::string & filename) -> Graph
     if (! infile)
         throw GraphFileError{ filename, "error reading size" };
 
+    // to be like the CP 2011 labelling scheme...
+    int m = result.size() * 33 / 100;
+    int p = 1, k1 = 0, k2 = 0;
+    while (p < m && k1 < 16) {
+      p *= 2;
+      k1 = k2;
+      k2++;
+    }
+    //result.vertices_by_label.resize(0x10000 >> (16 - k1));
+    result.vertex_labels.resize(result.size());
     for (unsigned r = 0 ; r < result.size() ; ++r) {
-        read_word(infile);
+      unsigned l = read_word(infile) >> (16 - k1);
+      result.vertex_labels.at(r) = l;
+      //result.vertices_by_label.at(l).push_back(r);
     }
 
     if (! infile)

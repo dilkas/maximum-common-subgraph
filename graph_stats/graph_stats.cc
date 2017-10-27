@@ -210,24 +210,28 @@ auto main(int argc, char * argv[]) -> int
     //auto overall_time = duration_cast<milliseconds>(steady_clock::now() - start_time);
 
     //std::cout << "time = " << overall_time.count() << std::endl;
-    std::cout << "vertices = " << graph.size() << std::endl;
-    std::cout << "edges = " << edges << std::endl;
-    std::cout << "loops = " << loops << std::endl;
-    std::cout << "meandeg = " << mean_deg << std::endl;
-    std::cout << "maxdeg = " << max_deg << std::endl;
-    std::cout << "stddeg = " << std_deg << std::endl;
-    std::cout << "density = " << ((0.0 + 2 * edges) / (graph.size() * (graph.size() - 1))) << std::endl;
+    //std::cout << "vertices = " << graph.size() << std::endl;
+    //std::cout << "edges = " << edges << std::endl;
+    //std::cout << "loops = " << loops << std::endl;
+    //std::cout << "meandeg = " << mean_deg << std::endl;
+    //std::cout << "maxdeg = " << max_deg << std::endl;
+    //std::cout << "stddeg = " << std_deg << std::endl;
+    //std::cout << "density = " << ((0.0 + 2 * edges) / (graph.size() * (graph.size() - 1))) << std::endl;
 
-    if (options_vars.count("distances")) {
+    /*if (options_vars.count("distances")) {
       std::cout << "isconnected = " << is_connected << std::endl;
       std::cout << "meandistance = " << ((0.0 + sum_distances) / (0.0 + distance_count)) << std::endl;
       std::cout << "maxdistance = " << max_distance << std::endl;
       std::cout << "proportiondistancege2 = " << ((0.0 + distancege2) / (graph.size() * graph.size() + 0.0)) << std::endl;
       std::cout << "proportiondistancege3 = " << ((0.0 + distancege3) / (graph.size() * graph.size() + 0.0)) << std::endl;
       std::cout << "proportiondistancege4 = " << ((0.0 + distancege4) / (graph.size() * graph.size() + 0.0)) << std::endl;
-    }
+      }*/
 
-    //std::cout << "labelled = " << ((graph.vertices_by_label.size() > 1) ? 1 : 0) << std::endl;
+    //std::cout << "num_labels = " << graph.vertices_by_label.size() << std::endl;
+    //std::cout << "graphs per label:";
+    for (unsigned i = 0; i < graph.vertices_by_label.size(); i++)
+      std::cout << "," << graph.vertices_by_label.at(i).size();
+    std::cout << std::endl;
 
     return EXIT_SUCCESS;
   }
