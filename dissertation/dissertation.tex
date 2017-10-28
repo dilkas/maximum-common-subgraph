@@ -4,7 +4,7 @@
 \usepackage[UKenglish]{isodate}
 \usepackage[backend=bibtex]{biblatex}
 \usepackage[hidelinks]{hyperref}
-\usepackage{amsthm}
+\usepackage{amsfonts, amsthm, graphicx}
 
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
@@ -17,19 +17,49 @@
 \begin{document}
 \maketitle
 
-\section{The Problem}
-Maximum common induced subgraph for undirected graphs. We are considering three
-types of labelling: no labelling, labels on vertices, and labels on both
-vertices and edges. When labelling is used, every vertex (and possibly edge)
-gets assigned a random (?) label (are they uniformly distributed?). The number of
-distinct labels is approximately equal to 33\% of the number of vertices, just
-like in what studies? Some of the graphs also contain loops, but no multiple
-edges (confirm!).
+\section{Introduction}
+Maximum common induced subgraph for undirected graphs. Some of the graphs also
+contain loops and multiple edges.
 
 \section{Algorithms}
 Clique encoding \cite{DBLP:conf/cp/McCreeshNPS16}
-$k\downarrow$ \cite{DBLP:conf/aaai/HoffmannMR17}
-\textsc{McSplit} and $\textsc{McSplit}\downarrow$ \cite{DBLP:conf/ijcai/McCreeshPT17}
+
+$k\downarrow$ algorithm \cite{DBLP:conf/aaai/HoffmannMR17} starts by trying to
+solve the subgraph isomorphism problem, i.e. finding the pattern graph in the
+target graph. If that fails, it allows a single vertex of the pattern graph to
+not match any of the target graph vertices and tries again, allowing smaller and
+smaller pattern graphs until it finds a solution. The number of vertices of the
+pattern graph that are allowed this additional freedom is represented by $k$.
+More specifically, the algorithm creates a domain for each pattern graph vertex,
+which initially includes all vertices of the target graph and $k$ wildcards. The
+domains are filtered with various propagation techniques. Then the search begins
+with a smallest domain (not counting wildcards), a value is chosen, and domains
+are filtered again to eliminate the chosen value.
+
+\textsc{McSplit} \cite{DBLP:conf/ijcai/McCreeshPT17} is a branch and bound
+algorithm that builds its own bit string labels for vertices in both pattern and
+target graphs. Once it chooses to match a vertex $u$ in graph $G_1$ with a
+vertex $v$ in graph $G_2$, it iterates over all unmatched vertices in both
+graphs, adding a 1 to their labels if they are adjacent to $u$ or $v$ and 0
+otherwise. That way a vertex can only be matched with vertices that have the
+same labels. The labels are also used in the upper bound function by noticing
+that if a particular label is assigned to $m$ vertices in $G_1$ and $n$
+vertices in $G_2$, then up to $\min \{ m, n \}$ pairs can be matched for that
+label.
+
+$\textsc{McSplit} \downarrow$ is a variant of \textsc{McSplit} mentioned but not
+explained in \cite{DBLP:conf/ijcai/McCreeshPT17}. It is meant to be similar to
+$k\downarrow$ in that it starts by trying to find a subgraph isomorphism and
+then allows more and more of the pattern graph vertices to not be part of the
+solution. Based on the source
+code\footnote{\url{https://github.com/jamestrimble/ijcai2017-partitioning-common-subgraph/blob/master/code/james-cpp/mcsp.c}},
+there are two relatively minor differences between $\textsc{McSplit} \downarrow$
+and \textsc{McSplit}:
+\begin{itemize}
+\item Instead of always looking for a larger and larger common subgraph, we have
+  a goal size and exit early if a common subgraph of that size is found.
+\item The goal size is decreased if the search finishes without a solution.
+\end{itemize}
 
 \section{Problem Instances}
 In order to determine which algorithm should be used for which problem instance,
@@ -44,8 +74,9 @@ win with labelled graphs, and $\textsc{McSplit}\downarrow$ to win with the
 performance between \textsc{McSplit} and the clique encoding or between
 $\textsc{McSplit}\downarrow$ and $k\downarrow$ was very small.
 
-(Somewhere) 1000 s limit, 512 GB limit (clique becomes impossible for some
-instances), insert CPU specs.
+% TODO: add this somewhere 1000 s limit, 512 GB limit (clique becomes impossible for some
+%instances), insert CPU specs. kdown now accepts vertex labels. mention how
+%many instances were solved by at least one algorithm in each dataset.
 
 \subsection{Labelled graphs}
 All of the labelled graphs are taken from the ARG Database \cite{DeSanto2003,
@@ -63,9 +94,57 @@ values. The database includes 81400 pairs of labelled graphs. Their unlabelled
 versions are used as well.
 
 \subsubsection{Characteristics of Graph Labelling}
+For the purposes of this paper, we look at two types of labelled graphs: those
+that have their vertices labelled and those that have both vertices and edges
+labelled. We define them as follows (the definitions are loosely inspired by
+\cite{abu-aisheh_2016}):
+
 \begin{definition}
-  A \emph{(vertex) labelled graph}
+  A graph $G = (V, E)$ is a \emph{(vertex) labelled graph} if it has an associated
+  vertex labelling function $\mu \colon V \to \{ 0, \dots, N - 1 \}$ for some $N
+  \in \{2, \dots, |V| \}$.
 \end{definition}
+
+\begin{definition}
+  A graph $G = (V, E)$ is a \emph{fully labelled graph} if it is a vertex labelled
+  graph and it has an associated edge labelling function $\zeta \colon E \to
+  \{ 0, \dots, M - 1 \}$ for some $M \in \{ 2, \dots, |E| \}$.
+\end{definition}
+
+Specifically, note that:
+
+\begin{itemize}
+\item If a graph is labelled, then all its vertices (and possibly edges) are
+  assigned a label.
+\item We are only considering finite sets of labels, represented by non-negative integers.
+\end{itemize}
+
+Now we need a way to choose $N$ and $M$. For that we formally define how
+labelling is implemented in the ARG database:
+
+\begin{definition}
+  A graph $G = (V, E)$ is said to have a \emph{$p\%$ (vertex) labelling} if
+  \[ N = \max \left\{ 2^n : n \in \mathbb{N},\, 2^n < \left\lfloor \frac{p}{100\%}
+        \times |V| \right\rfloor \right\}. \]
+\end{definition}
+
+The default value for $p$ is 33\%.
+
+\begin{figure}
+  \includegraphics[scale=0.5]{labelling_histogram.png}
+  \caption{Histogram of the difference between the expected number of vertices
+    assigned each label and the actual number (for all labelled graphs)}
+  \label{figure:labelling_histogram}
+\end{figure}
+
+% TODO: could insert an example
+The publications associated with the database \cite{DeSanto2003, foggia2001-2}
+say nothing about how the labels are distributed among the $N$ values. We
+calculate the number of vertices that were assigned each label for each graph
+(represented by $C$) and compare those values with the numbers we would expect
+from a uniform distribution (represented by $E(C)$). We plot a histogram of the
+difference $E(C) - C$ in Figure \ref{figure:labelling_histogram} and observe
+that the difference is normally distributed around 0.
 
 \subsection{Unlabelled graphs}
 We also include a collection of benchmark instances for the subgraph isomorphism
@@ -102,11 +181,13 @@ graphs). It contains only unlabelled graphs and consists of the following sets:
     DBLP:conf/ijcai/McCreeshPT17}.
 \end{description}
 
-Note that this set of instances was taken from the repository of
-\cite{DBLP:conf/ijcai/McCreeshPT17} and has some minor differences from the
+Note that this set of instances was taken from the
+repository\footnote{\url{https://github.com/jamestrimble/ijcai2017-partitioning-common-subgraph}}
+of \cite{DBLP:conf/ijcai/McCreeshPT17} and has some minor differences from the
 version on Christine Solnon's website.
 
 \section{Features}
+% TODO: feature extractor adopted, formulas for features
 The initial set of features was based on the algorithm selection paper for the subgraph isomorphism
 problem \cite{DBLP:conf/lion/KotthoffMS16}:
 
@@ -122,25 +203,17 @@ problem \cite{DBLP:conf/lion/KotthoffMS16}:
 \item mean distance between all pairs of vertices,
 \item maximum distance between all pairs of vertices,
 \item proportion of all vertex pairs that have a distance of at least 2, 3, and 4.
+%\item uniformity of the distribution of edges.
 \end{itemize}
 
 We excluded feature extraction running time as a viable feature by itself since it would
-not provide any insight into what properties of the graph affect
+not provide any insight into what properties of the graph affect which algorithm
+is likely to achieve the best performance.
+
 Counting the number of (distinct and not) labels was later rethought to be
 unnecessary and replaced by a boolean feature ``labelled'' because if labelling
 is enabled, the number of labels is equal to the number of vertices and the
 number of distinct labels is equal to 33\% of that.
-
-Features that could be computed if we end up using a presolver:
-
-\begin{itemize}
-\item uniformity of the distribution of edges,
-\item how many candidate pairs were removed,
-\item proportion of candidate pairs removed over all pairs,
-\item min values removed per variable,
-\item max values removed per variable,
-\item CPU time taken to compute all this.
-\end{itemize}
 
 \subsection{Distributions of Features}
 In this section we plot and discuss how the selected features are distributed...
