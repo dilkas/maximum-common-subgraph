@@ -18,11 +18,22 @@
 \maketitle
 
 \section{Introduction}
+% TODO: define graph colouring
 Maximum common induced subgraph for undirected graphs. Some of the graphs also
 contain loops and multiple edges.
 
 \section{Algorithms}
-Clique encoding \cite{DBLP:conf/cp/McCreeshNPS16}
+The clique encoding \cite{DBLP:conf/cp/McCreeshNPS16} solves the maximum common
+subgraph problem by creating a new (association) graph and transforming the
+problem into an instance of maximum clique, which is then solved by a sequential
+version of the maximum clique solver from \cite{DBLP:journals/topc/McCreeshP15},
+which is a branch and bound algorithm that uses bitsets and greedy colouring.
+Colouring is used to provide a quick upper bound: if a subgraph can be coloured
+with $k$ colours, then it cannot have a clique of size more than $k$. It should
+be noted that creating the association graph can use a significant amount of
+memory. In fact, since memory usage for a pair of graphs with $n$ and $m$
+vertices is $\Theta(n^2m^2)$, pairs of graphs with $n \times m \ge 16000 $ had
+to be abandoned. % TODO: prove the Theta bound
 
 $k\downarrow$ algorithm \cite{DBLP:conf/aaai/HoffmannMR17} starts by trying to
 solve the subgraph isomorphism problem, i.e. finding the pattern graph in the
@@ -186,7 +197,9 @@ repository\footnote{\url{https://github.com/jamestrimble/ijcai2017-partitioning-
 of \cite{DBLP:conf/ijcai/McCreeshPT17} and has some minor differences from the
 version on Christine Solnon's website.
 
-\section{Features}
+\section{Training Data}
+% TODO: how the data was generated: algorithms * datasets * labelling, etc, hardware
+\subsection{Features}
 % TODO: feature extractor adopted, formulas for features
 The initial set of features was based on the algorithm selection paper for the subgraph isomorphism
 problem \cite{DBLP:conf/lion/KotthoffMS16}:
@@ -215,7 +228,7 @@ unnecessary and replaced by a boolean feature ``labelled'' because if labelling
 is enabled, the number of labels is equal to the number of vertices and the
 number of distinct labels is equal to 33\% of that.
 
-\subsection{Distributions of Features}
+\subsubsection{Distributions of Features}
 In this section we plot and discuss how the selected features are distributed...
 
 \section{Selection Model}
