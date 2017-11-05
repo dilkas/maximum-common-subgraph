@@ -4,10 +4,12 @@
 \usepackage[UKenglish]{isodate}
 \usepackage[backend=bibtex]{biblatex}
 \usepackage[hidelinks]{hyperref}
-\usepackage{amsfonts, amsthm, graphicx}
+\usepackage{amsfonts, amsthm, graphicx, subcaption}
 
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}[section]
 
 \bibliography{references.bib}
 
@@ -18,22 +20,40 @@
 \maketitle
 
 \section{Introduction}
-% TODO: define graph colouring
-Maximum common induced subgraph for undirected graphs. Some of the graphs also
-contain loops and multiple edges.
+% TODO: define graph colouring, induced subset, common induced subgraph
+% TODO: which sets have loops, multiple edges
+\begin{definition}
+  An undirected \emph{multigraph} is a pair $(V, E)$, where $V$ is a set of
+  vertices and $E$ is a set of edges, together with a map $E \to V \cup V^2$,
+  which assigns one or two vertices to each edge
+  \cite{DBLP:books/daglib/0030488}. If an edge is assigned to a single vertex,
+  it is called a \emph{loop}. When several edges map to the same pair of
+  vertices, they are referred to as \emph{multiple edges}. 
+\end{definition}
+
+We will refer to undirected multigraphs simply as graphs.
+
+\begin{definition}
+  The \emph{maximum common induced subgraph} between graphs $G_1$ and $G_2$ is a
+  graph $G_3 = (V_3, E_3)$ such that $G_3$ is isomorphic to an induced subset of
+  $G_1$ and $G_2$ and $|V_3|$ is maximised.
+\end{definition}
+In this paper we will be dealing with the maximum common induced subgraph
+problem defined for undirected multigraphs, even though most of the benchmark
+instances do not have multiple edges.
 
 \section{Algorithms}
 The clique encoding \cite{DBLP:conf/cp/McCreeshNPS16} solves the maximum common
 subgraph problem by creating a new (association) graph and transforming the
 problem into an instance of maximum clique, which is then solved by a sequential
-version of the maximum clique solver from \cite{DBLP:journals/topc/McCreeshP15},
-which is a branch and bound algorithm that uses bitsets and greedy colouring.
-Colouring is used to provide a quick upper bound: if a subgraph can be coloured
-with $k$ colours, then it cannot have a clique of size more than $k$. It should
-be noted that creating the association graph can use a significant amount of
-memory. In fact, since memory usage for a pair of graphs with $n$ and $m$
-vertices is $\Theta(n^2m^2)$, pairs of graphs with $n \times m \ge 16000 $ had
-to be abandoned. % TODO: prove the Theta bound
+version of the maximum clique solver by McCreesh and Prosser
+\cite{DBLP:journals/topc/McCreeshP15}, which is a branch and bound algorithm
+that uses bitsets and greedy colouring. Colouring is used to provide a quick
+upper bound: if a subgraph can be coloured with $k$ colours, then it cannot have
+a clique of size more than $k$. It should be noted that creating the association
+graph can use a significant amount of memory. In fact, since memory usage for a
+pair of graphs with $n$ and $m$ vertices is $\Theta(n^2m^2)$, pairs of graphs
+with $n \times m \ge 16000 $ had to be abandoned. % TODO: prove the Theta bound
 
 $k\downarrow$ algorithm \cite{DBLP:conf/aaai/HoffmannMR17} starts by trying to
 solve the subgraph isomorphism problem, i.e. finding the pattern graph in the
@@ -53,23 +73,25 @@ target graphs. Once it chooses to match a vertex $u$ in graph $G_1$ with a
 vertex $v$ in graph $G_2$, it iterates over all unmatched vertices in both
 graphs, adding a 1 to their labels if they are adjacent to $u$ or $v$ and 0
 otherwise. That way a vertex can only be matched with vertices that have the
-same labels. The labels are also used in the upper bound function by noticing
-that if a particular label is assigned to $m$ vertices in $G_1$ and $n$
-vertices in $G_2$, then up to $\min \{ m, n \}$ pairs can be matched for that
-label.
+same labels. The labels are also used in the upper bound heuristic function
+using the rule that if a particular label is assigned to $m$ vertices in $G_1$
+and $n$ vertices in $G_2$, then up to $\min \{ m, n \}$ pairs can be matched for
+that label.
 
 $\textsc{McSplit} \downarrow$ is a variant of \textsc{McSplit} mentioned but not
-explained in \cite{DBLP:conf/ijcai/McCreeshPT17}. It is meant to be similar to
-$k\downarrow$ in that it starts by trying to find a subgraph isomorphism and
-then allows more and more of the pattern graph vertices to not be part of the
-solution. Based on the source
+explained in the original paper \cite{DBLP:conf/ijcai/McCreeshPT17}. It is meant
+to be similar to $k\downarrow$ in that it starts by trying to find a subgraph
+isomorphism and keeps decreasing the size of common subgraphs that it is
+interested in until a solution is found. Based on the source
 code\footnote{\url{https://github.com/jamestrimble/ijcai2017-partitioning-common-subgraph/blob/master/code/james-cpp/mcsp.c}},
-there are two relatively minor differences between $\textsc{McSplit} \downarrow$
-and \textsc{McSplit}:
+there are a few key differences between $\textsc{McSplit} \downarrow$ and
+\textsc{McSplit}:
 \begin{itemize}
-\item Instead of always looking for a larger and larger common subgraph, we have
+\item Instead of always looking for larger and larger common subgraphs, we have
   a goal size and exit early if a common subgraph of that size is found.
 \item The goal size is decreased if the search finishes without a solution.
+\item Having a big goal size allows the heuristic to be more selective and prune
+  more of the search tree branches.
 \end{itemize}
 
 \section{Problem Instances}
@@ -85,14 +107,18 @@ win with labelled graphs, and $\textsc{McSplit}\downarrow$ to win with the
 performance between \textsc{McSplit} and the clique encoding or between
 $\textsc{McSplit}\downarrow$ and $k\downarrow$ was very small.
 
-% TODO: add this somewhere 1000 s limit, 512 GB limit (clique becomes impossible for some
-%instances), insert CPU specs. kdown now accepts vertex labels. mention how
-%many instances were solved by at least one algorithm in each dataset.
+The algorithms were compiled with gcc 6.3.0 and run on Intel Xeon E5-2697A v4
+(2.60 GHz) processors with 512 GB of memory and a 1000 s time limit.
+$k\downarrow$ was further modified to accept graphs with vertex labels.
+% TODO: mention how %many instances were solved by at least one algorithm in
+% each dataset.
+% TODO: what labelling was used
 
 \subsection{Labelled graphs}
-All of the labelled graphs are taken from the ARG Database \cite{DeSanto2003,
-  foggia2001-2}, which is a large collection of graphs for benchmarking various
-graph-matching algorithms. The graphs are generated using several algorithms:
+All of the labelled graphs are taken from the ARG Database \cite{foggia2001-2,
+  DBLP:journals/prl/SantoFSV03}, which is a large collection of graphs for
+benchmarking various graph-matching algorithms. The graphs are generated using
+several algorithms:
 
 \begin{itemize}
 \item randomly generated,
@@ -141,7 +167,7 @@ labelling is implemented in the ARG database:
 
 The default value for $p$ is 33\%.
 
-\begin{figure}
+\begin{figure} % TODO: could add a qq plot as well
   \includegraphics[scale=0.5]{labelling_histogram.png}
   \caption{Histogram of the difference between the expected number of vertices
     assigned each label and the actual number (for all labelled graphs)}
@@ -149,7 +175,7 @@ The default value for $p$ is 33\%.
 \end{figure}
 
 % TODO: could insert an example
-The publications associated with the database \cite{DeSanto2003, foggia2001-2}
+The publications associated with the database \cite{foggia2001-2, DBLP:journals/prl/SantoFSV03}
 say nothing about how the labels are distributed among the $N$ values. We
 calculate the number of vertices that were assigned each label for each graph
 (represented by $C$) and compare those values with the numbers we would expect
@@ -192,44 +218,180 @@ graphs). It contains only unlabelled graphs and consists of the following sets:
     DBLP:conf/ijcai/McCreeshPT17}.
 \end{description}
 
-Note that this set of instances was taken from the
+\begin{remark}
+This set of instances was taken from the
 repository\footnote{\url{https://github.com/jamestrimble/ijcai2017-partitioning-common-subgraph}}
-of \cite{DBLP:conf/ijcai/McCreeshPT17} and has some minor differences from the
-version on Christine Solnon's website.
+for the \textsc{McSplit} paper \cite{DBLP:conf/ijcai/McCreeshPT17} and has some
+minor differences from the version on Christine Solnon's website.
+\end{remark}
 
-\section{Training Data}
-% TODO: how the data was generated: algorithms * datasets * labelling, etc, hardware
-\subsection{Features}
-% TODO: feature extractor adopted, formulas for features
-The initial set of features was based on the algorithm selection paper for the subgraph isomorphism
-problem \cite{DBLP:conf/lion/KotthoffMS16}:
+\begin{remark}
+  Since $k\downarrow$ comes from the subgraph isomorphism problem background, it
+  treats the two (pattern and target) graphs differently. Therefore, when graphs
+  are not divided into patterns and targets, we run the algorithms with both
+  orders ($(G_1, G_2)$ and $(G_2, G_1)$).
+\end{remark}
+
+\section{Features}
+% TODO: formulas for features
+The initial set of features is based on the algorithm selection paper for the
+subgraph isomorphism problem \cite{DBLP:conf/lion/KotthoffMS16} and consists of
+the following:
 
 \begin{itemize}
 \item number of vertices,
 \item number of edges,
-\item density,
-\item number of loops,
 \item mean degree,
 \item maximum degree,
 \item standard deviation of degrees,
-\item whether the graph is connected,
+\item density,
 \item mean distance between all pairs of vertices,
 \item maximum distance between all pairs of vertices,
-\item proportion of all vertex pairs that have a distance of at least 2, 3, and 4.
+\item number of loops,
+\item proportion of all vertex pairs that have a distance of at least 2, 3, and 4,
+\item whether the graph is connected.
 %\item uniformity of the distribution of edges.
 \end{itemize}
 
-We excluded feature extraction running time as a viable feature by itself since it would
-not provide any insight into what properties of the graph affect which algorithm
-is likely to achieve the best performance.
+We excluded feature extraction running time as a viable feature by itself since
+it would not provide any insight into what properties of the graph affect which
+algorithm is likely to achieve the best performance.
+% TODO: labelling features
 
-Counting the number of (distinct and not) labels was later rethought to be
-unnecessary and replaced by a boolean feature ``labelled'' because if labelling
-is enabled, the number of labels is equal to the number of vertices and the
-number of distinct labels is equal to 33\% of that.
+\subsection{Distributions of Features}
 
-\subsubsection{Distributions of Features}
-In this section we plot and discuss how the selected features are distributed...
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{mcs_vertices.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{mcs_edges.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{mcs_meandeg.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{mcs_maxdeg.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{mcs_stddeg.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{mcs_density.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{mcs_meandist.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{mcs_maxdist.png}
+  \end{subfigure}
+  \caption{Plots of how various features are distributed for the labelled graphs}
+  \label{fig:mcs_features1}
+\end{figure}
+
+\begin{figure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{mcs_prop2.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{mcs_prop3.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{mcs_prop4.png}
+  \end{subfigure}
+  \caption{Plots showing typical distances between pairs of vertices for the
+    labelled graphs}
+  \label{fig:mcs_features2}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{sip_vertices.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{sip_edges.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{sip_meandeg.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{sip_maxdeg.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{sip_stddeg.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{sip_density.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{sip_meandist.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{sip_maxdist.png}
+  \end{subfigure}
+  \caption{Plots of how various features are distributed for the unlabelled
+    graphs}
+  \label{fig:sip_features1}
+\end{figure}
+
+\begin{figure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{sip_prop2.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{sip_prop3.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{sip_prop4.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{sip_loops.png}
+  \end{subfigure}
+  \caption{Plots showing typical distances between pairs of vertices and the
+    number of loops for the unlabelled graphs}
+  \label{fig:mcs_features2}
+\end{figure}
+
+% TODO: reference 4 figures, discuss the data
+% TODO: how many instances were solved by one algorithm that weren't solved by
+% any others?
+In this section we plot and discuss how the selected features are distributed in
+different datasets. We plot most of the data, except for two statistics, which % TODO: here!
+are ought to be mentioned as numbers. 99.81\% of the labelled graphs are connected, compared to
+93.19\% of the unlabelled dataset.
+
+In the ARG database, all graphs are assigned into pairs (A and B) with no
+significant differences between them. Thus all of the statistical information is
+provided only for pattern graphs and is plotted in Figures
+\ref{fig:mcs_features1} and \ref{fig:mcs_features2}. 0.98\% of the graphs have a
+single loop, other graphs have no loops.
+
+For unlabelled graphs, we will only consider graphs that are part of a pair of graphs solved by at least one algorithm. Since most of the data is heavily skewed, Figures \ref{fig:sip_features1} and \ref{fig:sip_features2} show the distributions as density plots.
 
 \section{Selection Model}
 We're using \textsc{Llama} \cite{kotthoff_llama_2013}. Describe k-folding.
