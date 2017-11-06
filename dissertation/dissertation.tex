@@ -374,24 +374,56 @@ algorithm is likely to achieve the best performance.
   \end{subfigure}
   \caption{Plots showing typical distances between pairs of vertices and the
     number of loops for the unlabelled graphs}
-  \label{fig:mcs_features2}
+  \label{fig:sip_features2}
 \end{figure}
 
+% TODO: correlation?
 % TODO: reference 4 figures, discuss the data
 % TODO: how many instances were solved by one algorithm that weren't solved by
 % any others?
 In this section we plot and discuss how the selected features are distributed in
-different datasets. We plot most of the data, except for two statistics, which % TODO: here!
-are ought to be mentioned as numbers. 99.81\% of the labelled graphs are connected, compared to
-93.19\% of the unlabelled dataset.
+different datasets. Most of the data is plotted, except for the number of loops
+of the labelled dataset and connectedness of both labelled and unlabelled data.
+For connectedness, 99.81\% of the labelled graphs are connected, compared to
+93.19\% of the unlabelled graphs. As both numbers are quite high, they may not
+be ideal for establishing if connectedness is a significant factor in
+determining which algorithm performs the best, however, the numbers seem quite
+representative of real data, where connected graphs are a lot more common. In
+fact, applications in chemistry are often only interested in connected graphs
+\cite{WCMS:WCMS5}.
 
-In the ARG database, all graphs are assigned into pairs (A and B) with no
+With the labelled graphs, all graphs are assigned into pairs (A and B) with no
 significant differences between them. Thus all of the statistical information is
 provided only for pattern graphs and is plotted in Figures
-\ref{fig:mcs_features1} and \ref{fig:mcs_features2}. 0.98\% of the graphs have a
-single loop, other graphs have no loops.
+\ref{fig:mcs_features1} and \ref{fig:mcs_features2}. As the number of loops
+varies between two values, it is not plotted: 0.98\% of the graphs have a
+single loop, other graphs have no loops. Other than the plot for number of
+vertices, which is manually chosen by the creators of the database, all the
+distributions in Figure \ref{fig:mcs_features1} are centered around lower
+values, with some instances providing significantly higher values. More
+importantly, we have some graphs that are quite dense and some graphs with
+higher mean distance values.
 
-For unlabelled graphs, we will only consider graphs that are part of a pair of graphs solved by at least one algorithm. Since most of the data is heavily skewed, Figures \ref{fig:sip_features1} and \ref{fig:sip_features2} show the distributions as density plots.
+For unlabelled graphs, we will only consider graphs that are part of a pair of
+graphs solved by at least one algorithm. Since most of the data is heavily
+skewed, Figures \ref{fig:sip_features1} and \ref{fig:sip_features2} show the
+distributions as density plots. Because of this choice of which graphs to
+include, all of the easy instances are solved and thus end up in the sample,
+while only some of the harder instances are solved by at least one algorithm.
+Harder instances typically have more vertices, which means they are also capable
+of higher values for many other features, hence all of the density plots in
+Figure \ref{fig:sip_features1} are right skewed. The same applies to the number
+of loops in Figure \ref{fig:sip_features2}: almost all graphs have a small
+number of them, while some (presumably larger) graphs have significantly more.
+
+To sum up, even though the distributions are far from normal, most of them still
+provide a good range of different values. There is one important difference
+between the plots of proportions of vertex pairs with distance $\ge k$ for $k =
+2, 3, 4$ for labelled and unlabelled datasets (in Figures
+\ref{fig:mcs_features2} and \ref{fig:sip_features2}, respectively). With
+labelled graphs, the mean value keeps shifting to the left, while with
+unlabelled graphs, the plot for $k = 4$ still has its highest peak around 0.9,
+which means adding features for $k \ge 5$ could be valuable.
 
 \section{Selection Model}
 We're using \textsc{Llama} \cite{kotthoff_llama_2013}. Describe k-folding.
