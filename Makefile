@@ -1,5 +1,5 @@
 MCSPLIT_HEURISTIC := min_max # min_max or min_product
-TIMEOUT := 100
+TIMEOUT := 1000
 HOW_MANY := 10
 CLIQUE_LIMIT := 16000
 

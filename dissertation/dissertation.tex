@@ -20,8 +20,8 @@
 \maketitle
 
 \section{Introduction}
-% TODO: define graph colouring, induced subset, common induced subgraph
-% TODO: which sets have loops, multiple edges
+TODO: could define graph colouring, induced subgraph, common induced subgraph
+TODO: which datasets have loops, multiple edges?
 \begin{definition}
   An undirected \emph{multigraph} is a pair $(V, E)$, where $V$ is a set of
   vertices and $E$ is a set of edges, together with a map $E \to V \cup V^2$,
@@ -53,7 +53,7 @@ upper bound: if a subgraph can be coloured with $k$ colours, then it cannot have
 a clique of size more than $k$. It should be noted that creating the association
 graph can use a significant amount of memory. In fact, since memory usage for a
 pair of graphs with $n$ and $m$ vertices is $\Theta(n^2m^2)$, pairs of graphs
-with $n \times m \ge 16000 $ had to be abandoned. % TODO: prove the Theta bound
+with $n \times m \ge 16000 $ had to be abandoned. TODO: prove/cite the Theta bound
 
 $k\downarrow$ algorithm \cite{DBLP:conf/aaai/HoffmannMR17} starts by trying to
 solve the subgraph isomorphism problem, i.e. finding the pattern graph in the
@@ -110,9 +110,7 @@ $\textsc{McSplit}\downarrow$ and $k\downarrow$ was very small.
 The algorithms were compiled with gcc 6.3.0 and run on Intel Xeon E5-2697A v4
 (2.60 GHz) processors with 512 GB of memory and a 1000 s time limit.
 $k\downarrow$ was further modified to accept graphs with vertex labels.
-% TODO: mention how %many instances were solved by at least one algorithm in
-% each dataset.
-% TODO: what labelling was used
+TODO: mention how many instances were solved by at least one algorithm in each dataset.
 
 \subsection{Labelled graphs}
 All of the labelled graphs are taken from the ARG Database \cite{foggia2001-2,
@@ -165,16 +163,16 @@ labelling is implemented in the ARG database:
         \times |V| \right\rfloor \right\}. \]
 \end{definition}
 
-The default value for $p$ is 33\%.
+The default value for $p$ is 33\%. TODO: could add a qq plot as well
 
-\begin{figure} % TODO: could add a qq plot as well
+\begin{figure}
   \includegraphics[scale=0.5]{labelling_histogram.png}
   \caption{Histogram of the difference between the expected number of vertices
     assigned each label and the actual number (for all labelled graphs)}
   \label{figure:labelling_histogram}
 \end{figure}
 
-% TODO: could insert an example
+TODO: could insert an example.
 The publications associated with the database \cite{foggia2001-2, DBLP:journals/prl/SantoFSV03}
 say nothing about how the labels are distributed among the $N$ values. We
 calculate the number of vertices that were assigned each label for each graph
@@ -233,7 +231,7 @@ minor differences from the version on Christine Solnon's website.
 \end{remark}
 
 \section{Features}
-% TODO: formulas for features
+TODO: formulas for features?
 The initial set of features is based on the algorithm selection paper for the
 subgraph isomorphism problem \cite{DBLP:conf/lion/KotthoffMS16} and consists of
 the following:
@@ -256,7 +254,7 @@ the following:
 We excluded feature extraction running time as a viable feature by itself since
 it would not provide any insight into what properties of the graph affect which
 algorithm is likely to achieve the best performance.
-% TODO: labelling features
+TODO: what features were used to describe labelling
 
 \subsection{Distributions of Features}
 
@@ -377,10 +375,7 @@ algorithm is likely to achieve the best performance.
   \label{fig:sip_features2}
 \end{figure}
 
-% TODO: correlation?
-% TODO: reference 4 figures, discuss the data
-% TODO: how many instances were solved by one algorithm that weren't solved by
-% any others?
+TODO: investigate feature correlation?
 In this section we plot and discuss how the selected features are distributed in
 different datasets. Most of the data is plotted, except for the number of loops
 of the labelled dataset and connectedness of both labelled and unlabelled data.
