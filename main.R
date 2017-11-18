@@ -1,5 +1,4 @@
 require(llama)
-require(FSelector)
 
 # Import running time data and fix header names
 names <- c("ID", "nodes", "time", "size")
@@ -47,24 +46,52 @@ colnames(performance) <- c("ID", "clique", "kdown", "mcsplit")
 performance <- merge(performance, mcsplitdown[, c("ID", "time")], by = "ID", all.x = TRUE)
 colnames(performance) <- c("ID", "clique", "kdown", "mcsplit", "mcsplitdown")
 performance$clique[is.na(performance$clique)] <- 1000000
-
-# Test
-performance$clique[1] <- 0
+performance$kdown <- pmin(performance$kdown, 1000000)
+performance$mcsplit <- pmin(performance$mcsplit, 1000000)
+performance$mcsplitdown <- pmin(performance$mcsplitdown, 1000000)
+performance <- performance[performance$clique < 1000000 | performance$kdown < 1000000 | performance$mcsplit < 1000000 | performance$mcsplitdown < 1000000, ]
+features <- features[features$ID %in% performance$ID,]
 
 # Construct the success data frame
-success <- data.frame(ID = features[1],
-                      clique = ifelse(!is.na(performance$clique) &&
-                                        performance$clique < 1000000, "T", "F"),
-                      kdown = ifelse(performance$kdown < 1000000, "T", "F"),
-                      mcsplit = ifelse(performance$mcsplit < 1000000, "T", "F"),
-                      mcsplitdown = ifelse(performance$mcsplitdown < 1000000, "T", "F"))
+success <- cbind(performance)
+success$clique <- ifelse(success$clique < 1000000, "T", "F")
+success$kdown <- ifelse(success$kdown < 1000000, "T", "F")
+success$mcsplit <- ifelse(success$mcsplit < 1000000, "T", "F")
+success$mcsplitdown <- ifelse(success$mcsplitdown < 1000000, "T", "F")
 
 data = input(features, performance, success)
 folds = cvFolds(data)
 model = classify(makeLearner("classif.randomForest"), folds)
 
+# Plots
 times = subset(data$data, T, data$performance)
 cols = gray(seq(1, 0, length.out = 255))
+labels = c("clique", sprintf('k\u2193'), "McSplit", sprintf('McSplit\u2193'))
+
+# Runtimes by solver and instance
 image(t(as.matrix(times)), axes = F, col = cols)
-axis(1, labels = c("clique", sprintf('k\u2193'), "McSplit", sprintf('McSplit\u2193')), at = seq(0, 1, 1/(length( data$performance ) - 1)), las = 2)
-#legend("topleft", legend = c(min(times), max(times)), fill = c("white", "black"), bty = "n", inset = -0.12 , xpd = NA)
+axis(1, labels = labels, at = seq(0, 1, 1/(length( data$performance ) - 1)), las = 2)
+
+# Log runtimes by solver and instance
+image(log10(t(as.matrix(times))), axes = F, col = cols)
+axis(1, labels = labels, at = seq(0, 1, 1/(length(data$performance) - 1)), las = 2)
+
+# White - first, black - last (filtered)
+image(apply(times , 1, order), axes = F, col = cols)
+axis(1, labels = labels, at = seq(0, 1, 1/(length(data$performance) - 1)), las = 2)
+
+# How many times is each algorithm the best?
+length(which(times$clique < times$kdown & times$clique < times$mcsplit & times$clique < times$mcsplitdown))
+length(which(times$kdown < times$clique & times$kdown < times$mcsplit & times$kdown < times$mcsplitdown))
+length(which(times$mcsplit < times$clique & times$mcsplit < times$kdown & times$mcsplit < times$mcsplitdown))
+length(which(times$mcsplitdown < times$clique & times$mcsplitdown < times$kdown & times$mcsplitdown < times$mcsplit))
+
+# Heatmaps for pattern/target features. Group differently?
+features = subset(data$data, T, data$features)
+nFeatures = normalize(features)
+graph_feature_names <- c("vertices", "edges", "loops", "mean degree", "max degree", "SD of degrees", "density", "connected", "mean distance", "max distance", "distance \u2265 2", "distance \u2265 3", "distance \u2265 4")
+full_feature_names = c(paste("pattern", graph_feature_names), paste("target", graph_feature_names))
+par(mar = c(1, 10, 1, 1))
+image(as.matrix(nFeatures$features), axes = F, col = cols)
+axis(2, labels = full_feature_names, at = seq(0, 1, 1/(length(data$features) - 1)), las = 2)
+

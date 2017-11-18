@@ -1,8 +1,8 @@
-\documentclass{article}
+\pdfoutput=1
+\documentclass{l4proj}
 
 \usepackage[UKenglish]{babel}
 \usepackage[UKenglish]{isodate}
-\usepackage[backend=bibtex]{biblatex}
 \usepackage[hidelinks]{hyperref}
 \usepackage{amsfonts, amsthm, graphicx, subcaption}
 
@@ -11,17 +11,24 @@
 \theoremstyle{remark}
 \newtheorem{remark}{Remark}[section]
 
-\bibliography{references.bib}
-
-\author{Paulius Dilkas}
 \title{Algorithm Selection for Maximum Common Subgraph}
+\author{Paulius Dilkas}
+%\date{}
 
 \begin{document}
 \maketitle
 
-\section{Introduction}
-TODO: could define graph colouring, induced subgraph, common induced subgraph
-TODO: which datasets have loops, multiple edges?
+%\begin{abstract}
+%\end{abstract}
+
+\educationalconsent
+\tableofcontents
+
+\chapter{Introduction}
+\pagenumbering{arabic}
+% TODO: could define graph colouring, bijection
+% TODO: do we want to give this function a name?
+% TODO: which datasets have loops, multiple edges?
 \begin{definition}
   An undirected \emph{multigraph} is a pair $(V, E)$, where $V$ is a set of
   vertices and $E$ is a set of edges, together with a map $E \to V \cup V^2$,
@@ -31,13 +38,30 @@ TODO: which datasets have loops, multiple edges?
   vertices, they are referred to as \emph{multiple edges}. 
 \end{definition}
 
-We will refer to undirected multigraphs simply as graphs.
+We will refer to undirected multigraphs simply as graphs. The following 3
+definitions are adapted from \cite{DBLP:journals/jcamd/RaymondW02a} for
+multigraphs.
 
 \begin{definition}
-  The \emph{maximum common induced subgraph} between graphs $G_1$ and $G_2$ is a
-  graph $G_3 = (V_3, E_3)$ such that $G_3$ is isomorphic to an induced subset of
-  $G_1$ and $G_2$ and $|V_3|$ is maximised.
+  Two graphs $G_1 = (V_1, E_1)$ and $G_2 = (V_2, E_2)$ are said to be
+  \emph{isomorphic} if there is a bijection $f \colon V_1 \to V_2$ such that
+  for all $v \in V_1 \cup V_1^2$, the number of edges in $E_1$ that are mapped
+  to $v$ is equal to the number of edges in $E_2$ that are mapped to $f(v)$,
+  where $f(v) = (f(v_1), f(v_2))$ if $v$ is a tuple $(v_1, v_2)$.
 \end{definition}
+
+\begin{definition}
+  An \emph{induced subgraph} of a graph $G = (V, E)$ is a graph $H = (S, E')$,
+  where $S \subseteq V$ is a set of vertices and $E' \subseteq E$ is a set of
+  edges that are mapped to $S \cup S^2$.
+\end{definition}
+
+\begin{definition}
+  A \emph{maximum common induced subgraph} between graphs $G_1$ and $G_2$ is a
+  graph $G_3 = (V_3, E_3)$ such that $G_3$ is isomorphic to induced subgraphs of
+  both $G_1$ and $G_2$ with $|V_3|$ maximised.
+\end{definition}
+
 In this paper we will be dealing with the maximum common induced subgraph
 problem defined for undirected multigraphs, even though most of the benchmark
 instances do not have multiple edges.
@@ -53,7 +77,7 @@ upper bound: if a subgraph can be coloured with $k$ colours, then it cannot have
 a clique of size more than $k$. It should be noted that creating the association
 graph can use a significant amount of memory. In fact, since memory usage for a
 pair of graphs with $n$ and $m$ vertices is $\Theta(n^2m^2)$, pairs of graphs
-with $n \times m \ge 16000 $ had to be abandoned. TODO: prove/cite the Theta bound
+with $n \times m \ge 16000 $ had to be abandoned. %TODO: prove/cite the Theta bound
 
 $k\downarrow$ algorithm \cite{DBLP:conf/aaai/HoffmannMR17} starts by trying to
 solve the subgraph isomorphism problem, i.e. finding the pattern graph in the
@@ -109,8 +133,11 @@ $\textsc{McSplit}\downarrow$ and $k\downarrow$ was very small.
 
 The algorithms were compiled with gcc 6.3.0 and run on Intel Xeon E5-2697A v4
 (2.60 GHz) processors with 512 GB of memory and a 1000 s time limit.
-$k\downarrow$ was further modified to accept graphs with vertex labels.
-TODO: mention how many instances were solved by at least one algorithm in each dataset.
+$k\downarrow$ was further modified to accept graphs with vertex labels by adding
+an additional constraint for matching labels on line 8 of the
+\texttt{klessSubgraphIsomorphism} function \cite{DBLP:conf/aaai/HoffmannMR17}.
+
+%TODO: mention how many instances were solved by at least one algorithm in each dataset.
 
 \subsection{Labelled graphs}
 All of the labelled graphs are taken from the ARG Database \cite{foggia2001-2,
@@ -163,16 +190,17 @@ labelling is implemented in the ARG database:
         \times |V| \right\rfloor \right\}. \]
 \end{definition}
 
-The default value for $p$ is 33\%. TODO: could add a qq plot as well
+The default value for $p$ is 33\%. %TODO: could add a qq plot as well
 
 \begin{figure}
+  \centering
   \includegraphics[scale=0.5]{labelling_histogram.png}
   \caption{Histogram of the difference between the expected number of vertices
     assigned each label and the actual number (for all labelled graphs)}
   \label{figure:labelling_histogram}
 \end{figure}
 
-TODO: could insert an example.
+%TODO: could insert an example.
 The publications associated with the database \cite{foggia2001-2, DBLP:journals/prl/SantoFSV03}
 say nothing about how the labels are distributed among the $N$ values. We
 calculate the number of vertices that were assigned each label for each graph
@@ -231,7 +259,7 @@ minor differences from the version on Christine Solnon's website.
 \end{remark}
 
 \section{Features}
-TODO: formulas for features?
+%TODO: formulas for features?
 The initial set of features is based on the algorithm selection paper for the
 subgraph isomorphism problem \cite{DBLP:conf/lion/KotthoffMS16} and consists of
 the following:
@@ -254,7 +282,7 @@ the following:
 We excluded feature extraction running time as a viable feature by itself since
 it would not provide any insight into what properties of the graph affect which
 algorithm is likely to achieve the best performance.
-TODO: what features were used to describe labelling
+%TODO: what features were used to describe labelling
 
 \subsection{Distributions of Features}
 
@@ -297,6 +325,7 @@ TODO: what features were used to describe labelling
 \end{figure}
 
 \begin{figure}
+  \centering
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
     \includegraphics[width=\textwidth]{mcs_prop2.png}
@@ -354,6 +383,7 @@ TODO: what features were used to describe labelling
 \end{figure}
 
 \begin{figure}
+  \centering
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
     \includegraphics[width=\textwidth]{sip_prop2.png}
@@ -375,7 +405,7 @@ TODO: what features were used to describe labelling
   \label{fig:sip_features2}
 \end{figure}
 
-TODO: investigate feature correlation?
+%TODO: investigate feature correlation?
 In this section we plot and discuss how the selected features are distributed in
 different datasets. Most of the data is plotted, except for the number of loops
 of the labelled dataset and connectedness of both labelled and unlabelled data.
@@ -423,5 +453,9 @@ which means adding features for $k \ge 5$ could be valuable.
 \section{Selection Model}
 We're using \textsc{Llama} \cite{kotthoff_llama_2013}. Describe k-folding.
 
-\printbibliography
+%\begin{appendices}
+%\end{appendices}
+
+\bibliographystyle{plain}
+\bibliography{references}
 \end{document}
