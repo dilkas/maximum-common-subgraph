@@ -1,14 +1,20 @@
 MCSPLIT_HEURISTIC := min_max # min_max or min_product
 TIMEOUT := 1000
-HOW_MANY := 10
-CLIQUE_LIMIT := 16000
+
+# limits for clique (>= and <)
+MIN_SIZE := 0
+MAX_SIZE := 30000
+
+# memory limits for clique
+MEMORY_LIMIT := 7340032
 
 # add -a to mcsplit to make it use vertex and edge labels
 define run_sip
 #echo $1, `./algorithms/mcsplit/mcsp --timeout=$(TIMEOUT) -l -q $(MCSPLIT_HEURISTIC)$1` >> results/mcsplit.csv
 #echo $1, `./algorithms/kdown/solve_subgraph_isomorphism sequentialix --timeout $(TIMEOUT) --format lad --induced $1` >> results/kdown.csv
-if [ $(shell echo $(shell head -n 1 $(firstword $1)) \* $(shell head -n 1 $(word 2,$1)) | bc) -lt $(CLIQUE_LIMIT) ] ; then \
-	echo $1, `./algorithms/clique/solve_max_common_subgraph --unlabelled --undirected --lad --timeout $(TIMEOUT) $1` >> results/clique.csv ;\
+size=$(shell echo $(shell head -n 1 $(firstword $1)) \* $(shell head -n 1 $(word 2,$1)) | bc) ; \
+if [ $${size} -lt $(MAX_SIZE) -a $${size} -ge $(MIN_SIZE) ] ; then \
+	echo $1, `ulimit -v $(MEMORY_LIMIT) ; ./algorithms/clique/solve_max_common_subgraph --unlabelled --undirected --lad --timeout $(TIMEOUT) $1` >> results/clique.csv ;\
 fi
 #echo $1 `./graph_stats/graph_stats --distances $(firstword $1)` `./graph_stats/graph_stats --distances $(word 2,$1)` >> results/features.csv
 #echo $1 >> results/sip_instances
@@ -17,8 +23,8 @@ endef
 define run_mcs
 #echo $1, `./algorithms/mcsplit/mcsp --timeout=$(TIMEOUT) -q $(MCSPLIT_HEURISTIC)$1` >> results/mcsplit.csv
 #echo $1, `./algorithms/kdown/solve_subgraph_isomorphism sequentialix --timeout $(TIMEOUT) --format vf --induced $1` >> results/kdown.csv
-#echo $1, `./algorithms/clique/solve_max_common_subgraph --unlabelled --undirected --timeout $(TIMEOUT) $1` >> results/clique.csv
-echo $1 `./graph_stats/graph_stats --vf --distances $(firstword $1)` `./graph_stats/graph_stats --distances $(word 2,$1)` >> results/features.csv
+echo $1, `ulimit -v $(MEMORY_LIMIT) ; ./algorithms/clique/solve_max_common_subgraph --unlabelled --undirected --timeout $(TIMEOUT) $1` >> results/clique.csv
+#echo $1 `./graph_stats/graph_stats --vf --distances $(firstword $1)` `./graph_stats/graph_stats --distances $(word 2,$1)` >> results/features.csv
 #echo $1 >> results/mcs_instances
 endef
 
@@ -32,12 +38,11 @@ endef
 #main: $(call generate_pairs,data/sip-instances/meshes-CVIU11/patterns/*,data/sip-instances/meshes-CVIU11/targets/*,MESH)
 #main: $(call generate_pairs,data/sip-instances/LV/*,data/sip-instances/LV/*,LV)
 #main: $(call generate_pairs,data/sip-instances/largerGraphs/*,data/sip-instances/largerGraphs/*,LARGER)
-#main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/images-PR15/pattern*))
+main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/images-PR15/pattern*))
 #main: $(call generate_pairs,data/sip-instances/images-CVIU11/patterns/*,data/sip-instances/images-CVIU11/targets/*,IMAGE)
 
 #main: $(addsuffix /TRGT,$(foreach f,$(wildcard data/mcs-instances/*/*/*),$(wildcard $f/*A*)))
-main: $(addsuffix /TRGT,$(wildcard data/mcs-instances/*/*/*/*))
-#main: $(addsuffix /TRGT,$(foreach f,$(foreach s,10 30 50,$(wildcard data/mcs-instances/mcs$s/*/*)),$(wordlist 1,$(HOW_MANY),$(wildcard $f/*A*))))
+#main: $(addsuffix /TRGT,$(wildcard data/mcs-instances/*/*/*/*))
 
 # column names: nodes, time, size
 parse:
@@ -62,8 +67,8 @@ data/sip-instances/images-PR15/%/MAKE_TARGET: data/sip-instances/images-PR15/% d
 MESH% LV% LARGER% IMAGE%:
 	$(call run_sip,$(subst _,/,$(word 2,$(subst ., ,$@)) $(word 3,$(subst ., ,$@))))
 
-#data/mcs-instances/%/TRGT:
-#	$(call run_mcs,$(subst /TRGT,,$@ $(subst A,B,$@)))
-
 data/mcs-instances/%/TRGT:
-	echo $(subst /TRGT,,$@)`./graph_stats/graph_stats --vf --distances $(subst /TRGT,,$@)` >> results/features.csv
+	$(call run_mcs,$(subst /TRGT,,$@ $(subst A,B,$@)))
+
+#data/mcs-instances/%/TRGT:
+#	echo $(subst /TRGT,,$@)`./graph_stats/graph_stats --vf --distances $(subst /TRGT,,$@)` >> results/features.csv

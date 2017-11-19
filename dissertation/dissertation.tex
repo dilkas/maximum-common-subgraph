@@ -66,7 +66,7 @@ In this paper we will be dealing with the maximum common induced subgraph
 problem defined for undirected multigraphs, even though most of the benchmark
 instances do not have multiple edges.
 
-\section{Algorithms}
+\chapter{Algorithms}
 The clique encoding \cite{DBLP:conf/cp/McCreeshNPS16} solves the maximum common
 subgraph problem by creating a new (association) graph and transforming the
 problem into an instance of maximum clique, which is then solved by a sequential
@@ -74,10 +74,7 @@ version of the maximum clique solver by McCreesh and Prosser
 \cite{DBLP:journals/topc/McCreeshP15}, which is a branch and bound algorithm
 that uses bitsets and greedy colouring. Colouring is used to provide a quick
 upper bound: if a subgraph can be coloured with $k$ colours, then it cannot have
-a clique of size more than $k$. It should be noted that creating the association
-graph can use a significant amount of memory. In fact, since memory usage for a
-pair of graphs with $n$ and $m$ vertices is $\Theta(n^2m^2)$, pairs of graphs
-with $n \times m \ge 16000 $ had to be abandoned. %TODO: prove/cite the Theta bound
+a clique of size more than $k$.
 
 $k\downarrow$ algorithm \cite{DBLP:conf/aaai/HoffmannMR17} starts by trying to
 solve the subgraph isomorphism problem, i.e. finding the pattern graph in the
@@ -118,7 +115,7 @@ there are a few key differences between $\textsc{McSplit} \downarrow$ and
   more of the search tree branches.
 \end{itemize}
 
-\section{Problem Instances}
+\chapter{Problem Instances}
 In order to determine which algorithm should be used for which problem instance,
 we run all algorithms on two databases that contain a large variety of graphs
 differing in size, various characteristics, and the way they were generated.
@@ -132,14 +129,32 @@ performance between \textsc{McSplit} and the clique encoding or between
 $\textsc{McSplit}\downarrow$ and $k\downarrow$ was very small.
 
 The algorithms were compiled with gcc 6.3.0 and run on Intel Xeon E5-2697A v4
-(2.60 GHz) processors with 512 GB of memory and a 1000 s time limit.
+(2.60 GHz) processors with 512 GB of memory and a 1000 s time limit. A Makefile
+was created to run multiple experiments in parallel with, e.g., \texttt{make -j
+  64}, which generates pairs of graph filenames for all datasets, runs the
+selected algorithms with various command line arguments, redirects their output
+to files that are later parsed using \texttt{sed} and regular expressions into
+the CSV format. For each algorithm, we keep the full names of pattern and target
+graphs, the number of vertices in the returned maximum common subgraph, running
+time as reported by the algorithms themselves, and the number of explored nodes
+in the search tree. Entries with running time greater than or equal to the
+timeout value are considered to have timed out. The aforementioned node counts
+are collected but not currently used. Afterwards, the answers of different
+algorithms are checked for equality (for algorithms that did not time out).
+
+The clique algorithm requires $O(n^2m^2)$ memory for a pair of graphs with $n$
+amd $m$ vertices \cite{DBLP:conf/aaai/HoffmannMR17, DBLP:conf/cp/McCreeshNPS16}.
+To avoid segmentation faults, its virtual memory usage was limited to 7 GB with
+\texttt{ulimit -v} and the unlabelled instances (which contain much larger
+graphs) were restricted to $m \times n < 30,000$.
+
 $k\downarrow$ was further modified to accept graphs with vertex labels by adding
 an additional constraint for matching labels on line 8 of the
 \texttt{klessSubgraphIsomorphism} function \cite{DBLP:conf/aaai/HoffmannMR17}.
 
 %TODO: mention how many instances were solved by at least one algorithm in each dataset.
 
-\subsection{Labelled graphs}
+\section{Labelled graphs}
 All of the labelled graphs are taken from the ARG Database \cite{foggia2001-2,
   DBLP:journals/prl/SantoFSV03}, which is a large collection of graphs for
 benchmarking various graph-matching algorithms. The graphs are generated using
@@ -155,7 +170,7 @@ Furthermore, each algorithm is executed with several (3--5) different parameter
 values. The database includes 81400 pairs of labelled graphs. Their unlabelled
 versions are used as well.
 
-\subsubsection{Characteristics of Graph Labelling}
+\subsection{Characteristics of Graph Labelling}
 For the purposes of this paper, we look at two types of labelled graphs: those
 that have their vertices labelled and those that have both vertices and edges
 labelled. We define them as follows (the definitions are loosely inspired by
@@ -184,7 +199,7 @@ Specifically, note that:
 Now we need a way to choose $N$ and $M$. For that we formally define how
 labelling is implemented in the ARG database:
 
-\begin{definition}
+\begin{definition} \label{def:percent_labelling}
   A graph $G = (V, E)$ is said to have a \emph{$p\%$ (vertex) labelling} if
   \[ N = \max \left\{ 2^n : n \in \mathbb{N},\, 2^n < \left\lfloor \frac{p}{100\%}
         \times |V| \right\rfloor \right\}. \]
@@ -194,7 +209,7 @@ The default value for $p$ is 33\%. %TODO: could add a qq plot as well
 
 \begin{figure}
   \centering
-  \includegraphics[scale=0.5]{labelling_histogram.png}
+  \includegraphics[scale=0.5]{images/labelling_histogram.png}
   \caption{Histogram of the difference between the expected number of vertices
     assigned each label and the actual number (for all labelled graphs)}
   \label{figure:labelling_histogram}
@@ -209,7 +224,7 @@ from a uniform distribution (represented by $E(C)$). We plot a histogram of the
 difference $E(C) - C$ in Figure \ref{figure:labelling_histogram} and observe
 that the difference is normally distributed around 0.
 
-\subsection{Unlabelled graphs}
+\section{Unlabelled graphs}
 We also include a collection of benchmark instances for the subgraph isomorphism
 problem\footnote{\url{http://liris.cnrs.fr/csolnon/SIP.html}} (with the
 biochemical reactions dataset excluded since we are not dealing with directed
@@ -237,9 +252,8 @@ graphs). It contains only unlabelled graphs and consists of the following sets:
 \item[phase] Random graphs generated to be close to the
   satisfiable-unsatisfiable phase transition (200 instances)
   \cite{DBLP:conf/ijcai/McCreeshPT16}.
-\item[largerGraphs] Large random and real-world graphs. There are 70 graphs,
-  giving $70^2=4900$ instances. This set is not actually part of the main
-  collection of benchmark instances, but is used in
+\item[largerGraphs] Larger instances of the \texttt{LV} dataset. There are 70
+  graphs, giving $70^2=4900$ instances. The separation was made and used in
   \cite{DBLP:conf/aaai/HoffmannMR17, DBLP:conf/lion/KotthoffMS16,
     DBLP:conf/ijcai/McCreeshPT17}.
 \end{description}
@@ -258,7 +272,7 @@ minor differences from the version on Christine Solnon's website.
   orders ($(G_1, G_2)$ and $(G_2, G_1)$).
 \end{remark}
 
-\section{Features}
+\chapter{Features}
 %TODO: formulas for features?
 The initial set of features is based on the algorithm selection paper for the
 subgraph isomorphism problem \cite{DBLP:conf/lion/KotthoffMS16} and consists of
@@ -281,44 +295,57 @@ the following:
 
 We excluded feature extraction running time as a viable feature by itself since
 it would not provide any insight into what properties of the graph affect which
-algorithm is likely to achieve the best performance.
-%TODO: what features were used to describe labelling
+algorithm is likely to achieve the best performance. We analyse three different
+types of labelling and treat them as separate problems:
 
-\subsection{Distributions of Features}
+\begin{itemize}
+\item no labels,
+\item vertex labels,
+\item vertex and edge labels.
+\end{itemize}
+
+% TODO: could have different percentages for vertices and edges
+For the last two types, we add a feature corresponding to $p$ defined in
+Definition \ref{def:percent_labelling} and collect data for the following values
+of p: 50\%, 33\%, 25\%, 20\%, 15\%, 10\%, 5\%. The values correspond to having
+about 2, 3, 4, 5, 10, and 20 vertices/edges with the same label on average,
+respectively.
+
+\section{Distributions of Features}
 
 \begin{figure}
   \centering
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{mcs_vertices.png}
+    \includegraphics[width=\textwidth]{images/mcs_vertices.png}
   \end{subfigure}
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{mcs_edges.png}
+    \includegraphics[width=\textwidth]{images/mcs_edges.png}
   \end{subfigure}
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{mcs_meandeg.png}
+    \includegraphics[width=\textwidth]{images/mcs_meandeg.png}
   \end{subfigure}
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{mcs_maxdeg.png}
+    \includegraphics[width=\textwidth]{images/mcs_maxdeg.png}
   \end{subfigure}
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{mcs_stddeg.png}
+    \includegraphics[width=\textwidth]{images/mcs_stddeg.png}
   \end{subfigure}
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{mcs_density.png}
+    \includegraphics[width=\textwidth]{images/mcs_density.png}
   \end{subfigure}
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{mcs_meandist.png}
+    \includegraphics[width=\textwidth]{images/mcs_meandist.png}
   \end{subfigure}
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{mcs_maxdist.png}
+    \includegraphics[width=\textwidth]{images/mcs_maxdist.png}
   \end{subfigure}
   \caption{Plots of how various features are distributed for the labelled graphs}
   \label{fig:mcs_features1}
@@ -328,15 +355,15 @@ algorithm is likely to achieve the best performance.
   \centering
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{mcs_prop2.png}
+    \includegraphics[width=\textwidth]{images/mcs_prop2.png}
   \end{subfigure}
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{mcs_prop3.png}
+    \includegraphics[width=\textwidth]{images/mcs_prop3.png}
   \end{subfigure}
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{mcs_prop4.png}
+    \includegraphics[width=\textwidth]{images/mcs_prop4.png}
   \end{subfigure}
   \caption{Plots showing typical distances between pairs of vertices for the
     labelled graphs}
@@ -347,35 +374,35 @@ algorithm is likely to achieve the best performance.
   \centering
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{sip_vertices.png}
+    \includegraphics[width=\textwidth]{images/sip_vertices.png}
   \end{subfigure}
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{sip_edges.png}
+    \includegraphics[width=\textwidth]{images/sip_edges.png}
   \end{subfigure}
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{sip_meandeg.png}
+    \includegraphics[width=\textwidth]{images/sip_meandeg.png}
   \end{subfigure}
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{sip_maxdeg.png}
+    \includegraphics[width=\textwidth]{images/sip_maxdeg.png}
   \end{subfigure}
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{sip_stddeg.png}
+    \includegraphics[width=\textwidth]{images/sip_stddeg.png}
   \end{subfigure}
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{sip_density.png}
+    \includegraphics[width=\textwidth]{images/sip_density.png}
   \end{subfigure}
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{sip_meandist.png}
+    \includegraphics[width=\textwidth]{images/sip_meandist.png}
   \end{subfigure}
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{sip_maxdist.png}
+    \includegraphics[width=\textwidth]{images/sip_maxdist.png}
   \end{subfigure}
   \caption{Plots of how various features are distributed for the unlabelled
     graphs}
@@ -386,19 +413,19 @@ algorithm is likely to achieve the best performance.
   \centering
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{sip_prop2.png}
+    \includegraphics[width=\textwidth]{images/sip_prop2.png}
   \end{subfigure}
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{sip_prop3.png}
+    \includegraphics[width=\textwidth]{images/sip_prop3.png}
   \end{subfigure}
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{sip_prop4.png}
+    \includegraphics[width=\textwidth]{images/sip_prop4.png}
   \end{subfigure}
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{sip_loops.png}
+    \includegraphics[width=\textwidth]{images/sip_loops.png}
   \end{subfigure}
   \caption{Plots showing typical distances between pairs of vertices and the
     number of loops for the unlabelled graphs}
@@ -450,8 +477,79 @@ labelled graphs, the mean value keeps shifting to the left, while with
 unlabelled graphs, the plot for $k = 4$ still has its highest peak around 0.9,
 which means adding features for $k \ge 5$ could be valuable.
 
-\section{Selection Model}
-We're using \textsc{Llama} \cite{kotthoff_llama_2013}. Describe k-folding.
+\chapter{Machine Learning}
+After running the algorithms on all of the data for different types of labelling
+and $p$ values, a machine learning (ML) algorithm can be trained to predict which
+algorithm should be chosen for each pair of graphs. For that we are using an R
+package called \textsc{Llama} \cite{kotthoff_llama_2013}, which was created for
+exactly this purpose. For each pair of graphs it takes:
+
+\begin{itemize}
+\item A list of features. We treat the features of pattern and target graphs
+  separately, giving more than 20 features per problem instance.
+\item A list of performance measures for all algorithms, i.e., the values that
+  we are trying to optimise. In this case (as in most cases), this corresponds
+  to running time. The values are capped at the timeout value (1,000,000 ms).
+  Furthermore, instances that were not run on the clique algorithm are also set
+  to the timeout value. Finally, we filter out instances where all of the
+  algorithms timed out.
+\item A list of boolean values, denoting whether each algorithm successfully
+  finished or not. Timeouts, the clique algorithm running out of memory, and
+  instances that were not run with the clique algorithm because of their size
+  are all marked as false.
+\item A dataframe, measuring the running time taken to compute each feature for
+  each problem instance. Alternatively, a single number for the approximate time
+  taken to compute all features for any instance. This parameter is taken into
+  account when comparing the algorithm portfolio against specific algorithms. As
+  the main goal of this work is to gain insight about how the algorithms compare
+  rather than to prove an algorithm portfolio as a superior approach, this
+  parameter is not used.
+\end{itemize}
+
+After constructing the required dataframes as described above, the data needs to
+be split into training and test sets. We use a technique called 10-fold
+\emph{cross-validation}, which splits the data into 10 parts \cite{citeulike:1304145}.
+9/10\textsuperscript{ths} of the data is used to train the ML algorithm, while
+the remaining 1/10\textsuperscript{th} is used to evaluate how good the trained
+model is. This process of training and evaluation is repeated 10 times, letting
+each of the 10 parts be used for evaluation exactly once. The goodness-of-fit
+criteria are then averaged out between the 10 runs.
+
+The 10 folds could, of course, be chosen completely randomly. However, research
+suggests that stratified cross-validation typically outperforms
+random-sampling-based cross-validation and results in a better model
+\cite{DBLP:conf/ijcai/Kohavi95}. Suppose we have a dataset of $N$ elements.
+\emph{Stratified sampling} partitions it into a number of subpopulations $s_1,
+\dots, s_n$ with $n_1, \dots, n_N$ elements, respectively (typically based on
+the value of some feature or collection of features). It then draws from each
+subpopulation independently, ensuring that approximately $n_i/N$ of the sample
+comes from subpopulation $s_i$ for $i = 1, \dots, n$ \cite{lohr2009sampling}. In
+this case the data is partitioned into four groups based on which algorithm
+performed the best.
+
+% TODO: describe/cite random forest
+The cross-validation folds are then passed to the ML algorithm. We are using a
+classifier called random forest as it is recommended in the manual
+\cite{kotthoff_llama_2013} and successfully used in a similar study
+\cite{DBLP:conf/lion/KotthoffMS16}.
+
+As we are trying to use hundreds of megabytes of data, the R code was optimised
+to reduce memory consumption by removing temporary variables as soon as they are
+no longer needed and parallelised with the help of \texttt{parallelMap} package.
+
+\section{Unlabelled Graphs}
+
+\begin{figure}
+  \centering
+  \includegraphics{images/runtime_heatmap.png}
+  \caption{A heatmap of ...}
+  \label{fig:runtime_heatmap}
+\end{figure}
+
+
+\section{Vertex-Labelled Graphs}
+
+\section{Vertex- and Edge-Labelled Graphs}
 
 %\begin{appendices}
 %\end{appendices}
