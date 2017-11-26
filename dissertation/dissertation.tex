@@ -5,6 +5,7 @@
 \usepackage[UKenglish]{isodate}
 \usepackage[hidelinks]{hyperref}
 \usepackage{amsfonts, amsthm, graphicx, subcaption}
+\usepackage[group-separator={,}]{siunitx}
 
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
@@ -120,6 +121,7 @@ In order to determine which algorithm should be used for which problem instance,
 we run all algorithms on two databases that contain a large variety of graphs
 differing in size, various characteristics, and the way they were generated.
 
+% TODO: largerGraphs part is wrong!!
 The \textsc{McSplit} paper \cite{DBLP:conf/ijcai/McCreeshPT17} used the same
 datasets to compare these (and a few constraint programming) algorithms and
 found \textsc{McSplit} to win with unlabelled graphs, the clique encoding to
@@ -129,24 +131,25 @@ performance between \textsc{McSplit} and the clique encoding or between
 $\textsc{McSplit}\downarrow$ and $k\downarrow$ was very small.
 
 The algorithms were compiled with gcc 6.3.0 and run on Intel Xeon E5-2697A v4
-(2.60 GHz) processors with 512 GB of memory and a 1000 s time limit. A Makefile
-was created to run multiple experiments in parallel with, e.g., \texttt{make -j
-  64}, which generates pairs of graph filenames for all datasets, runs the
-selected algorithms with various command line arguments, redirects their output
-to files that are later parsed using \texttt{sed} and regular expressions into
-the CSV format. For each algorithm, we keep the full names of pattern and target
-graphs, the number of vertices in the returned maximum common subgraph, running
-time as reported by the algorithms themselves, and the number of explored nodes
-in the search tree. Entries with running time greater than or equal to the
-timeout value are considered to have timed out. The aforementioned node counts
-are collected but not currently used. Afterwards, the answers of different
-algorithms are checked for equality (for algorithms that did not time out).
+(2.60 GHz) processors with 512 GB of memory and a \num{1000} s time limit. A
+Makefile was created to run multiple experiments in parallel with, e.g.,
+\texttt{make -j 64}, which generates pairs of graph filenames for all datasets,
+runs the selected algorithms with various command line arguments, redirects
+their output to files that are later parsed using \texttt{sed} and regular
+expressions into the CSV format. For each algorithm, we keep the full names of
+pattern and target graphs, the number of vertices in the returned maximum common
+subgraph, running time as reported by the algorithms themselves, and the number
+of explored nodes in the search tree. Entries with running time greater than or
+equal to the timeout value are considered to have timed out. The aforementioned
+node counts are collected but not currently used. Afterwards, the answers of
+different algorithms are checked for equality (for algorithms that did not time
+out).
 
 The clique algorithm requires $O(n^2m^2)$ memory for a pair of graphs with $n$
 amd $m$ vertices \cite{DBLP:conf/aaai/HoffmannMR17, DBLP:conf/cp/McCreeshNPS16}.
 To avoid segmentation faults, its virtual memory usage was limited to 7 GB with
 \texttt{ulimit -v} and the unlabelled instances (which contain much larger
-graphs) were restricted to $m \times n < 30,000$.
+graphs) were restricted to $m \times n < \num{30000}$.
 
 $k\downarrow$ was further modified to accept graphs with vertex labels by adding
 an additional constraint for matching labels on line 8 of the
@@ -154,7 +157,7 @@ an additional constraint for matching labels on line 8 of the
 
 %TODO: mention how many instances were solved by at least one algorithm in each dataset.
 
-\section{Labelled graphs}
+\section{Labelled graphs} \label{sec:labelled}
 All of the labelled graphs are taken from the ARG Database \cite{foggia2001-2,
   DBLP:journals/prl/SantoFSV03}, which is a large collection of graphs for
 benchmarking various graph-matching algorithms. The graphs are generated using
@@ -224,7 +227,7 @@ from a uniform distribution (represented by $E(C)$). We plot a histogram of the
 difference $E(C) - C$ in Figure \ref{figure:labelling_histogram} and observe
 that the difference is normally distributed around 0.
 
-\section{Unlabelled graphs}
+\section{Unlabelled graphs} \label{sec:unlabelled}
 We also include a collection of benchmark instances for the subgraph isomorphism
 problem\footnote{\url{http://liris.cnrs.fr/csolnon/SIP.html}} (with the
 biochemical reactions dataset excluded since we are not dealing with directed
@@ -232,9 +235,9 @@ graphs). It contains only unlabelled graphs and consists of the following sets:
 
 \begin{description}
 \item[images-CVIU11] Graphs generated from segmented images. 43 pattern graphs
-  and 146 target graphs, giving a total of 6278 instances.
+  and 146 target graphs, giving a total of \num{6278} instances.
 \item[meshes-CVIU11] Graphs generated from meshes modelling 3D
-  objects. 6 pattern graphs and 503 target graphs, giving a total of 3018
+  objects. 6 pattern graphs and 503 target graphs, giving a total of \num{3018}
   instances. Both \texttt{images-CVIU11} and \texttt{meshes-CVIU11} datasets are
   described in \cite{DBLP:journals/cviu/DamiandSHJS11}.
 \item[images-PR15] Graphs generated from segmented images
@@ -242,19 +245,19 @@ graphs). It contains only unlabelled graphs and consists of the following sets:
   graph, giving 24 instances.
 \item[LV] Graphs with various properties (connected, biconnected, triconnected,
   bipartite, planar, etc.). 49 graphs are paired up in all possible ways, giving
-  $49^2=2401$ instances.
+  $49^2=\num{2401}$ instances.
 \item[scalefree] Scale-free networks generated using a power law distribution of
   degrees (100 instances).
-\item[si] Bounded valence graphs, 4D meshes, and randomly generated graphs (1170
-  instances). This is the unlabelled part of the ARG database. \texttt{LV},
-  \texttt{scalefree}, and \texttt{si} datasets are described in
+\item[si] Bounded valence graphs, 4D meshes, and randomly generated graphs
+  (\num{1170} instances). This is the unlabelled part of the ARG database.
+  \texttt{LV}, \texttt{scalefree}, and \texttt{si} datasets are described in
   \cite{DBLP:journals/ai/Solnon10, DBLP:journals/constraints/ZampelliDS10}.
 \item[phase] Random graphs generated to be close to the
   satisfiable-unsatisfiable phase transition (200 instances)
   \cite{DBLP:conf/ijcai/McCreeshPT16}.
 \item[largerGraphs] Larger instances of the \texttt{LV} dataset. There are 70
-  graphs, giving $70^2=4900$ instances. The separation was made and used in
-  \cite{DBLP:conf/aaai/HoffmannMR17, DBLP:conf/lion/KotthoffMS16,
+  graphs, giving $70^2=\num{4900}$ instances. The separation was made and used
+  in \cite{DBLP:conf/aaai/HoffmannMR17, DBLP:conf/lion/KotthoffMS16,
     DBLP:conf/ijcai/McCreeshPT17}.
 \end{description}
 
@@ -278,33 +281,39 @@ The initial set of features is based on the algorithm selection paper for the
 subgraph isomorphism problem \cite{DBLP:conf/lion/KotthoffMS16} and consists of
 the following:
 
-\begin{itemize}
+\begin{enumerate}
 \item number of vertices,
 \item number of edges,
 \item mean degree,
 \item maximum degree,
-\item standard deviation of degrees,
 \item density,
 \item mean distance between all pairs of vertices,
 \item maximum distance between all pairs of vertices,
+\item standard deviation of degrees,
 \item number of loops,
 \item proportion of all vertex pairs that have a distance of at least 2, 3, and 4,
 \item whether the graph is connected.
 %\item uniformity of the distribution of edges.
-\end{itemize}
+\end{enumerate}
 
-We excluded feature extraction running time as a viable feature by itself since
+We exclude feature extraction running time as a viable feature by itself since
 it would not provide any insight into what properties of the graph affect which
-algorithm is likely to achieve the best performance. We analyse three different
-types of labelling and treat them as separate problems:
+algorithm is likely to achieve the best performance. Since $k\downarrow$ and
+$\textsc{McSplit}\downarrow$ both start by looking for (complete) subgraph
+isomorphisms, they are likely to outperform other algorithms when both graphs
+are very similar and the maximum common subgraph has (almost) as many vertices
+as the smaller of the two graphs. Thus, for each feature $f$ in features 1--7
+(excluding the rest to avoid division by 0), we also add a feature for the ratio
+$\frac{f(G_p)}{f(G_t)}$, where $G_p$ and $G_t$ are the pattern and target
+graphs, respectively.
+
+We analyse three different types of labelling and treat them as separate problems:
 
 \begin{itemize}
 \item no labels,
 \item vertex labels,
 \item vertex and edge labels.
 \end{itemize}
-
-% TODO: could have different percentages for vertices and edges
 For the last two types, we add a feature corresponding to $p$ defined in
 Definition \ref{def:percent_labelling} and collect data for the following values
 of p: 50\%, 33\%, 25\%, 20\%, 15\%, 10\%, 5\%. The values correspond to having
@@ -432,6 +441,14 @@ respectively.
   \label{fig:sip_features2}
 \end{figure}
 
+\begin{figure}
+  \centering
+  \includegraphics{images/features_heatmap.png}
+  \caption{A heatmap for normalised features with black denoting the maximum
+    value and white denoting the minimum for each feature}
+  \label{fig:features_heatmap}
+\end{figure}
+
 %TODO: investigate feature correlation?
 In this section we plot and discuss how the selected features are distributed in
 different datasets. Most of the data is plotted, except for the number of loops
@@ -467,6 +484,11 @@ of higher values for many other features, hence all of the density plots in
 Figure \ref{fig:sip_features1} are right skewed. The same applies to the number
 of loops in Figure \ref{fig:sip_features2}: almost all graphs have a small
 number of them, while some (presumably larger) graphs have significantly more.
+The same story is represented in the heatmap in Figure
+\ref{fig:features_heatmap}, where the average values are coloured grey, largest
+values black, and smallest values white. The rows that look almost completely
+white represent features that have several significantly higher values.
+% TODO: the heatmap is for both, not just SIP
 
 To sum up, even though the distributions are far from normal, most of them still
 provide a good range of different values. There is one important difference
@@ -535,17 +557,55 @@ classifier called random forest as it is recommended in the manual
 
 As we are trying to use hundreds of megabytes of data, the R code was optimised
 to reduce memory consumption by removing temporary variables as soon as they are
-no longer needed and parallelised with the help of \texttt{parallelMap} package.
+no longer needed and parallelised with the help of the \texttt{parallelMap}
+package.
 
 \section{Unlabelled Graphs}
 
 \begin{figure}
   \centering
+  \includegraphics{images/ecdf_sip.png}
+  \caption{Comparison of the runtimes of algorithms for the unlabelled dataset}
+  \label{fig:ecdf_sip}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics{images/ecdf_unlabelled.png}
+  \caption{Comparison of the runtimes of algorithms for all of the unlabelled data}
+  \label{fig:ecdf_unlabelled}
+\end{figure}
+
+\begin{figure}
+  \centering
   \includegraphics{images/runtime_heatmap.png}
-  \caption{A heatmap of ...}
+  \caption{A heatmap of $\log_{10}$ runtimes: light colours for low running
+    times and black for timing out}
   \label{fig:runtime_heatmap}
 \end{figure}
 
+In order to compare the runtimes of the algorithms, we use empirical cumulative
+distribution function (ECDF) plots \cite{10.2307/2334448}: for each unit of time
+on the $x$ axis, the $y$ value represents what part of the problem instances
+was solved in that amount of time or less. Figures (TODO: add the MCS figure)
+and \ref{fig:ecdf_sip} show the ECDF plots for unlabelled instances described in
+Sections \ref{sec:labelled} and \ref{sec:unlabelled}, respectively. We can check
+that the ordering of the algorithms in these plots is the same as in Figures
+3.(a) and 4 in the \textsc{McSplit} paper \cite{DBLP:conf/ijcai/McCreeshPT17}.
+Next, Figure \ref{fig:ecdf_unlabelled} provides the same plot for all of the
+unlabelled data and Figure \ref{fig:runtime_heatmap} compares the runtimes of
+the algorithms on a per-instance basis. Out of \num{45465} instances that were
+solved by at least one algorithm, the clique encoding won 85 times,
+$k\downarrow$ won 81 times, \textsc{McSplit} won \num{15017} times, and
+$\textsc{McSplit}\downarrow$ won \num{21484} times. In the remaining 8798 cases
+2 or more algorithms performed equally well (usually with a runtime of less than
+10 ms). Note that even though $k\downarrow$ performs considerably better than
+the clique encoding according to Figures \ref{fig:ecdf_unlabelled} and
+\ref{fig:runtime_heatmap}, it is the best algorithm in only 81 instances, less
+than the clique encoding. Given this information, we would expect the ML
+algorithm to suggest using \textsc{McSplit} and $\textsc{McSplit}\downarrow$
+most of the time, only suggesting $k\downarrow$ and the clique encoding in very
+specific situations.
 
 \section{Vertex-Labelled Graphs}
 

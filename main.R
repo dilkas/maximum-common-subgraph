@@ -1,5 +1,6 @@
 library(parallelMap)
-parallelStartSocket(4)
+require(llama)
+parallelStartSocket(64)
 parallelLibrary("llama")
 
 # Read the data
@@ -21,10 +22,7 @@ rm("mcsplit2")
 mcsplitdown <- read.csv("results/mcsplit.down.sip.csv", header = FALSE, colClasses = classes, col.names = names)
 mcsplitdown2 <- read.csv("results/mcsplit.down.mcs.csv", header = FALSE, colClasses = classes, col.names = names)
 mcsplitdown <- rbind(mcsplitdown, mcsplitdown2)
-rm("mcsplitdown2")
-
-rm("names")
-rm("classes")
+rm("mcsplitdown2", "names", "classes")
 
 # Construct the feature data frame
 feature_names <- c("vertices", "edges", "loops", "meandeg", "maxdeg", "stddeg", "density", "isconnected", "meandistance", "maxdistance", "proportiondistancege2", "proportiondistancege3", "proportiondistancege4")
@@ -33,6 +31,11 @@ colnames(features) <- c("ID", paste("pattern", feature_names, sep = "."), paste(
 features2 <- read.csv("results/mcs_features.csv", header = FALSE)
 colnames(features2) <- c("ID", paste("pattern", feature_names, sep = "."), paste("target", feature_names, sep = "."))
 features <- rbind(features, features2)
+rm("features2", "feature_names")
+for (feature in c("vertices", "edges", "meandeg", "maxdeg", "density", "meandistance", "maxdistance")) {
+  features[paste(feature, "ratio", sep = ".")] <- features[paste("pattern", feature, sep = ".")] / features[paste("target", feature, sep = ".")]
+}
+rm("feature")
 
 # Check the clique dataset
 #clique_features <- merge(clique, features, by = "ID")
@@ -62,6 +65,7 @@ colnames(performance) <- c("ID", "clique", "kdown")
 performance <- merge(performance, mcsplit[, c("ID", "time")], by = "ID", all.x = TRUE)
 colnames(performance) <- c("ID", "clique", "kdown", "mcsplit")
 performance <- merge(performance, mcsplitdown[, c("ID", "time")], by = "ID", all.x = TRUE)
+rm("clique", "kdown", "mcsplit", "mcsplitdown")
 colnames(performance) <- c("ID", "clique", "kdown", "mcsplit", "mcsplitdown")
 performance$clique[is.na(performance$clique)] <- 1000000
 performance$kdown <- pmin(performance$kdown, 1000000)
@@ -77,37 +81,43 @@ success$kdown <- success$kdown < 1000000
 success$mcsplit <- success$mcsplit < 1000000
 success$mcsplitdown <- success$mcsplitdown < 1000000
 
-require(llama)
 data <- input(features, performance, success)
-folds <- cvFolds(data, stratify = TRUE)
-model <- classify(makeLearner("classif.randomForest"), folds)
+rm("features", "performance", "success")
+model <- classify(makeLearner("classif.randomForest"), cvFolds(data, stratify = TRUE))
+saveRDS(model, "models/unlabelled_model.rds")
 
-# Plots
-times <- subset(data$data, T, data$performance)
-cols <- gray(seq(1, 0, length.out = 255))
-labels <- c("clique", sprintf('k\u2193'), "McSplit", sprintf('McSplit\u2193'))
-
-# Log runtimes by solver and instance
-image(log10(t(as.matrix(times))), axes = F, col = cols)
-axis(1, labels = labels, at = seq(0, 1, 1/(length(data$performance) - 1)), las = 2)
-
-# White - first, black - last (filtered)
-image(apply(times , 1, order), axes = F, col = cols)
-axis(1, labels = labels, at = seq(0, 1, 1/(length(data$performance) - 1)), las = 2)
-
-# How many times is each algorithm the best?
-length(which(times$clique < times$kdown & times$clique < times$mcsplit & times$clique < times$mcsplitdown))
-length(which(times$kdown < times$clique & times$kdown < times$mcsplit & times$kdown < times$mcsplitdown))
-length(which(times$mcsplit < times$clique & times$mcsplit < times$kdown & times$mcsplit < times$mcsplitdown))
-length(which(times$mcsplitdown < times$clique & times$mcsplitdown < times$kdown & times$mcsplitdown < times$mcsplit))
-
-# Heatmaps for pattern/target features. Group differently?
-features <- subset(data$data, T, data$features)
-nFeatures <- normalize(features)
-graph_feature_names <- c("vertices", "edges", "loops", "mean degree", "max degree", "SD of degrees", "density", "connected", "mean distance", "max distance", "distance \u2265 2", "distance \u2265 3", "distance \u2265 4")
-full_feature_names <- c(paste("pattern", graph_feature_names), paste("target", graph_feature_names))
-par(mar = c(1, 10, 1, 1))
-image(as.matrix(nFeatures$features), axes = F, col = cols)
-axis(2, labels = full_feature_names, at = seq(0, 1, 1/(length(data$features) - 1)), las = 2)
-
+# # Plots
+# times <- subset(data$data, T, data$performance)
+# cols <- gray(seq(1, 0, length.out = 255))
+# labels <- c("clique", sprintf('k\u2193'), "McSplit", sprintf('McSplit\u2193'))
+# 
+# # Log runtimes by solver and instance
+# image(log10(t(as.matrix(times))), axes = F, col = cols)
+# axis(1, labels = labels, at = seq(0, 1, 1/(length(data$performance) - 1)), las = 2)
+# 
+# # White - first, black - last (weird results because of equal timing out values)
+# #image(apply(times , 1, order), axes = F, col = cols)
+# #axis(1, labels = labels, at = seq(0, 1, 1/(length(data$performance) - 1)), las = 2)
+# 
+# # How many times is each algorithm the best?
+# length(which(times$clique < times$kdown & times$clique < times$mcsplit & times$clique < times$mcsplitdown))
+# length(which(times$kdown < times$clique & times$kdown < times$mcsplit & times$kdown < times$mcsplitdown))
+# length(which(times$mcsplit < times$clique & times$mcsplit < times$kdown & times$mcsplit < times$mcsplitdown))
+# length(which(times$mcsplitdown < times$clique & times$mcsplitdown < times$kdown & times$mcsplitdown < times$mcsplit))
+# 
+# summary(times[!(times$clique < times$kdown & times$clique < times$mcsplit & times$clique < times$mcsplitdown) & !(times$kdown < times$clique & times$kdown < times$mcsplit & times$kdown < times$mcsplitdown) & !(times$mcsplit < times$clique & times$mcsplit < times$kdown & times$mcsplit < times$mcsplitdown) & !(times$mcsplitdown < times$clique & times$mcsplitdown < times$kdown & times$mcsplitdown < times$mcsplit), ])
+# 
+# library(lattice)
+# library(latticeExtra)
+# ecdfplot(~ clique + kdown + mcsplit + mcsplitdown, data = times, auto.key = list(space = "right", text = labels), xlab = "Runtime (ms)")
+# 
+# # Heatmaps for pattern/target features. Group differently?
+# features <- subset(data$data, T, data$features)
+# nFeatures <- normalize(features)
+# graph_feature_names <- c("vertices", "edges", "loops", "mean degree", "max degree", "SD of degrees", "density", "connected", "mean distance", "max distance", "distance \u2265 2", "distance \u2265 3", "distance \u2265 4")
+# full_feature_names <- c(paste("pattern", graph_feature_names), paste("target", graph_feature_names))
+# par(mar = c(1, 10, 1, 1))
+# image(as.matrix(nFeatures$features), axes = F, col = cols)
+# axis(2, labels = full_feature_names, at = seq(0, 1, 1/(length(data$features) - 1)), las = 2)
+# 
 parallelStop()
