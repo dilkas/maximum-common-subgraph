@@ -1,5 +1,5 @@
 library(parallelMap)
-require(llama)
+library(llama)
 parallelStartSocket(64)
 parallelLibrary("llama")
 
@@ -84,10 +84,11 @@ success$mcsplitdown <- success$mcsplitdown < 1000000
 data <- input(features, performance, success)
 rm("features", "performance", "success")
 model <- classify(makeLearner("classif.randomForest"), cvFolds(data, stratify = TRUE))
-saveRDS(model, "models/unlabelled_model.rds")
+saveRDS(model, "models/unlabelled.rds")
+parallelStop()
 
 # # Plots
-# times <- subset(data$data, T, data$performance)
+times <- subset(data$data, T, data$performance)
 # cols <- gray(seq(1, 0, length.out = 255))
 # labels <- c("clique", sprintf('k\u2193'), "McSplit", sprintf('McSplit\u2193'))
 # 
@@ -98,13 +99,24 @@ saveRDS(model, "models/unlabelled_model.rds")
 # # White - first, black - last (weird results because of equal timing out values)
 # #image(apply(times , 1, order), axes = F, col = cols)
 # #axis(1, labels = labels, at = seq(0, 1, 1/(length(data$performance) - 1)), las = 2)
-# 
-# # How many times is each algorithm the best?
-# length(which(times$clique < times$kdown & times$clique < times$mcsplit & times$clique < times$mcsplitdown))
-# length(which(times$kdown < times$clique & times$kdown < times$mcsplit & times$kdown < times$mcsplitdown))
-# length(which(times$mcsplit < times$clique & times$mcsplit < times$kdown & times$mcsplit < times$mcsplitdown))
-# length(which(times$mcsplitdown < times$clique & times$mcsplitdown < times$kdown & times$mcsplitdown < times$mcsplit))
-# 
+ 
+# Tables for best algorithms
+times <- performance[grep("data/sip-instances/images-CVIU11", performance$ID), ]
+times <- performance[grep("data/sip-instances/images-PR15", performance$ID), ]
+times <- performance[grep("data/sip-instances/largerGraphs", performance$ID), ]
+times <- performance[grep("data/sip-instances/LV", performance$ID), ]
+times <- performance[grep("data/sip-instances/meshes-CVIU11", performance$ID), ]
+times <- performance[grep("data/sip-instances/phase", performance$ID), ]
+times <- performance[grep("data/sip-instances/scalefree", performance$ID), ]
+times <- performance[grep("data/sip-instances/si", performance$ID), ]
+times <- performance[grep("data/mcs-instances", performance$ID), ]
+
+# How many times is each algorithm the best?
+length(which(times$clique < times$kdown & times$clique < times$mcsplit & times$clique < times$mcsplitdown))
+length(which(times$kdown < times$clique & times$kdown < times$mcsplit & times$kdown < times$mcsplitdown))
+length(which(times$mcsplit < times$clique & times$mcsplit < times$kdown & times$mcsplit < times$mcsplitdown))
+length(which(times$mcsplitdown < times$clique & times$mcsplitdown < times$kdown & times$mcsplitdown < times$mcsplit))
+ 
 # summary(times[!(times$clique < times$kdown & times$clique < times$mcsplit & times$clique < times$mcsplitdown) & !(times$kdown < times$clique & times$kdown < times$mcsplit & times$kdown < times$mcsplitdown) & !(times$mcsplit < times$clique & times$mcsplit < times$kdown & times$mcsplit < times$mcsplitdown) & !(times$mcsplitdown < times$clique & times$mcsplitdown < times$kdown & times$mcsplitdown < times$mcsplit), ])
 # 
 # library(lattice)
@@ -120,4 +132,4 @@ saveRDS(model, "models/unlabelled_model.rds")
 # image(as.matrix(nFeatures$features), axes = F, col = cols)
 # axis(2, labels = full_feature_names, at = seq(0, 1, 1/(length(data$features) - 1)), las = 2)
 # 
-parallelStop()
+
