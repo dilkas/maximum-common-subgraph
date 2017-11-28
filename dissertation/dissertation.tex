@@ -199,7 +199,7 @@ labelling is implemented in the ARG database:
         \times |V| \right\rfloor \right\}. \]
 \end{definition}
 
-The default value for $p$ is 33\%. %TODO: could add a qq plot as well
+The default value for $p$ is 33\%.
 
 \begin{figure}
   \centering
@@ -307,7 +307,105 @@ graphs) were restricted to $m \times n < \num{30000}$.
 $k\downarrow$ was further modified to accept graphs with vertex labels by adding
 an additional constraint for matching labels on line 8 of the
 \texttt{klessSubgraphIsomorphism} function \cite{DBLP:conf/aaai/HoffmannMR17}.
-%TODO: mention how many instances were solved by at least one algorithm in each dataset.
+
+In the rest of this section we explore and compare how the algorithms performed
+on the three different subproblems under consideration, those of having no
+labels, vertex labels, and both vertex and edge labels. We introduce
+\emph{empirical cumulative distribution function (ECDF)}
+plots \cite{10.2307/2334448}: for each unit of time on the $x$ axis, the value on
+the $y$ axis represents what part of the problem instances was solved in that
+amount of time or less.
+% TODO: mention how many instances were solved by at least one algorithm in each dataset.
+
+\subsection{Unlabelled Graphs}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering % TODO: replace this with the MCS plot
+    \includegraphics[scale=0.7]{images/ecdf_sip.png}
+    \caption{Data from Section \ref{sec:labelled}, the ARG Database}
+    \label{fig:ecdf_unlabelled_mcs}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[scale=0.7]{images/ecdf_sip.png}
+    \caption{Data from Section \ref{sec:unlabelled}}
+    \label{fig:ecdf_unlabelled_sip}
+  \end{subfigure}
+  \begin{subfigure}[t]{\textwidth}
+    \centering
+    \includegraphics[scale=0.7]{images/ecdf_unlabelled.png}
+    \caption{All unlabelled data}
+    \label{fig:ecdf_unlabelled_both}
+  \end{subfigure}
+  \caption{Comparison of the runtimes of algorithms on unlabelled data}
+  \label{fig:ecdf_unlabelled}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics{images/runtime_heatmap.png}
+  \caption{A heatmap of $\log_{10}$ runtimes: light colours for low running
+    times and black for timing out}
+  \label{fig:runtime_heatmap}
+\end{figure}
+
+We plot the ECDF plots for unlablled graphs in both databases in Figure \ref{fig:ecdf_unlabelled}. We can check that the orderings of the algorithms in parts (a) and (b) of Figure \ref{fig:ecdf_unlabelled} are the same as in Figures 3a and 4 in the \textsc{McSplit} paper \cite{DBLP:conf/ijcai/McCreeshPT17}. We also provide a heatmap in Figure \ref{fig:runtime_heatmap} to compare the runtimes of the algorithms on a per-instance basis.
+
+\begin{remark}
+  Not every problem instance gets a line of pixels on the heatmap. Therefore,
+  the column for the clique encoding may look darker than it actually is.
+  Furthermore, there are problem instances where $k\downarrow$ performs better
+  than the other algorithms, even though it may not be apparent from the heatmap.
+\end{remark}
+
+\begin{table}
+  \centering
+  \begin{tabular}{l r r r r}
+    Dataset & clique & $k\downarrow$ & \textsc{McSplit} & $\textsc{McSplit}\downarrow$ \\
+    \hline
+    \texttt{images-CVIU11} & 0 & 32 & 78 & 1080 \\
+    \texttt{images-PR15} & 0 & 0 & 0 & 24 \\
+    \texttt{largerGraphs} & 0 & 14 & 6 & 143 \\
+    \texttt{LV} & 85 & 12 & 256 & 206 \\
+    \texttt{meshes-CVIU11} & 0 & 13 & 0 & 23 \\
+    \texttt{phase} & 0 & 0 & 0 & 0 \\
+    \texttt{scalefree} & 0 & 0 & 0 & 80 \\
+    \texttt{si} & 0 & 10 & 11 & 1044 \\
+    ARG Database & 0 & 0 & 14666 & 18884 \\
+    \hline
+    Total & 85 & 81 & 15017 & 21484
+  \end{tabular}
+  \caption{The number of times each algorithm was the best, for each dataset}
+  \label{table:best}
+\end{table}
+
+Table \ref{table:best} shows that most of the datasets have multiple algorithms
+that managed to outperform the others for some problem instances. Thus, looking
+at the differences between different datasets will not be enough to predict the
+best algorithm.
+
+\begin{remark}
+  More specifically, Table \ref{table:best} shows the numbers of times that each
+  algorithm's runtime was lower than the runtimes of other algorithms.
+  Therefore, if 2 or more lowest runtimes are equal (as can often happen with
+  single-digit runtimes), neither algorithm is marked as winning in the table.
+\end{remark}
+
+\begin{remark}
+Note that even though $k\downarrow$ performs considerably better than the clique
+encoding according to Figures \ref{fig:ecdf_unlabelled} and
+\ref{fig:runtime_heatmap}, it is counted as the best algorithm in only 81
+instances, less than the clique encoding.
+\end{remark}
+
+Given this information, we would expect the ML algorithm to suggest using
+\textsc{McSplit} and $\textsc{McSplit}\downarrow$ most of the time, only
+suggesting $k\downarrow$ and the clique encoding in very specific situations.
+
+\subsection{Vertex-Labelled Graphs}
+\subsection{Vertex- and Edge-Labelled Graphs}
 
 \section{Graph Features} \label{sec:features}
 %TODO: formulas for features?
@@ -497,75 +595,6 @@ respectively.
   \label{fig:features_heatmap}
 \end{figure}
 
-
-\begin{figure}
-  \centering
-  \includegraphics{images/ecdf_sip.png}
-  \caption{Comparison of the runtimes of algorithms on problem instances from
-    Section \ref{sec:unlabelled}}
-  \label{fig:ecdf_sip}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \includegraphics{images/ecdf_unlabelled.png}
-  \caption{Comparison of the runtimes of algorithms on all unlabelled graphs}
-  \label{fig:ecdf_unlabelled}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \includegraphics{images/runtime_heatmap.png}
-  \caption{A heatmap of $\log_{10}$ runtimes: light colours for low running
-    times and black for timing out}
-  \label{fig:runtime_heatmap}
-\end{figure}
-
-% TODO: move things to a section called "results"
-In order to compare the runtimes of the algorithms, we use empirical cumulative
-distribution function (ECDF) plots \cite{10.2307/2334448}: for each unit of time
-on the $x$ axis, the $y$ value represents what part of the problem instances
-was solved in that amount of time or less. Figures (TODO: add the MCS figure)
-and \ref{fig:ecdf_sip} show the ECDF plots for unlabelled instances described in
-Sections \ref{sec:labelled} and \ref{sec:unlabelled}, respectively. We can check
-that the ordering of the algorithms in these plots is the same as in Figures
-3.(a) and 4 in the \textsc{McSplit} paper \cite{DBLP:conf/ijcai/McCreeshPT17}.
-Next, Figure \ref{fig:ecdf_unlabelled} provides the same plot for all of the
-unlabelled data and Figure \ref{fig:runtime_heatmap} compares the runtimes of
-the algorithms on a per-instance basis. Table \ref{table:best} shows that most
-of the datasets have multiple algorithms that... Note that even though
-$k\downarrow$ performs considerably better than the clique encoding according to
-Figures \ref{fig:ecdf_unlabelled} and \ref{fig:runtime_heatmap}, it is the best
-algorithm in only 81 instances, less than the clique encoding. Given this
-information, we would expect the ML algorithm to suggest using \textsc{McSplit}
-and $\textsc{McSplit}\downarrow$ most of the time, only suggesting $k\downarrow$
-and the clique encoding in very specific situations.
-% TODO: finish the sentence
-
-% TODO: In the remaining ... cases 2 or more algorithms performed equally well
-% (usually with a runtime of less than 10 ms)
-% TODO: discuss this table the way they do in the LION paper
-\begin{table} % TODO: make conclusions about this for feature selection
-  \centering
-  \begin{tabular}{l r r r r}
-    Dataset & clique & $k\downarrow$ & \textsc{McSplit} & $\textsc{McSplit}\downarrow$ \\
-    \hline
-    \texttt{images-CVIU11} & 0 & 32 & 78 & 1080 \\
-    \texttt{images-PR15} & 0 & 0 & 0 & 24 \\
-    \texttt{largerGraphs} & 0 & 14 & 6 & 143 \\
-    \texttt{LV} & 85 & 12 & 256 & 206 \\
-    \texttt{meshes-CVIU11} & 0 & 13 & 0 & 23 \\
-    \texttt{phase} & 0 & 0 & 0 & 0 \\
-    \texttt{scalefree} & 0 & 0 & 0 & 80 \\
-    \texttt{si} & 0 & 10 & 11 & 1044 \\
-    ARG Database & 0 & 0 & 14666 & 18884 \\
-    \hline
-    Total & 85 & 81 & 15017 & 21484
-  \end{tabular}
-  \caption{The number of times each algorithm was the best, for each dataset}
-  \label{table:best}
-\end{table}
-
 %TODO: investigate feature correlation?
 In this section we plot and discuss how the selected features are distributed in
 both databases. Most of the data is plotted, except for the number of loops
@@ -692,6 +721,51 @@ no longer needed and parallelised with the help of the \texttt{parallelMap}
 package.
 
 \section{Unlabelled Graphs}
+
+\begin{figure}
+  \centering
+  \includegraphics{images/unlabelled_forest_errors.png}
+  \caption{Convergence plot of various error measures as the number of trees in
+    a random forest increases. The plot shows the OOB error and $1 -
+    \text{recall}$ for each algorithm.}
+  \label{fig:unlabelled_forest_errors}
+\end{figure}
+
+Random forests support a convenient way to estimate the test error without
+cross-validation or any other kind of data splitting. Each tree in a random
+forest uses around 2/3 of the data. The remaining 1/3 is referred to as
+\emph{out-of-bag (OOB)} observations \cite{James:2014:ISL:2517747}. For each
+observation in the data, we can predict the answer (the vote on which algorithm
+is expected to win) using all trees that have the observation as OOB. The
+majority vote is then declared to be the answer. The \emph{OOB error} is
+the relative frequency of incorrect predictions. As each prediction was made
+using trees that had not seen that particular observation before, OOB error is a
+valid estimate of test error. The black line in Figure
+\ref{fig:unlabelled_forest_errors} shows how the error converges with the number
+of trees to about 17\%.
+
+% TODO: count how many times each algorithm was predicted
+% TODO: and explain the high error rates for clique and kdown
+The other lines in the figure, one for each algorithm, are defined as $1 -
+\text{recall}$, where for an algorithm $A$ \emph{recall}
+\cite{citeulike:12882259} is
+\[ \frac{\text{the number of instances that were correctly predicted as
+      $A$}}{\text{the number of instances where $A$ is the correct
+      prediction}}. \]
+The error rates for the clique encoding and $k\downarrow$ are quite high,
+converging to 47\% and 81\%, respectively. This is most likely due to having very
+few observations with them as the winning algorithms. The error rates for
+\textsc{McSplit} and $\textsc{McSplit}\downarrow$ converge to 27\% and 11\%,
+respectively.
+
+\begin{definition}
+  The \emph{Gini index}, defined as \cite{James:2014:ISL:2517747}
+  \[ G = \sum_{k=1}^K \hat{p}_{mk}(1-\hat{p}_{mk}), \]
+  where $\hat{p}_{mk}$ represents the proportion of observations in the $m$th
+  region that are from the $k$th class. TODO: continue!!!
+  is a measure of total variance across the $K$ classes.
+\end{definition}
+
 \section{Vertex-Labelled Graphs}
 
 \section{Vertex- and Edge-Labelled Graphs}

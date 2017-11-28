@@ -6,17 +6,19 @@ forest <- model[["models"]][[1]][["learner.model"]]
 
 # From random forest
 
-layout(matrix(c(1, 2), nrow = 1), widths = c(4, 1))
-par(mar = c(5, 4, 4, 0))
-plot(forest, main = "", log = "y")
-par(mar = c(5, 0, 4, 2))
-plot(c(0, 1), type = "n", axes = FALSE, xlab = "", ylab = "")
-legend("top", c("OOB", "clique", "k\u2193", "McSplit", "McSplit\u2193"), col = 1:5, cex = 0.8, fill = 1:5)
+plot(forest, main = "")
+legend("topright", c("OOB", "clique", "k\u2193", "McSplit", "McSplit\u2193"), fill = 1:5, xpd = TRUE)
 
-partialPlot(forest, data[["data"]], "pattern.vertices")
-varImpPlot(forest)
+varImpPlot(forest, main = "")
+importance <- importance(forest)
+graph_feature_names <- c("vertices", "edges", "loops", "mean degree", "max degree", "SD of degrees", "density", "connected", "mean distance", "max distance", "distance \u2265 2", "distance \u2265 3", "distance \u2265 4")
+selected_features <- c("vertices", "edges", "mean degree", "max degree", "density", "mean distance", "max distance")
+full_feature_names <- c(paste("pattern", graph_feature_names), paste("target", graph_feature_names), paste(selected_features, "ratio"))
+row.names(importance) <- full_feature_names
+dotchart(sort(importance[,1]), xlab = "Mean decrease in Gini index")
+
+partialPlot(forest, data[["data"]], "target.stddeg", ...)
 varUsed(forest)
-importance(forest)
 plot(margin(forest))
 MDSplot(forest) # with classCenter?
 treesize(forest)
