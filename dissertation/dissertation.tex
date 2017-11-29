@@ -351,7 +351,12 @@ amount of time or less.
   \label{fig:runtime_heatmap}
 \end{figure}
 
-We plot the ECDF plots for unlablled graphs in both databases in Figure \ref{fig:ecdf_unlabelled}. We can check that the orderings of the algorithms in parts (a) and (b) of Figure \ref{fig:ecdf_unlabelled} are the same as in Figures 3a and 4 in the \textsc{McSplit} paper \cite{DBLP:conf/ijcai/McCreeshPT17}. We also provide a heatmap in Figure \ref{fig:runtime_heatmap} to compare the runtimes of the algorithms on a per-instance basis.
+We plot the ECDF plots for unlablled graphs in both databases in Figure
+\ref{fig:ecdf_unlabelled}. We can check that the orderings of the algorithms in
+parts (a) and (b) of Figure \ref{fig:ecdf_unlabelled} are the same as in Figures
+3a and 4 in the \textsc{McSplit} paper \cite{DBLP:conf/ijcai/McCreeshPT17}. We
+also provide a heatmap in Figure \ref{fig:runtime_heatmap} to compare the
+runtimes of the algorithms on a per-instance basis.
 
 \begin{remark}
   Not every problem instance gets a line of pixels on the heatmap. Therefore,
@@ -758,13 +763,61 @@ few observations with them as the winning algorithms. The error rates for
 \textsc{McSplit} and $\textsc{McSplit}\downarrow$ converge to 27\% and 11\%,
 respectively.
 
-\begin{definition}
-  The \emph{Gini index}, defined as \cite{James:2014:ISL:2517747}
+% TODO: define tree, root, observation, node, child, class, split
+% TODO: cite all of this
+Next we are going to explore how important each feature is in making
+predictions, but for that we need to introduce some new definitions. Consider a
+single tree $T$ in a random forest. The root of $T$ can be reached by any
+observation, regardless of the values of its features. After passing some node
+$n$, some feature is restricted, i.e., it is imposed an upper or lower limit on
+the kind of values it can have for it to move towards a particular child of $n$.
+The part of feature space that an observation can have while at some node $n$ is
+called a \emph{region}.
+
+\begin{definition} % TODO: explain using pictures and examples?
+  Suppose we have $K$ classes. Consider some region $m$. The \emph{Gini index}
+  is then defined as
   \[ G = \sum_{k=1}^K \hat{p}_{mk}(1-\hat{p}_{mk}), \]
-  where $\hat{p}_{mk}$ represents the proportion of observations in the $m$th
-  region that are from the $k$th class. TODO: continue!!!
-  is a measure of total variance across the $K$ classes.
+  where $\hat{p}_{mk}$ represents the proportion of observations in region $m$
+  that are from class $k$ (i.e., have algorithm $k$ as the best algorithm)
+  \cite{James:2014:ISL:2517747}.
 \end{definition}
+
+As we move down a tree, we want the region to be restricted to a single class.
+Then the observations from the training data that satisfy the conditions imposed
+by the parent nodes would be classified with perfect accuracy. The Gini is at
+its lowest when all the proportions $\hat{p}_{mk}$ are close to either 0 or 1,
+meaning that almost all the observations in the region belong to a single class.
+Hence the Gini index is often used to evaluate the quality of a split.
+
+\begin{remark}
+  Note that $G=0$ when any single $\hat{p}_{mk}=0$, regardless of the values of
+  other proportions. Therefore $G=0$ does not automatically imply that the tree
+  is a good classifier.
+\end{remark}
+
+\begin{figure}
+  \centering
+  \includegraphics{images/unlabelled_variable_importance.png}
+  \caption{Dotchart of variable importance calculated based on the Gini index
+    and sorted from most important to least important}
+  \label{fig:unlabelled_variable_importance}
+\end{figure}
+
+The variable importance measure of feature $f$ in Figure
+\ref{fig:unlabelled_variable_importance} is calculated as the amount by which
+the Gini index decreases after passing nodes that use feature $f$, averaged over
+all trees in the random forest \cite{James:2014:ISL:2517747}. Looking at the
+figure more closely, the standard deviations of degrees of both target and
+pattern graphs are by far the most important predictors. Unsurprisingly, the
+worst predictors are the features with very low variance: number of loops and
+connectedness of both graphs. Perhaps more surprisingly, the ratio features are
+not as successful as one might have hoped: the ratio of the numbers of vertices
+is at the bottom 5th place and the best ratio feature, the mean distance ratio,
+is only 10th. Last thing to note is that features of the pattern graph are
+always behind the same features of the target graph and usually not far behind.
+Perhaps this is due to some datasets having less pattern graphs, or them having
+fewer vertices.
 
 \section{Vertex-Labelled Graphs}
 

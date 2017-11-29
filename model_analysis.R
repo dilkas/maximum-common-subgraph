@@ -9,7 +9,6 @@ forest <- model[["models"]][[1]][["learner.model"]]
 plot(forest, main = "")
 legend("topright", c("OOB", "clique", "k\u2193", "McSplit", "McSplit\u2193"), fill = 1:5, xpd = TRUE)
 
-varImpPlot(forest, main = "")
 importance <- importance(forest)
 graph_feature_names <- c("vertices", "edges", "loops", "mean degree", "max degree", "SD of degrees", "density", "connected", "mean distance", "max distance", "distance \u2265 2", "distance \u2265 3", "distance \u2265 4")
 selected_features <- c("vertices", "edges", "mean degree", "max degree", "density", "mean distance", "max distance")
