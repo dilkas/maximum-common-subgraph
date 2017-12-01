@@ -301,8 +301,8 @@ algorithms are checked for equality (for algorithms that did not time out).
 The clique algorithm requires $O(n^2m^2)$ memory for a pair of graphs with $n$
 amd $m$ vertices \cite{DBLP:conf/aaai/HoffmannMR17, DBLP:conf/cp/McCreeshNPS16}.
 To avoid segmentation faults, its virtual memory usage was limited to 7 GB with
-\texttt{ulimit -v} and the unlabelled instances (which contain much larger
-graphs) were restricted to $m \times n < \num{30000}$.
+\texttt{ulimit -v} and the instances from Section \ref{sec:unlabelled} (which
+contain much larger graphs) were restricted to $m \times n < \num{16000}$.
 
 $k\downarrow$ was further modified to accept graphs with vertex labels by adding
 an additional constraint for matching labels on line 8 of the
@@ -319,11 +319,11 @@ amount of time or less.
 
 \subsection{Unlabelled Graphs}
 
-\begin{figure}
+\begin{figure} % NOTE: updated with MCS data
   \centering
   \begin{subfigure}[t]{0.49\textwidth}
-    \centering % TODO: replace this with the MCS plot
-    \includegraphics[scale=0.7]{images/ecdf_sip.png}
+    \centering
+    \includegraphics[scale=0.7]{images/ecdf_mcs.png}
     \caption{Data from Section \ref{sec:labelled}, the ARG Database}
     \label{fig:ecdf_unlabelled_mcs}
   \end{subfigure}
@@ -343,7 +343,7 @@ amount of time or less.
   \label{fig:ecdf_unlabelled}
 \end{figure}
 
-\begin{figure}
+\begin{figure} % NOTE: updated with MCS data
   \centering
   \includegraphics{images/runtime_heatmap.png}
   \caption{A heatmap of $\log_{10}$ runtimes: light colours for low running
@@ -354,9 +354,12 @@ amount of time or less.
 We plot the ECDF plots for unlablled graphs in both databases in Figure
 \ref{fig:ecdf_unlabelled}. We can check that the orderings of the algorithms in
 parts (a) and (b) of Figure \ref{fig:ecdf_unlabelled} are the same as in Figures
-3a and 4 in the \textsc{McSplit} paper \cite{DBLP:conf/ijcai/McCreeshPT17}. We
-also provide a heatmap in Figure \ref{fig:runtime_heatmap} to compare the
-runtimes of the algorithms on a per-instance basis.
+3a and 4 in the \textsc{McSplit} paper \cite{DBLP:conf/ijcai/McCreeshPT17}.
+Namely, \textsc{McSplit} outperforms $k\downarrow$ in Figure
+\ref{fig:ecdf_unlabelled_mcs}, and the opposite happens in Figure
+\ref{fig:ecdf_unlabelled_sip}. We also provide a heatmap in Figure
+\ref{fig:runtime_heatmap} to compare the runtimes of the algorithms on a
+per-instance basis.
 
 \begin{remark}
   Not every problem instance gets a line of pixels on the heatmap. Therefore,
@@ -365,7 +368,7 @@ runtimes of the algorithms on a per-instance basis.
   than the other algorithms, even though it may not be apparent from the heatmap.
 \end{remark}
 
-\begin{table}
+\begin{table} % NOTE: updated with mcs data
   \centering
   \begin{tabular}{l r r r r}
     Dataset & clique & $k\downarrow$ & \textsc{McSplit} & $\textsc{McSplit}\downarrow$ \\
@@ -378,9 +381,9 @@ runtimes of the algorithms on a per-instance basis.
     \texttt{phase} & 0 & 0 & 0 & 0 \\
     \texttt{scalefree} & 0 & 0 & 0 & 80 \\
     \texttt{si} & 0 & 10 & 11 & 1044 \\
-    ARG Database & 0 & 0 & 14666 & 18884 \\
+    ARG Database & 1178 & 0 & 13511 & 18858 \\
     \hline
-    Total & 85 & 81 & 15017 & 21484
+    Total & 1263 & 81 & 13862 & 21458
   \end{tabular}
   \caption{The number of times each algorithm was the best, for each dataset}
   \label{table:best}
@@ -401,8 +404,7 @@ best algorithm.
 \begin{remark}
 Note that even though $k\downarrow$ performs considerably better than the clique
 encoding according to Figures \ref{fig:ecdf_unlabelled} and
-\ref{fig:runtime_heatmap}, it is counted as the best algorithm in only 81
-instances, less than the clique encoding.
+\ref{fig:runtime_heatmap}, it is almost never the best algorithm.
 \end{remark}
 
 Given this information, we would expect the ML algorithm to suggest using
@@ -712,14 +714,23 @@ supports algorithm portfolios based on three different types of ML algorithms:
     then be assigned to the closest cluster.
 \end{description}
 
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.5]{images/tree_sizes.png}
+  \caption{A histogram of the number of nodes in each tree}
+  \label{fig:tree_size}
+\end{figure}
+
 % TODO: describe random forest
 We are using a classification algorithm called random forests. The ideas behind
 the main algorithm is described in \cite{DBLP:journals/ml/Breiman01}. More
 information about its implementaion in R can be found in \cite{randomforest}. We
 chose this algorithm as it is recommended in the \textsc{Llama} manual
 \cite{kotthoff_llama_2013} and successfully used in a similar study
-\cite{DBLP:conf/lion/KotthoffMS16}.
+\cite{DBLP:conf/lion/KotthoffMS16}. We use the default number of trees (500),
+and the number of nodes per tree is plotted in Figure \ref{fig:tree_size}.
 
+% TODO: when making a mistake, what is confused for what?
 As we are trying to use hundreds of megabytes of data, the R code was optimised
 to reduce memory consumption by removing temporary variables as soon as they are
 no longer needed and parallelised with the help of the \texttt{parallelMap}
@@ -804,6 +815,13 @@ Hence the Gini index is often used to evaluate the quality of a split.
   \label{fig:unlabelled_variable_importance}
 \end{figure}
 
+\begin{figure}
+  \centering
+  \includegraphics{images/unlabelled_var_used.png}
+  \caption{How often was each variable used to make splitting decisions?}
+  \label{fig:unlabelled_var_used}
+\end{figure}
+
 The variable importance measure of feature $f$ in Figure
 \ref{fig:unlabelled_variable_importance} is calculated as the amount by which
 the Gini index decreases after passing nodes that use feature $f$, averaged over
@@ -817,7 +835,83 @@ is at the bottom 5th place and the best ratio feature, the mean distance ratio,
 is only 10th. Last thing to note is that features of the pattern graph are
 always behind the same features of the target graph and usually not far behind.
 Perhaps this is due to some datasets having less pattern graphs, or them having
-fewer vertices.
+fewer vertices. The variable usage plot in Figure \ref{fig:unlabelled_var_used}
+tells a similar story: the orders are not identical, but there are no big
+outliers.
+% TODO: define vote
+
+\begin{definition}
+  Let $c_1, \dots, c_n$ be $n$ classes and let $p$ be a data point that belongs
+  to class $c_p$. Let $v_1, \dots, v_n$ denote the number of votes for each
+  class when given $p$ as input. The \emph{margin} of $p$ is
+  \[ \frac{v_p}{\sum_{i=1}^n v_i} - \max_{i \ne p} \frac{v_i}{\sum_{j=1}^n v_j}, \]
+  which is a number in $[-1, 1]$ \cite{forest}.
+\end{definition}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[scale=0.7]{images/unlabelled_margin.png}
+    \caption{Sorted}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[scale=0.7]{images/unlabelled_margin2.png}
+    \caption{Unsorted}
+  \end{subfigure}
+  \caption{Margins of all the data points. \textsc{McSplit} is in green,
+    $\textsc{McSplit}\downarrow$ is in purple, $k\downarrow$ is in blue, and the
+    clique encoding is in red.}
+  \label{fig:unlabelled_margins}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[scale=0.7]{images/clique_hist.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[scale=0.7]{images/kdown_hist.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[scale=0.7]{images/mcsplit_hist.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[scale=0.7]{images/mcsplitdown_hist.png}
+  \end{subfigure}
+  \caption{Histograms of margins for each winning algorithm}
+  \label{fig:unlabelled_margin_hist}
+\end{figure}
+
+A value above 0 means that the forest as a whole predicted correctly. A margin
+of 1 would mean that all trees voted correctly. Figure
+\ref{fig:unlabelled_margins} shows the sorted and unsorted margin of all data
+points. We can recognise the same error rates as in Figure
+\ref{fig:unlabelled_forest_errors} as well as areas where \textsc{McSplit} and
+$\textsc{McSplit}\downarrow$ dominate. We also plot the histograms of how the
+margins are distributed for each algorithm in Figure
+\ref{fig:unlabelled_margin_hist}. We note that:
+
+\begin{itemize}
+\item we have no clue how to recognise when we should choose the clique
+  encoding,
+\item we are usually wrong about $k\downarrow$ (probably because it is the
+  winning algorithm in only 0.178\% of all cases),
+\item when faced with an instance that is best handled by
+  $\textsc{McSplit}\downarrow$, the vast majority of the trees vote correctly,
+\item \textsc{McSplit} detection rates are decent, but far behind
+  $\textsc{McSplit}\downarrow$.
+\end{itemize}
+
+Since the standard deviations of degrees of both target and pattern graphs are
+the most important features and we are mostly choosing between \textsc{McSplit}
+and $\textsc{McSplit}\downarrow$ when dealing with unlabelled graphs, we plot
+partial dependence plots in... % TODO: continue here
 
 \section{Vertex-Labelled Graphs}
 

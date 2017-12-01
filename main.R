@@ -8,6 +8,9 @@ names <- c("ID", "nodes", "time", "size")
 classes <- c("character", "NULL", "integer", "NULL")
 
 clique <- read.csv("results/clique.sip.csv", header = FALSE, colClasses = classes, col.names = names)
+clique2 <- read.csv("results/clique.mcs.csv", header = FALSE, colClasses = classes, col.names = names)
+clique <- rbind(clique, clique2)
+rm("clique2")
 
 kdown <- read.csv("results/kdown.sip.csv", header = FALSE, colClasses = classes, col.names = names)
 kdown2 <- read.csv("results/kdown.mcs.csv", header = FALSE, colClasses = classes, col.names = names)
@@ -68,10 +71,12 @@ performance <- merge(performance, mcsplitdown[, c("ID", "time")], by = "ID", all
 rm("clique", "kdown", "mcsplit", "mcsplitdown")
 colnames(performance) <- c("ID", "clique", "kdown", "mcsplit", "mcsplitdown")
 performance$clique[is.na(performance$clique)] <- 1000000
+performance$clique <- pmin(performance$clique, 1000000)
 performance$kdown <- pmin(performance$kdown, 1000000)
 performance$mcsplit <- pmin(performance$mcsplit, 1000000)
 performance$mcsplitdown <- pmin(performance$mcsplitdown, 1000000)
 performance <- performance[performance$clique < 1000000 | performance$kdown < 1000000 | performance$mcsplit < 1000000 | performance$mcsplitdown < 1000000, ]
+performance <- performance[order(performance$ID),]
 features <- features[features$ID %in% performance$ID,]
 
 # Construct the success data frame
@@ -83,23 +88,23 @@ success$mcsplitdown <- success$mcsplitdown < 1000000
 
 data <- input(features, performance, success)
 rm("features", "performance", "success")
-model <- classify(makeLearner("classif.randomForest"), cvFolds(data, stratify = TRUE))
+model <- classify(makeLearner("classif.randomForest", proximity = TRUE), cvFolds(data, stratify = TRUE))
 saveRDS(model, "models/unlabelled.rds")
 parallelStop()
 
 # # Plots
 times <- subset(data$data, T, data$performance)
-# cols <- gray(seq(1, 0, length.out = 255))
-# labels <- c("clique", sprintf('k\u2193'), "McSplit", sprintf('McSplit\u2193'))
-# 
-# # Log runtimes by solver and instance
-# image(log10(t(as.matrix(times))), axes = F, col = cols)
-# axis(1, labels = labels, at = seq(0, 1, 1/(length(data$performance) - 1)), las = 2)
-# 
-# # White - first, black - last (weird results because of equal timing out values)
-# #image(apply(times , 1, order), axes = F, col = cols)
-# #axis(1, labels = labels, at = seq(0, 1, 1/(length(data$performance) - 1)), las = 2)
- 
+cols <- gray(seq(1, 0, length.out = 255))
+labels <- c("clique", sprintf('k\u2193'), "McSplit", sprintf('McSplit\u2193'))
+
+# Log runtimes by solver and instance
+image(log10(t(as.matrix(times))), axes = F, col = cols)
+axis(1, labels = labels, at = seq(0, 1, 1/(length(data$performance) - 1)), las = 2)
+
+# White - first, black - last (weird results because of equal timing out values)
+image(apply(times , 1, order), axes = F, col = cols)
+axis(1, labels = labels, at = seq(0, 1, 1/(length(data$performance) - 1)), las = 2)
+
 # Tables for best algorithms
 times <- performance[grep("data/sip-instances/images-CVIU11", performance$ID), ]
 times <- performance[grep("data/sip-instances/images-PR15", performance$ID), ]
@@ -116,20 +121,18 @@ length(which(times$clique < times$kdown & times$clique < times$mcsplit & times$c
 length(which(times$kdown < times$clique & times$kdown < times$mcsplit & times$kdown < times$mcsplitdown))
 length(which(times$mcsplit < times$clique & times$mcsplit < times$kdown & times$mcsplit < times$mcsplitdown))
 length(which(times$mcsplitdown < times$clique & times$mcsplitdown < times$kdown & times$mcsplitdown < times$mcsplit))
- 
-# summary(times[!(times$clique < times$kdown & times$clique < times$mcsplit & times$clique < times$mcsplitdown) & !(times$kdown < times$clique & times$kdown < times$mcsplit & times$kdown < times$mcsplitdown) & !(times$mcsplit < times$clique & times$mcsplit < times$kdown & times$mcsplit < times$mcsplitdown) & !(times$mcsplitdown < times$clique & times$mcsplitdown < times$kdown & times$mcsplitdown < times$mcsplit), ])
-# 
-# library(lattice)
-# library(latticeExtra)
-# ecdfplot(~ clique + kdown + mcsplit + mcsplitdown, data = times, auto.key = list(space = "right", text = labels), xlab = "Runtime (ms)")
-# 
-# # Heatmaps for pattern/target features. Group differently?
-# features <- subset(data$data, T, data$features)
-# nFeatures <- normalize(features)
-# graph_feature_names <- c("vertices", "edges", "loops", "mean degree", "max degree", "SD of degrees", "density", "connected", "mean distance", "max distance", "distance \u2265 2", "distance \u2265 3", "distance \u2265 4")
-# full_feature_names <- c(paste("pattern", graph_feature_names), paste("target", graph_feature_names))
-# par(mar = c(1, 10, 1, 1))
-# image(as.matrix(nFeatures$features), axes = F, col = cols)
-# axis(2, labels = full_feature_names, at = seq(0, 1, 1/(length(data$features) - 1)), las = 2)
-# 
 
+summary(times[!(times$clique < times$kdown & times$clique < times$mcsplit & times$clique < times$mcsplitdown) & !(times$kdown < times$clique & times$kdown < times$mcsplit & times$kdown < times$mcsplitdown) & !(times$mcsplit < times$clique & times$mcsplit < times$kdown & times$mcsplit < times$mcsplitdown) & !(times$mcsplitdown < times$clique & times$mcsplitdown < times$kdown & times$mcsplitdown < times$mcsplit), ])
+
+library(lattice)
+library(latticeExtra)
+ecdfplot(~ clique + kdown + mcsplit + mcsplitdown, data = times, auto.key = list(space = "right", text = labels), xlab = "Runtime (ms)")
+
+# Heatmaps for pattern/target features. Group differently?
+features <- subset(data$data, T, data$features)
+nFeatures <- normalize(features)
+graph_feature_names <- c("vertices", "edges", "loops", "mean degree", "max degree", "SD of degrees", "density", "connected", "mean distance", "max distance", "distance \u2265 2", "distance \u2265 3", "distance \u2265 4")
+full_feature_names <- c(paste("pattern", graph_feature_names), paste("target", graph_feature_names))
+par(mar = c(1, 10, 1, 1))
+image(as.matrix(nFeatures$features), axes = F, col = cols)
+axis(2, labels = full_feature_names, at = seq(0, 1, 1/(length(data$features) - 1)), las = 2)

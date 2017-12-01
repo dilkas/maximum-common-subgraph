@@ -16,11 +16,26 @@ full_feature_names <- c(paste("pattern", graph_feature_names), paste("target", g
 row.names(importance) <- full_feature_names
 dotchart(sort(importance[,1]), xlab = "Mean decrease in Gini index")
 
-partialPlot(forest, data[["data"]], "target.stddeg", ...)
-varUsed(forest)
-plot(margin(forest))
-MDSplot(forest) # with classCenter?
-treesize(forest)
+par(mar = c(0, 10, 0, 5))
+barplot(sort(setNames(varUsed(forest), full_feature_names)), las = 2, horiz = TRUE)
+dotchart(sort(setNames(varUsed(forest), full_feature_names)), las = 2)
+
+mean(treesize(forest))
+hist(treesize(forest), main = "", xlab = "tree size")
+
+margin <- margin(forest)
+plot(margin)
+plot(margin, sort = FALSE)
+hist(subset(margin, attr(margin, "names") == "clique"), main = "clique", xlab = "margin")
+hist(subset(margin, attr(margin, "names") == "kdown"), main = "k\u2193", xlab = "margin")
+hist(subset(margin, attr(margin, "names") == "mcsplit"), main = "McSplit", xlab = "margin")
+hist(subset(margin, attr(margin, "names") == "mcsplitdown"), main = "McSplit\u2193", xlab = "margin")
+
+partialPlot(forest, data[["data"]], "target.stddeg", "mcsplitdown", main = "McSplit\u2193", xlab = "target SD of degrees")
+partialPlot(forest, data[["data"]], "target.stddeg", "clique", main = "McSplit", xlab = "target SD of degrees")
+
+MDSplot(forest)
+outlier(forest)
 
 mean(parscores(data, model))
 mean(parscores(data, vbs))
