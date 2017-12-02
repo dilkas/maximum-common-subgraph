@@ -88,7 +88,7 @@ success$mcsplitdown <- success$mcsplitdown < 1000000
 
 data <- input(features, performance, success)
 rm("features", "performance", "success")
-model <- classify(makeLearner("classif.randomForest", proximity = TRUE), cvFolds(data, stratify = TRUE))
+model <- classify(makeLearner("classif.randomForest"), cvFolds(data, stratify = TRUE))
 saveRDS(model, "models/unlabelled.rds")
 parallelStop()
 
