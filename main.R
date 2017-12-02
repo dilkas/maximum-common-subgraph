@@ -92,47 +92,47 @@ model <- classify(makeLearner("classif.randomForest", proximity = TRUE), cvFolds
 saveRDS(model, "models/unlabelled.rds")
 parallelStop()
 
-# # Plots
-times <- subset(data$data, T, data$performance)
-cols <- gray(seq(1, 0, length.out = 255))
-labels <- c("clique", sprintf('k\u2193'), "McSplit", sprintf('McSplit\u2193'))
+# Plots
+#times <- subset(data$data, T, data$performance)
+#cols <- gray(seq(1, 0, length.out = 255))
+#labels <- c("clique", sprintf('k\u2193'), "McSplit", sprintf('McSplit\u2193'))
 
 # Log runtimes by solver and instance
-image(log10(t(as.matrix(times))), axes = F, col = cols)
-axis(1, labels = labels, at = seq(0, 1, 1/(length(data$performance) - 1)), las = 2)
+#image(log10(t(as.matrix(times))), axes = F, col = cols)
+#axis(1, labels = labels, at = seq(0, 1, 1/(length(data$performance) - 1)), las = 2)
 
 # White - first, black - last (weird results because of equal timing out values)
-image(apply(times , 1, order), axes = F, col = cols)
-axis(1, labels = labels, at = seq(0, 1, 1/(length(data$performance) - 1)), las = 2)
+#image(apply(times , 1, order), axes = F, col = cols)
+#axis(1, labels = labels, at = seq(0, 1, 1/(length(data$performance) - 1)), las = 2)
 
 # Tables for best algorithms
-times <- performance[grep("data/sip-instances/images-CVIU11", performance$ID), ]
-times <- performance[grep("data/sip-instances/images-PR15", performance$ID), ]
-times <- performance[grep("data/sip-instances/largerGraphs", performance$ID), ]
-times <- performance[grep("data/sip-instances/LV", performance$ID), ]
-times <- performance[grep("data/sip-instances/meshes-CVIU11", performance$ID), ]
-times <- performance[grep("data/sip-instances/phase", performance$ID), ]
-times <- performance[grep("data/sip-instances/scalefree", performance$ID), ]
-times <- performance[grep("data/sip-instances/si", performance$ID), ]
-times <- performance[grep("data/mcs-instances", performance$ID), ]
+#times <- performance[grep("data/sip-instances/images-CVIU11", performance$ID), ]
+#times <- performance[grep("data/sip-instances/images-PR15", performance$ID), ]
+#times <- performance[grep("data/sip-instances/largerGraphs", performance$ID), ]
+#times <- performance[grep("data/sip-instances/LV", performance$ID), ]
+#times <- performance[grep("data/sip-instances/meshes-CVIU11", performance$ID), ]
+#times <- performance[grep("data/sip-instances/phase", performance$ID), ]
+#times <- performance[grep("data/sip-instances/scalefree", performance$ID), ]
+#times <- performance[grep("data/sip-instances/si", performance$ID), ]
+#times <- performance[grep("data/mcs-instances", performance$ID), ]
 
 # How many times is each algorithm the best?
-length(which(times$clique < times$kdown & times$clique < times$mcsplit & times$clique < times$mcsplitdown))
-length(which(times$kdown < times$clique & times$kdown < times$mcsplit & times$kdown < times$mcsplitdown))
-length(which(times$mcsplit < times$clique & times$mcsplit < times$kdown & times$mcsplit < times$mcsplitdown))
-length(which(times$mcsplitdown < times$clique & times$mcsplitdown < times$kdown & times$mcsplitdown < times$mcsplit))
+#length(which(times$clique < times$kdown & times$clique < times$mcsplit & times$clique < times$mcsplitdown))
+#length(which(times$kdown < times$clique & times$kdown < times$mcsplit & times$kdown < times$mcsplitdown))
+#length(which(times$mcsplit < times$clique & times$mcsplit < times$kdown & times$mcsplit < times$mcsplitdown))
+#length(which(times$mcsplitdown < times$clique & times$mcsplitdown < times$kdown & times$mcsplitdown < times$mcsplit))
 
-summary(times[!(times$clique < times$kdown & times$clique < times$mcsplit & times$clique < times$mcsplitdown) & !(times$kdown < times$clique & times$kdown < times$mcsplit & times$kdown < times$mcsplitdown) & !(times$mcsplit < times$clique & times$mcsplit < times$kdown & times$mcsplit < times$mcsplitdown) & !(times$mcsplitdown < times$clique & times$mcsplitdown < times$kdown & times$mcsplitdown < times$mcsplit), ])
+#summary(times[!(times$clique < times$kdown & times$clique < times$mcsplit & times$clique < times$mcsplitdown) & !(times$kdown < times$clique & times$kdown < times$mcsplit & times$kdown < times$mcsplitdown) & !(times$mcsplit < times$clique & times$mcsplit < times$kdown & times$mcsplit < times$mcsplitdown) & !(times$mcsplitdown < times$clique & times$mcsplitdown < times$kdown & times$mcsplitdown < times$mcsplit), ])
 
-library(lattice)
-library(latticeExtra)
-ecdfplot(~ clique + kdown + mcsplit + mcsplitdown, data = times, auto.key = list(space = "right", text = labels), xlab = "Runtime (ms)")
+#library(lattice)
+#library(latticeExtra)
+#ecdfplot(~ clique + kdown + mcsplit + mcsplitdown, data = times, auto.key = list(space = "right", text = labels), xlab = "Runtime (ms)")
 
 # Heatmaps for pattern/target features. Group differently?
-features <- subset(data$data, T, data$features)
-nFeatures <- normalize(features)
-graph_feature_names <- c("vertices", "edges", "loops", "mean degree", "max degree", "SD of degrees", "density", "connected", "mean distance", "max distance", "distance \u2265 2", "distance \u2265 3", "distance \u2265 4")
-full_feature_names <- c(paste("pattern", graph_feature_names), paste("target", graph_feature_names))
-par(mar = c(1, 10, 1, 1))
-image(as.matrix(nFeatures$features), axes = F, col = cols)
-axis(2, labels = full_feature_names, at = seq(0, 1, 1/(length(data$features) - 1)), las = 2)
+#features <- subset(data$data, T, data$features)
+#nFeatures <- normalize(features)
+#graph_feature_names <- c("vertices", "edges", "loops", "mean degree", "max degree", "SD of degrees", "density", "connected", "mean distance", "max distance", "distance \u2265 2", "distance \u2265 3", "distance \u2265 4")
+#full_feature_names <- c(paste("pattern", graph_feature_names), paste("target", graph_feature_names))
+#par(mar = c(1, 10, 1, 1))
+#image(as.matrix(nFeatures$features), axes = F, col = cols)
+#axis(2, labels = full_feature_names, at = seq(0, 1, 1/(length(data$features) - 1)), las = 2)
