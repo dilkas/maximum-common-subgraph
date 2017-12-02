@@ -1,0 +1,124 @@
+\documentclass[11pt]{article}
+\usepackage{times}
+\usepackage{fullpage}
+\usepackage[UKenglish]{babel}
+\usepackage[UKenglish]{isodate}
+    
+\title{Algorithm Selection for Maximum Common Subgraph}
+\author{Paulius Dilkas - 2146879}
+
+\begin{document}
+\maketitle
+
+\section{Status report}
+
+\subsection{Proposal}\label{proposal}
+
+\subsubsection{Motivation}\label{motivation}
+
+%\emph{{[}Clearly motivate the purpose of your project; why someone would
+%care about what you are doing{]}}
+
+There are several algorithms for the maximum common subgraph problem, each
+capable of outperforming the others for some problem instances. The purpose of
+this project is to create a machine learning (ML) algorithm portfolio that can select
+the best algorithm for each pair of graphs. Furthermore, the insights extracted
+from the ML model could be used to provide human-understandable information
+about which algorithm favours what kind of graphs and allow for meta-algorithms
+that can switch what algorithm they are using in the middle of execution.
+
+\subsubsection{Aims}\label{aims}
+
+%\emph{{[}Clearly state what the project is intended to do. This should
+%be something which is measurable; it should be possible to tell if you
+%succeeded{]}}
+
+This project will generate data by running all (currently 4) algorithms on close
+to 100000 problem instances for 3 different types of graph labelling: no labels,
+vertex labels, and both vertex and edge labels. For the last two cases, the
+number of vertices/edges assigned to each label will also be varied. Then an ML model
+will be trained for each of the 3 cases. Their prediction quality will be
+evaluated together with comparing the portfolios with the original algorithms.
+Finally, smaller ML models will be considered to provide human-understandable
+high-level view of how the algorithms compare.
+
+\subsection{Progress}\label{progress}
+
+%\emph{{[}Briefly state your progress so far, as a bulleted list{]}}
+
+\begin{itemize}
+\item A Makefile created to support running multiple experiments in parallel.
+\item Regular expressions (with \texttt{sed}) created to parse each algorithm's
+  output into a row of a CSV file.
+\item Graph feature extractor modified to support a different file format.
+\item Selected features to be used in ML, generated data about them, plotted
+  their distributions.
+\item One of the algorithms ($k\downarrow$) extended to support vertex labels.
+\item R scripts developed to clean and check the data, run the ML model, and
+  plot/output various results.
+\end{itemize}
+
+\subsection{Problems and risks}\label{problems-and-risks}
+
+\subsubsection{Problems}\label{problems}
+
+%\emph{{[}What problems have you had so far, that have held up the
+%project?{]}}
+
+\begin{itemize}
+%\item Initially worked on a new feature extraction program, later switched to
+%  modifying an already existing program.
+\item One of the algorithms (the clique encoding) turned out to use too much
+  memory on some instances. Upper bounds on graph sizes were added to the
+  Makefile and \texttt{ulimit} was used to limit memory usage.
+\item One of the FATA nodes keeps crashing, and there is no easy way to continue
+  halfway-done experiments without additional development.
+\end{itemize}
+
+\subsubsection{Risks}\label{risks}
+
+%\emph{{[}What problems do you foresee in the future and how will you
+%mitigate them?{]}}
+
+\begin{itemize}
+\item There might be too much data to train an ML model (a model for unlabelled
+  instances reached over 300 GB RAM). \textbf{Mitigation:} take samples from the
+  data, reduce the number of trees in a random forest, limit the size of a tree.
+\item Generating data might take too long. Worst case estimate is the end of
+  January. \textbf{Mitigation:} train a model on a subset of data. Plots and
+  numbers can be updated later.
+\end{itemize}
+
+\subsection{Plan}\label{plan}
+
+%\emph{{[}Time plan, in roughly weekly to monthly blocks, up until
+%submission week{]}}
+
+\textbf{Semester 2}
+\begin{itemize}
+\item Week 1--2: descriptions of how the algorithms perform in each of the 3 cases.
+  \begin{itemize}
+  \item \textbf{Deliverable:} cumulative plots, heatmaps, tables.
+  \end{itemize}
+\item Week 3--5: statistical analysis of the quality of ML models.
+  \begin{itemize}
+  \item \textbf{Deliverable:} convergence plots, variable importance/usage
+    measures, margin plots and histograms of margins for each algorithm.
+  \end{itemize}
+\item Week 6--7: compare the portfolios with individual algorithms.
+  \begin{itemize}
+  \item \textbf{Deliverable:} cumulative plots, PAR10 scores, other statistics.
+  \end{itemize}
+\item Week 8: experiment with small ML models (perhaps a single decision tree).
+  \begin{itemize}
+  \item \textbf{Deliverable:} important features and their critical values
+    identified, suggestions for future work.
+  \end{itemize}
+\item Week 9--10: writing.
+  \begin{itemize}
+  \item \textbf{Deliverable:} conclusion, expanded introduction, old plots
+    updated with latest data.
+  \end{itemize}
+\end{itemize}
+
+\end{document}

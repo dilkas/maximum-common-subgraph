@@ -37,6 +37,13 @@ partialPlot(forest, data[["data"]], "target.stddeg", "clique", main = "McSplit",
 MDSplot(forest)
 outlier(forest)
 
+# </randomForest> <llama>
+
+sum(successes(data, model))
+sum(successes(data, vbs, addCosts = FALSE))
+sum(misclassificationPenalties(data, model))
+sum(parscores(data, model))
 mean(parscores(data, model))
 mean(parscores(data, vbs))
 mean(parscores(data, singleBest))
+contributions(data)
