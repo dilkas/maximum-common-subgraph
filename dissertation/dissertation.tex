@@ -11,6 +11,7 @@
 \newtheorem{definition}{Definition}[section]
 \theoremstyle{remark}
 \newtheorem{remark}{Remark}[section]
+\DeclareMathOperator{\dom}{dom}
 
 \title{Algorithm Selection for Maximum Common Subgraph}
 \author{Paulius Dilkas}
@@ -28,9 +29,6 @@
 \chapter{Introduction}
 \pagenumbering{arabic}
 % TODO: write a proper introduction (and abstract)
-% TODO: could define graph colouring
-% TODO: do we want to give this function a name?
-% TODO: which datasets have loops, multiple edges?
 \begin{definition}
   An undirected \emph{multigraph} is a pair $(V, E)$, where $V$ is a set of
   vertices and $E$ is a set of edges, together with a map $E \to V \cup V^2$,
@@ -86,6 +84,11 @@ graph problem, the subgraph isomorphism problem.
     problem} is the decision problem of determining whether $G_1$ is isomorphic
   to a subgraph of $G_2$ \cite{DBLP:conf/stoc/Cook71}.
 \end{definition}
+
+The purpose of this project is to create and explore machine-learning-based
+algorithm \emph{portfolios}, i.e., machine learning models whose main goal is to
+provide a mapping, assigning the best-performing algorithm to each problem
+instance \cite{DBLP:journals/ai/BischlKKLMFHHLT16, DBLP:journals/ac/Rice76}.
 
 \chapter{The Algorithms}
 The clique encoding \cite{DBLP:conf/cp/McCreeshNPS16} solves the maximum common
@@ -209,7 +212,6 @@ The default value for $p$ is 33\%.
   \label{figure:labelling_histogram}
 \end{figure}
 
-%TODO: could insert an example.
 The publications associated with the database \cite{foggia2001-2, DBLP:journals/prl/SantoFSV03}
 say nothing about how the labels are distributed among the $N$ values. We
 calculate the number of vertices that were assigned each label for each graph
@@ -266,7 +268,6 @@ minor differences from the version on Christine Solnon's website.
   orders ($(G_1, G_2)$ and $(G_2, G_1)$).
 \end{remark}
 % TODO: mention algorithm portfolios, SAT, constraint solving, TSP, AI planning
-% TODO: define algorithm portfolio
 
 \chapter{Generating Data}
 A machine learning (ML) model requires data to learn from. We are using an R
@@ -357,7 +358,12 @@ parts (a) and (b) of Figure \ref{fig:ecdf_unlabelled} are the same as in Figures
 3a and 4 in the \textsc{McSplit} paper \cite{DBLP:conf/ijcai/McCreeshPT17}.
 Namely, \textsc{McSplit} outperforms $k\downarrow$ in Figure
 \ref{fig:ecdf_unlabelled_mcs}, and the opposite happens in Figure
-\ref{fig:ecdf_unlabelled_sip}. We also provide a heatmap in Figure
+\ref{fig:ecdf_unlabelled_sip}. In Figure \ref{fig:ecdf_unlabelled_both} we also
+plot a curve for the \emph{virtual best solver (VBS)}, i.e., a perfect algorithm
+portfolio that always chooses the best-performing algorithm for each problem
+instance. Note that the difference between $\textsc{McSplit}\downarrow$ and VBS
+is very small. Therefore, a portfolio cannot provide significant performance
+benefits for this subproblem. We also provide a heatmap in Figure
 \ref{fig:runtime_heatmap} to compare the runtimes of the algorithms on a
 per-instance basis.
 
@@ -602,7 +608,6 @@ respectively.
   \label{fig:features_heatmap}
 \end{figure}
 
-%TODO: investigate feature correlation?
 In this section we plot and discuss how the selected features are distributed in
 both databases. Most of the data is plotted, except for the number of loops
 of the ARG Database and connectedness of both databases. For connectedness,
@@ -613,11 +618,11 @@ algorithm performs the best, however, the numbers seem quite representative of
 real data, where connected graphs are a lot more common. In fact, applications
 in chemistry are often only interested in connected graphs \cite{WCMS:WCMS5}.
 
-With the labelled graphs, all graphs are assigned into pairs (A and B) with no
-significant differences between them. Thus all of the statistical information is
-provided only for pattern graphs and is plotted in Figures
-\ref{fig:mcs_features1} and \ref{fig:mcs_features2}. As the number of loops
-varies between two values, it is not plotted: 0.98\% of the graphs have a
+With graphs from Section \ref{sec:labelled}, all graphs are assigned into pairs
+(A and B) with no significant differences between them. Thus all of the
+statistical information is provided only for pattern graphs and is plotted in
+Figures \ref{fig:mcs_features1} and \ref{fig:mcs_features2}. As the number of
+loops varies between two values, it is not plotted: 0.98\% of the graphs have a
 single loop, other graphs have no loops. Other than the plot for number of
 vertices, which is manually chosen by the creators of the database, all the
 distributions in Figure \ref{fig:mcs_features1} are centered around lower
@@ -625,22 +630,22 @@ values, with some instances providing significantly higher values. More
 importantly, we have some graphs that are quite dense and some graphs with
 higher mean distance values.
 
-For unlabelled graphs, we will only consider graphs that are part of a pair of
-graphs solved by at least one algorithm. Since most of the data is heavily
-skewed, Figures \ref{fig:sip_features1} and \ref{fig:sip_features2} show the
-distributions as density plots. Because of this choice of which graphs to
-include, all of the easy instances are solved and thus end up in the sample,
-while only some of the harder instances are solved by at least one algorithm.
-Harder instances typically have more vertices, which means they are also capable
-of higher values for many other features, hence all of the density plots in
-Figure \ref{fig:sip_features1} are right skewed. The same applies to the number
-of loops in Figure \ref{fig:sip_features2}: almost all graphs have a small
-number of them, while some (presumably larger) graphs have significantly more.
-The same story is represented in the heatmap in Figure
-\ref{fig:features_heatmap}, where the average values are coloured grey, largest
-values black, and smallest values white. The rows that look almost completely
-white represent features that have several significantly higher values.
-% TODO: the heatmap is for both, not just SIP
+With graphs from Section \ref{sec:unlabelled}, we will only consider graphs that
+are part of a pair of graphs solved by at least one algorithm. Since most of the
+data is heavily skewed, Figures \ref{fig:sip_features1} and
+\ref{fig:sip_features2} show the distributions as density plots. Because of this
+choice of which graphs to include, all of the easy instances are solved and thus
+end up in the sample, while only some of the harder instances are solved by at
+least one algorithm. Harder instances typically have more vertices, which means
+they are also capable of higher values for many other features, hence all of the
+density plots in Figure \ref{fig:sip_features1} are right skewed. The same
+applies to the number of loops in Figure \ref{fig:sip_features2}: almost all
+graphs have a small number of them, while some (presumably larger) graphs have
+significantly more. The same story is represented in the heatmap in Figure
+\ref{fig:features_heatmap} (which is plotted for all of the data), where the
+average values are coloured grey, largest values black, and smallest values
+white. The rows that look almost completely white represent features that have
+several significantly higher values that skew the average.
 
 To sum up, even though the distributions are far from normal, most of them still
 provide a good range of different values. There is one important difference
@@ -698,7 +703,7 @@ the value of some feature or collection of features). It then draws from each
 subpopulation independently, ensuring that approximately $n_i/N$ of the sample
 comes from subpopulation $s_i$ for $i = 1, \dots, n$ \cite{lohr2009sampling}. In
 this case the data is partitioned into four groups based on which algorithm
-performed the best.
+performed best.
 
 The cross-validation folds are then passed to the ML algorithm. \textsc{Llama}
 supports algorithm portfolios based on three different types of ML algorithms:
@@ -721,16 +726,53 @@ supports algorithm portfolios based on three different types of ML algorithms:
   \label{fig:tree_size}
 \end{figure}
 
-% TODO: describe random forest
 We are using a classification algorithm called random forests. The ideas behind
 the main algorithm is described in \cite{DBLP:journals/ml/Breiman01}. More
-information about its implementaion in R can be found in \cite{randomforest}. We
+information about its implementation in R can be found in \cite{randomforest}. We
 chose this algorithm as it is recommended in the \textsc{Llama} manual
 \cite{kotthoff_llama_2013} and successfully used in a similar study
 \cite{DBLP:conf/lion/KotthoffMS16}. We use the default number of trees (500),
 and the number of nodes per tree is plotted in Figure \ref{fig:tree_size}.
 
-% TODO: when making a mistake, what is confused for what?
+In order to discuss and analyse the ML algorithm in more detail, we introduce
+some new terminology. Each problem instance with features and running times in
+the training dataset is called an \emph{observation}. The \emph{class} of an
+observation is the algorithm with lowest running time for that problem instance.
+Previously discussed features of graphs are sometimes referred to as
+\emph{(independent) variables}. The \emph{(problem) instance space} is the
+Cartesian product of the domains of features \cite{DBLP:series/smpai/RokachM14},
+where a \emph{domain} of $X$ (denoted $\dom X$) is a set of all possible values
+that $X$ can take.
+
+A \emph{(classification) decision tree} is ``a classifier expressed as a
+recursive partition of the instance space'' \cite{DBLP:series/smpai/RokachM14}.
+Typically, it can be represented as a rooted binary tree, where each internal
+node \emph{splits} the instance space into two regions based on the value of one
+of the features. For example, for some feature $X$ and a particular value $x \in
+\dom{X}$, the left child might be assigned all observations with $X < x$, while
+the right child would get observations with $X \ge x$. For each leaf node, we
+can count how many of its observations belong to each class and assign the most
+highly represented class to that node.
+
+\begin{remark}
+  Other possibilities include a node having more than two children and a split
+  being made in a more complicated way. Although trees with such properties fit
+  the definition of a decision tree, standard machine learning algorithms are
+  more restrictive \cite{James:2014:ISL:2517747, DBLP:series/smpai/RokachM14}.
+\end{remark}
+
+When a decision tree is used to make a classification prediction, a data point
+travels from node to node (starting at the root node) according to the splitting
+rules. When it reaches a leaf node, the class assigned to that node is outputted
+as the tree's prediction.
+
+A \emph{random forest} builds a collection of decision trees
+\cite{James:2014:ISL:2517747}. However, each time a split is considered, we
+choose the variable to split on not from all $p$ of the variables, but from a
+random sample (usually of size $\sqrt{p}$ for classification problems). This
+ensures some diversity among trees. % TODO: continue here
+% TODO: describe random forest, vote,
+
 As we are trying to use hundreds of megabytes of data, the R code was optimised
 to reduce memory consumption by removing temporary variables as soon as they are
 no longer needed and parallelised with the help of the \texttt{parallelMap}
@@ -774,7 +816,6 @@ few observations with them as the winning algorithms. The error rates for
 \textsc{McSplit} and $\textsc{McSplit}\downarrow$ converge to 27\% and 11\%,
 respectively.
 
-% TODO: define tree, root, observation, node, child, class, split
 % TODO: cite all of this
 Next we are going to explore how important each feature is in making
 predictions, but for that we need to introduce some new definitions. Consider a
@@ -785,7 +826,7 @@ the kind of values it can have for it to move towards a particular child of $n$.
 The part of feature space that an observation can have while at some node $n$ is
 called a \emph{region}.
 
-\begin{definition} % TODO: explain using pictures and examples?
+\begin{definition}
   Suppose we have $K$ classes. Consider some region $m$. The \emph{Gini index}
   is then defined as
   \[ G = \sum_{k=1}^K \hat{p}_{mk}(1-\hat{p}_{mk}), \]
@@ -838,7 +879,6 @@ Perhaps this is due to some datasets having less pattern graphs, or them having
 fewer vertices. The variable usage plot in Figure \ref{fig:unlabelled_var_used}
 tells a similar story: the orders are not identical, but there are no big
 outliers.
-% TODO: define vote
 
 \begin{definition}
   Let $c_1, \dots, c_n$ be $n$ classes and let $p$ be a data point that belongs
@@ -908,10 +948,60 @@ margins are distributed for each algorithm in Figure
   $\textsc{McSplit}\downarrow$.
 \end{itemize}
 
-Since the standard deviations of degrees of both target and pattern graphs are
-the most important features and we are mostly choosing between \textsc{McSplit}
-and $\textsc{McSplit}\downarrow$ when dealing with unlabelled graphs, we plot
-partial dependence plots in... % TODO: continue here
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[scale=0.7]{images/mcsplit_partial.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[scale=0.7]{images/clique_partial.png}
+  \end{subfigure}
+  \caption{Partial dependence plots for the standard deviation of degrees of
+    the target graph}
+  \label{fig:unlabelled_partials}
+\end{figure}
+
+Since the standard deviations of degrees in both target and pattern graphs are
+the most important features, we plot partial dependence plots for the standard
+deviation of degrees in the target graph for $\textsc{McSplit}\downarrow$ and
+the clique encoding in Figure \ref{fig:unlabelled_partials}. The plotted
+function \cite{forest} is defined as
+\[ f(x) = \log{p_k(x)} - \frac{1}{K} \sum_{i=1}^K \log{p_i(x)}, \]
+where:
+
+\begin{itemize}
+\item $x$ is the value of the $x$ axis (in this case a particular standard
+  deviation of degrees in the target graph),
+\item $p_i(x)$ is the proportion of votes for class $i$ for a problem instance
+  with a standard deviation of degrees in the target graph equal to $x$,
+\item $K$ is the number of classes,
+\item and $k$ is the main class under consideration
+  ($\textsc{McSplit}\downarrow$ and the clique encoding).
+\end{itemize}
+
+Essentially, $f(x)$ compares the proportion of votes for class $k$ with the
+average value over all classes. We can deduce that a low standard deviation of
+degrees is a strong sign that \textsc{McSplit} and $\textsc{McSplit}\downarrow$
+should perform well. On the other hand, the clique encoding is expected to
+perform better on graphs with high variance of degrees. However, $\max f(x)$ for
+the clique encoding is just barely above 0 and much lower than $\min f(x)$ for
+$\textsc{McSplit}\downarrow$, meaning that the standard deviation of degrees
+does not provide enough information to choose the clique encoding over
+\textsc{McSplit} or $\textsc{McSplit}\downarrow$.
+
+\begin{remark}
+  We omit the plots for the other two algorithms as the plot for \textsc{McSplit}
+  looks the same as the one for $\textsc{McSplit}\downarrow$ and prediction success
+  rate for $k\downarrow$ is so low that a plot for $k\downarrow$ would be
+  meaningless.
+\end{remark}
+
+\begin{remark}
+  The plots for the standard deviation of degrees of the pattern graph are
+  omitted since they are identical to those of the target graph.
+\end{remark}
 
 \section{Vertex-Labelled Graphs}
 

@@ -88,14 +88,16 @@ success$mcsplitdown <- success$mcsplitdown < 1000000
 
 data <- input(features, performance, success)
 rm("features", "performance", "success")
-model <- classify(makeLearner("classif.randomForest"), cvFolds(data, stratify = TRUE))
+model <- classify(makeLearner("classif.randomForest", proximity = TRUE), cvFolds(data, stratify = TRUE))
 saveRDS(model, "models/unlabelled.rds")
 parallelStop()
 
 # Plots
-#times <- subset(data$data, T, data$performance)
+times <- subset(data$data, T, data$performance)
+times$vbs <- apply(times, 1, min)
+times$llama <- times[model[["predictions"]][["algorithm"]]]
 #cols <- gray(seq(1, 0, length.out = 255))
-#labels <- c("clique", sprintf('k\u2193'), "McSplit", sprintf('McSplit\u2193'))
+labels <- c("clique", sprintf('k\u2193'), "McSplit", sprintf('McSplit\u2193'), "VBS", "Llama")
 
 # Log runtimes by solver and instance
 #image(log10(t(as.matrix(times))), axes = F, col = cols)
@@ -124,9 +126,9 @@ parallelStop()
 
 #summary(times[!(times$clique < times$kdown & times$clique < times$mcsplit & times$clique < times$mcsplitdown) & !(times$kdown < times$clique & times$kdown < times$mcsplit & times$kdown < times$mcsplitdown) & !(times$mcsplit < times$clique & times$mcsplit < times$kdown & times$mcsplit < times$mcsplitdown) & !(times$mcsplitdown < times$clique & times$mcsplitdown < times$kdown & times$mcsplitdown < times$mcsplit), ])
 
-#library(lattice)
-#library(latticeExtra)
-#ecdfplot(~ clique + kdown + mcsplit + mcsplitdown, data = times, auto.key = list(space = "right", text = labels), xlab = "Runtime (ms)")
+library(lattice)
+library(latticeExtra)
+ecdfplot(~ clique + kdown + mcsplit + mcsplitdown + vbs + llama, data = times, auto.key = list(space = "right", text = labels), xlab = "Runtime (ms)")
 
 # Heatmaps for pattern/target features. Group differently?
 #features <- subset(data$data, T, data$features)

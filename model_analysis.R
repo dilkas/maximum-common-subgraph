@@ -53,17 +53,17 @@ png("dissertation/images/mcsplitdown_hist.png", width = 440, height = 388)
 hist(subset(margin, attr(margin, "names") == "mcsplitdown"), main = "McSplit\u2193", xlab = "margin")
 dev.off()
 
-# TODO: decide on these later
-#partialPlot(forest, data[["data"]], "target.stddeg", "mcsplitdown", main = "McSplit\u2193", xlab = "target SD of degrees")
-#partialPlot(forest, data[["data"]], "target.stddeg", "clique", main = "McSplit", xlab = "target SD of degrees")
+data <- readRDS("models/data.rds")
+partialPlot(forest, data[["data"]], "target.stddeg", "mcsplit", main = "McSplit\u2193", xlab = "target SD of degrees")
+partialPlot(forest, data[["data"]], "target.stddeg", "clique", main = "clique", xlab = "target SD of degrees")
 
 # </randomForest> <llama>
 
-#sum(successes(data, model))
-#sum(successes(data, vbs, addCosts = FALSE))
-#sum(misclassificationPenalties(data, model))
-#sum(parscores(data, model))
-#mean(parscores(data, model))
-#mean(parscores(data, vbs))
-#mean(parscores(data, singleBest))
-#contributions(data)
+sum(successes(data, model))
+sum(successes(data, vbs, addCosts = FALSE))
+sum(misclassificationPenalties(data, model))
+sum(parscores(data, model))
+mean(parscores(data, model))
+mean(parscores(data, vbs))
+mean(parscores(data, singleBest))
+contributions(data)
