@@ -206,7 +206,7 @@ The default value for $p$ is 33\%.
 
 \begin{figure}
   \centering
-  \includegraphics[scale=0.5]{images/labelling_histogram.png}
+  \includegraphics[scale=0.7]{images/labelling_histogram.png}
   \caption{Histogram of the difference between the expected number of vertices
     assigned each label and the actual number (for all labelled graphs)}
   \label{figure:labelling_histogram}
@@ -271,7 +271,7 @@ minor differences from the version on Christine Solnon's website.
 
 \chapter{Generating Data}
 A machine learning (ML) model requires data to learn from. We are using an R
-package called \textsc{Llama} \cite{kotthoff_llama_2013}, which helps to train
+package called \textsc{Llama} \cite{kotthoff_llama_2013, llama}, which helps to train
 and evaluate ML models in order to compare algorithms and was used to create
 algorithm portfolios for the travelling salesperson problem
 \cite{DBLP:conf/lion/KotthoffKHT15} and the subgraph isomorphism problem
@@ -659,12 +659,12 @@ which means adding features for $k \ge 5$ could be valuable.
 \chapter{Machine Learning}
 After running the algorithms on all of the data for different types of labelling
 and $p$ values, an ML algorithm can be trained to predict which algorithm should
-be chosen for each pair of graphs. For each pair of graphs, \textsc{Llama} can
-take:
+be chosen for each pair of graphs. For each pair of graphs, \textsc{Llama}
+\cite{llama} can take:
 
 \begin{itemize}
-\item A list of features. We treat the features of pattern and target graphs
-  separately, giving more than 20 features per problem instance.
+\item A list of features. With separate features for pattern and target graphs
+  as well as ratio features, we have 33 features in total.
 \item A list of performance measures for all algorithms, i.e., the values that
   we are trying to optimise. In this case (as in most cases), this corresponds
   to running time. The values are capped at the timeout value (\num{1000000} ms).
@@ -706,11 +706,12 @@ this case the data is partitioned into four groups based on which algorithm
 performed best.
 
 The cross-validation folds are then passed to the ML algorithm. \textsc{Llama}
-supports algorithm portfolios based on three different types of ML algorithms:
+\cite{kotthoff_llama_2013, llama} supports algorithm portfolios based on three
+different types of ML algorithms:
 
 \begin{description}
   \item[Classification] The ML algorithm predicts which algorithm is likely to
-    perform the best on each problem instance.
+    perform best on each problem instance.
   \item[Regression] Each algorithm's data is used to train a separate ML model,
     predicting the algorithm's performance. The winning algorithm can then be
     chosen based on those predictions.
@@ -721,18 +722,18 @@ supports algorithm portfolios based on three different types of ML algorithms:
 
 \begin{figure}
   \centering
-  \includegraphics[scale=0.5]{images/tree_sizes.png}
+  \includegraphics[scale=0.7]{images/tree_sizes.png}
   \caption{A histogram of the number of nodes in each tree}
   \label{fig:tree_size}
 \end{figure}
 
-We are using a classification algorithm called random forests. The ideas behind
-the main algorithm is described in \cite{DBLP:journals/ml/Breiman01}. More
-information about its implementation in R can be found in \cite{randomforest}. We
-chose this algorithm as it is recommended in the \textsc{Llama} manual
-\cite{kotthoff_llama_2013} and successfully used in a similar study
-\cite{DBLP:conf/lion/KotthoffMS16}. We use the default number of trees (500),
-and the number of nodes per tree is plotted in Figure \ref{fig:tree_size}.
+We are using a classification algorithm called random forests
+\cite{DBLP:journals/ml/Breiman01} and its implementation in R
+\cite{randomforest}. We chose this algorithm as it is recommended in the
+\textsc{Llama} manual \cite{kotthoff_llama_2013} and successfully used in a
+similar study \cite{DBLP:conf/lion/KotthoffMS16}. We use the default number of
+trees (500), and the number of nodes per tree is plotted in Figure
+\ref{fig:tree_size}.
 
 In order to discuss and analyse the ML algorithm in more detail, we introduce
 some new terminology. Each problem instance with features and running times in
@@ -767,22 +768,24 @@ rules. When it reaches a leaf node, the class assigned to that node is outputted
 as the tree's prediction.
 
 A \emph{random forest} builds a collection of decision trees
-\cite{James:2014:ISL:2517747}. However, each time a split is considered, we
-choose the variable to split on not from all $p$ of the variables, but from a
-random sample (usually of size $\sqrt{p}$ for classification problems). This
-ensures some diversity among trees. % TODO: continue here
-% TODO: describe random forest, vote,
+\cite{James:2014:ISL:2517747}. Suppose we have $p$ variables. Then each time a
+split is considered, the variable to split on is chosen from $\sqrt{p}$ rather
+than $p$ variables. Therefore, the strongest predictors are sometimes not even
+considered, ensuring a level of diversity among the trees. An individual tree's
+prediction is called a \emph{vote}. A classifying random forest predicts by
+collecting the votes from all of the trees and predicting the class with the
+highest number of votes.
 
-As we are trying to use hundreds of megabytes of data, the R code was optimised
-to reduce memory consumption by removing temporary variables as soon as they are
-no longer needed and parallelised with the help of the \texttt{parallelMap}
-package.
+Lastly, we used the \texttt{parallelMap} package to train the model using
+multiple threads. Furthermore, the R code was heavily optimised to remove
+temporary variables as soon as they are no longer needed in order to reduce
+memory consumption.
 
 \section{Unlabelled Graphs}
 
 \begin{figure}
   \centering
-  \includegraphics[scale=0.5]{images/unlabelled_forest_errors.png}
+  \includegraphics[scale=0.7]{images/unlabelled_forest_errors.png}
   \caption{Convergence plot of various error measures as the number of trees in
     a random forest increases. The plot shows the OOB error and $1 -
     \text{recall}$ for each algorithm.}
@@ -791,8 +794,8 @@ package.
 
 Random forests support a convenient way to estimate the test error without
 cross-validation or any other kind of data splitting. Each tree in a random
-forest uses around 2/3 of the data. The remaining 1/3 is referred to as
-\emph{out-of-bag (OOB)} observations \cite{James:2014:ISL:2517747}. For each
+forest uses around 2/3 of the data \cite{James:2014:ISL:2517747}. The remaining
+1/3 is referred to as \emph{out-of-bag (OOB)} observations . For each
 observation in the data, we can predict the answer (the vote on which algorithm
 is expected to win) using all trees that have the observation as OOB. The
 majority vote is then declared to be the answer. The \emph{OOB error} is
@@ -803,18 +806,20 @@ valid estimate of test error. The black line in Figure
 of trees to about 17\%.
 
 % TODO: count how many times each algorithm was predicted
-% TODO: and explain the high error rates for clique and kdown
 The other lines in the figure, one for each algorithm, are defined as $1 -
-\text{recall}$, where for an algorithm $A$ \emph{recall}
+\text{recall}$, where, for an algorithm $A$, \emph{recall}
 \cite{citeulike:12882259} is
 \[ \frac{\text{the number of instances that were correctly predicted as
       $A$}}{\text{the number of instances where $A$ is the correct
       prediction}}. \]
-The error rates for the clique encoding and $k\downarrow$ are quite high,
-converging to 47\% and 81\%, respectively. This is most likely due to having very
-few observations with them as the winning algorithms. The error rates for
-\textsc{McSplit} and $\textsc{McSplit}\downarrow$ converge to 27\% and 11\%,
-respectively.
+
+The error rates for $\textsc{McSplit}\downarrow$, \textsc{McSplit}, the clique
+encoding, and $k\downarrow$ converge to 11\%, 29\%, 30\%, and 80\%,
+respectively. Unlike the errors of all the other classes, the error of
+$k\downarrow$ has an upward trend and converges to a very high value. Perhaps
+the model eventually learns not to predict $k\downarrow$ and the data points
+with $k\downarrow$ winning are treated as randomness in the data rather than
+statistically significant trends.
 
 % TODO: cite all of this
 Next we are going to explore how important each feature is in making
@@ -938,12 +943,12 @@ margins are distributed for each algorithm in Figure
 \ref{fig:unlabelled_margin_hist}. We note that:
 
 \begin{itemize}
-\item we have no clue how to recognise when we should choose the clique
-  encoding,
-\item we are usually wrong about $k\downarrow$ (probably because it is the
-  winning algorithm in only 0.178\% of all cases),
-\item when faced with an instance that is best handled by
-  $\textsc{McSplit}\downarrow$, the vast majority of the trees vote correctly,
+\item Instances best handled by the clique encoding are usually recognised, but
+  with significant uncertainty.
+\item We are usually wrong about $k\downarrow$ (probably because it is the
+  winning algorithm in only 0.178\% of all cases).
+\item When faced with an instance that is best handled by
+  $\textsc{McSplit}\downarrow$, the vast majority of the trees vote correctly.
 \item \textsc{McSplit} detection rates are decent, but far behind
   $\textsc{McSplit}\downarrow$.
 \end{itemize}
@@ -972,8 +977,8 @@ function \cite{forest} is defined as
 where:
 
 \begin{itemize}
-\item $x$ is the value of the $x$ axis (in this case a particular standard
-  deviation of degrees in the target graph),
+\item $x$ is the value on the $x$ axis (in this case standard deviation of
+  degrees in the target graph),
 \item $p_i(x)$ is the proportion of votes for class $i$ for a problem instance
   with a standard deviation of degrees in the target graph equal to $x$,
 \item $K$ is the number of classes,
