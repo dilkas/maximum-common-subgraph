@@ -53,11 +53,24 @@ png("dissertation/images/mcsplitdown_hist.png", width = 440, height = 388)
 hist(subset(margin, attr(margin, "names") == "mcsplitdown"), main = "McSplit\u2193", xlab = "margin")
 dev.off()
 
-data <- readRDS("models/data.rds")
+data <- readRDS("models/unlabelled_data.rds")
 partialPlot(forest, data[["data"]], "target.stddeg", "mcsplit", main = "McSplit\u2193", xlab = "target SD of degrees")
 partialPlot(forest, data[["data"]], "target.stddeg", "clique", main = "clique", xlab = "target SD of degrees")
 
-# </randomForest> <llama>
+# ECDF
+
+library(lattice)
+library(latticeExtra)
+labels <- c("McSplit\u2183", "Llama", "VBS")
+times <- subset(data$data, T, data$performance)
+times$vbs <- apply(times, 1, min)
+times$llama <- data$data[, model$predictions$algorithm[model$predictions$score == 1]]
+summary(model$predictions$algorithm[model$predictions$score == 1]) # how often each algorithm was predicted
+summary(as.factor(unlist(data$best))) # how often each algorithm won
+ecdfplot(~ mcsplitdown + llama + vbs, data = times, auto.key = list(space = "right", text = labels, xlab = "Runtime (ms)"))
+
+
+# llama metrics
 
 sum(successes(data, model))
 sum(successes(data, vbs, addCosts = FALSE))

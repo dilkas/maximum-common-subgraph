@@ -5,6 +5,4 @@ expectations <- unlist(lapply(counts, function(c) rep(sum(c)/length(c), length(c
 probabilities <- unlist(lapply(counts, function(c) rep(1/length(c), length(c))))
 counts <- unlist(counts)
 differences <- expectations - counts
-#png("test.png", width = 440, height = 388)
 hist(differences, main = paste("Histogram of", expression(E(C) - C)), xlab = expression(E(C) - C))
-#dev.off()

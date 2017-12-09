@@ -96,7 +96,7 @@ parallelStop()
 times <- subset(data$data, T, data$performance)
 times$vbs <- apply(times, 1, min)
 times$llama <- times[model[["predictions"]][["algorithm"]]]
-#cols <- gray(seq(1, 0, length.out = 255))
+cols <- gray(seq(1, 0, length.out = 255))
 labels <- c("clique", sprintf('k\u2193'), "McSplit", sprintf('McSplit\u2193'), "VBS", "Llama")
 
 # Log runtimes by solver and instance
@@ -131,10 +131,10 @@ library(latticeExtra)
 ecdfplot(~ clique + kdown + mcsplit + mcsplitdown + vbs + llama, data = times, auto.key = list(space = "right", text = labels), xlab = "Runtime (ms)")
 
 # Heatmaps for pattern/target features. Group differently?
-#features <- subset(data$data, T, data$features)
-#nFeatures <- normalize(features)
-#graph_feature_names <- c("vertices", "edges", "loops", "mean degree", "max degree", "SD of degrees", "density", "connected", "mean distance", "max distance", "distance \u2265 2", "distance \u2265 3", "distance \u2265 4")
-#full_feature_names <- c(paste("pattern", graph_feature_names), paste("target", graph_feature_names))
-#par(mar = c(1, 10, 1, 1))
-#image(as.matrix(nFeatures$features), axes = F, col = cols)
-#axis(2, labels = full_feature_names, at = seq(0, 1, 1/(length(data$features) - 1)), las = 2)
+features <- subset(data$data, T, data$features)
+nFeatures <- normalize(features)
+graph_feature_names <- c("vertices", "edges", "loops", "mean degree", "max degree", "SD of degrees", "density", "connected", "mean distance", "max distance", "distance \u2265 2", "distance \u2265 3", "distance \u2265 4")
+full_feature_names <- c(paste("pattern", graph_feature_names), paste("target", graph_feature_names), c("vertices ratio", "edges ratio", "mean degree ratio", "max degree ratio", "density ratio", "mean distance ratio", "max distance ratio"))
+par(mar = c(1, 10, 1, 1))
+image(as.matrix(nFeatures$features), axes = F, col = cols)
+axis(2, labels = full_feature_names, at = seq(0, 1, 1/(length(data$features) - 1)), las = 2)

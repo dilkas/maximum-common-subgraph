@@ -3,7 +3,7 @@ library(llama)
 parallelStartSocket(64)
 parallelLibrary("llama")
 
-labelling <- "vertex" # "vertex" or "both"
+labelling <- "both" # "vertex" or "both"
 p_values <- c(25, 33)
 
 algorithms <- c("clique", "mcsplit", "mcsplitdown")
@@ -66,8 +66,7 @@ answers$all_finished <- apply(success[, -1], 1, all)
 answers <- answers[answers$all_finished,]
 all(answers$mcsplit == answers$mcsplitdown)
 all(answers$mcsplit == answers$kdown)
-summary(answers$clique == answers$mcsplit)
-all(answers$clique <= answers$mcsplit)
+all(answers$clique == answers$mcsplit)
 
 data <- input(features, performance, success)
 rm("features", "performance", "success")

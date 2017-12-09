@@ -374,7 +374,7 @@ per-instance basis.
   than the other algorithms, even though it may not be apparent from the heatmap.
 \end{remark}
 
-\begin{table} % NOTE: updated with mcs data
+\begin{table}
   \centering
   \begin{tabular}{l r r r r}
     Dataset & clique & $k\downarrow$ & \textsc{McSplit} & $\textsc{McSplit}\downarrow$ \\
@@ -483,6 +483,22 @@ respectively.
 
 \begin{figure}
   \centering
+  \includegraphics{images/features_heatmap.png}
+  \caption{A heatmap for normalised features with black denoting the maximum
+    value and white denoting the minimum for each feature}
+  \label{fig:features_heatmap}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.7]{images/sip_loops.png}
+  \caption{Density plot of the number of loops in graphs from Section
+    \ref{sec:unlabelled}}
+  \label{fig:loops}
+\end{figure}
+
+\begin{figure}
+  \centering
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
     \includegraphics[width=\textwidth]{images/mcs_vertices.png}
@@ -515,27 +531,9 @@ respectively.
     \centering
     \includegraphics[width=\textwidth]{images/mcs_maxdist.png}
   \end{subfigure}
-  \caption{Plots of how various features are distributed for the labelled graphs}
+  \caption{Plots of how various features are distributed for graphs from Section
+  \ref{sec:labelled}}
   \label{fig:mcs_features1}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/mcs_prop2.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/mcs_prop3.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/mcs_prop4.png}
-  \end{subfigure}
-  \caption{Plots showing typical distances between pairs of vertices for the
-    labelled graphs}
-  \label{fig:mcs_features2}
 \end{figure}
 
 \begin{figure}
@@ -572,16 +570,24 @@ respectively.
     \centering
     \includegraphics[width=\textwidth]{images/sip_maxdist.png}
   \end{subfigure}
-  \caption{Plots of how various features are distributed for the unlabelled
-    graphs}
+  \caption{Plots of how various features are distributed for graphs from Section
+  \ref{sec:unlabelled}}
   \label{fig:sip_features1}
 \end{figure}
 
-\begin{figure}
+\begin{figure} % TODO: mentioned fourth
   \centering
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
+    \includegraphics[width=\textwidth]{images/mcs_prop2.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
     \includegraphics[width=\textwidth]{images/sip_prop2.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/mcs_prop3.png}
   \end{subfigure}
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
@@ -589,72 +595,159 @@ respectively.
   \end{subfigure}
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{images/sip_prop4.png}
+    \includegraphics[width=\textwidth]{images/mcs_prop4.png}
   \end{subfigure}
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{images/sip_loops.png}
+    \includegraphics[width=\textwidth]{images/sip_prop4.png}
   \end{subfigure}
-  \caption{Plots showing typical distances between pairs of vertices and the
-    number of loops for the unlabelled graphs}
-  \label{fig:sip_features2}
+  \caption{Comparison of typical distances between pairs of vertices between the
+  two graph databases with graphs from Section \ref{sec:labelled} on the left
+  and graphs from Section \ref{sec:unlabelled} on the right}
+  \label{fig:proportions}
 \end{figure}
 
 \begin{figure}
   \centering
-  \includegraphics{images/features_heatmap.png}
-  \caption{A heatmap for normalised features with black denoting the maximum
-    value and white denoting the minimum for each feature}
-  \label{fig:features_heatmap}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/mcs_ratio_vertices.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/sip_ratio_vertices.png}
+  \end{subfigure}
+  \caption{The density plots of log-transformed ratio of the number of vertices
+    between pattern and target graphs for both databases with graphs from
+    Section \ref{sec:labelled} on the left and graphs from Section
+    \ref{sec:unlabelled} on the right}
+  \label{fig:ratio_vertices}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/mcs_ratio_edges.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/mcs_ratio_meandeg.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/mcs_ratio_maxdeg.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/mcs_ratio_density.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/mcs_ratio_meandist.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/mcs_ratio_maxdist.png}
+  \end{subfigure}
+  \caption{The other density plots of the log-transformed ratio features for
+    graphs from Section \ref{sec:labelled}}
+  \label{fig:mcs_ratio}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/sip_ratio_edges.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/sip_ratio_meandeg.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/sip_ratio_maxdeg.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/sip_ratio_density.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/sip_ratio_meandist.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/sip_ratio_maxdist.png}
+  \end{subfigure}
+  \caption{The other density plots of the log-transformed ratio features for
+    graphs from Section \ref{sec:unlabelled}}
+  \label{fig:sip_ratio}
 \end{figure}
 
 In this section we plot and discuss how the selected features are distributed in
-both databases. Most of the data is plotted, except for the number of loops
-of the ARG Database and connectedness of both databases. For connectedness,
-99.81\% of the labelled graphs are connected, compared to 93.19\% of the
-unlabelled graphs. As both numbers are quite high, they may not be ideal for
-establishing if connectedness is a significant factor in determining which
-algorithm performs the best, however, the numbers seem quite representative of
-real data, where connected graphs are a lot more common. In fact, applications
-in chemistry are often only interested in connected graphs \cite{WCMS:WCMS5}.
+both databases. As the graphs from Section \ref{sec:unlabelled} contain some
+very hard instances, we only consider graphs that are part of a pair of graphs
+solved by at least one algorithm. In order to visualise highly skewed data, we
+sometimes use density plots. Furthermore, we take $\log$ transformations for
+ratio features. We also plot a heatmap of all features for all of the data in
+Figure \ref{fig:features_heatmap}. The rows that are almost completely white
+represent features that have several significantly higher values that skew the
+average.
 
-With graphs from Section \ref{sec:labelled}, all graphs are assigned into pairs
-(A and B) with no significant differences between them. Thus all of the
-statistical information is provided only for pattern graphs and is plotted in
-Figures \ref{fig:mcs_features1} and \ref{fig:mcs_features2}. As the number of
-loops varies between two values, it is not plotted: 0.98\% of the graphs have a
-single loop, other graphs have no loops. Other than the plot for number of
-vertices, which is manually chosen by the creators of the database, all the
-distributions in Figure \ref{fig:mcs_features1} are centered around lower
-values, with some instances providing significantly higher values. More
-importantly, we have some graphs that are quite dense and some graphs with
-higher mean distance values.
+Firstly, one feature is not plotted as by definition it has only two possible
+values. 99.81\% of graphs from Section \ref{sec:labelled} are connected,
+compared to 93.19\% of graphs from Section \ref{sec:unlabelled}. As both numbers
+are quite high, they may not be ideal for establishing if connectedness is a
+significant factor in determining which algorithm performs the best. However,
+many applications in chemistry are only interested in connected graphs
+\cite{WCMS:WCMS5}. Similarly, the number of loops for graphs from Section
+\ref{sec:labelled} is not plotted as it varies between two values: 0.98\% of the
+graphs have a single loops, while the remaining majority of graphs have no
+loops. On the other hand, as shown in Figure \ref{fig:loops}, some graphs
+from Section \ref{sec:unlabelled} have significantly more loops, although not
+many.
 
-With graphs from Section \ref{sec:unlabelled}, we will only consider graphs that
-are part of a pair of graphs solved by at least one algorithm. Since most of the
-data is heavily skewed, Figures \ref{fig:sip_features1} and
-\ref{fig:sip_features2} show the distributions as density plots. Because of this
-choice of which graphs to include, all of the easy instances are solved and thus
-end up in the sample, while only some of the harder instances are solved by at
-least one algorithm. Harder instances typically have more vertices, which means
-they are also capable of higher values for many other features, hence all of the
-density plots in Figure \ref{fig:sip_features1} are right skewed. The same
-applies to the number of loops in Figure \ref{fig:sip_features2}: almost all
-graphs have a small number of them, while some (presumably larger) graphs have
-significantly more. The same story is represented in the heatmap in Figure
-\ref{fig:features_heatmap} (which is plotted for all of the data), where the
-average values are coloured grey, largest values black, and smallest values
-white. The rows that look almost completely white represent features that have
-several significantly higher values that skew the average.
+Most of the features for graphs from Section \ref{sec:labelled} are displayed in
+Figure \ref{fig:mcs_features1}. Other than the plot for number of vertices,
+which is manually chosen by the creators of the database, all the other
+distributions are centered around lower values, with some outliers on the high
+end. More importantly, we have some graphs that are quite dense and some graphs
+with higher mean distance values.
 
-To sum up, even though the distributions are far from normal, most of them still
-provide a good range of different values. There is one important difference
-between the plots of proportions of vertex pairs with distance $\ge k$ for $k =
-2, 3, 4$ for the graphs from Sections \ref{sec:labelled} and \ref{sec:unlabelled} (in Figures
-\ref{fig:mcs_features2} and \ref{fig:sip_features2}, respectively). With
-the ARG Database, the mean value keeps shifting to the left, while with the
-other database, the plot for $k = 4$ still has its highest peak around 0.9,
-which means adding features for $k \ge 5$ could be valuable.
+The same plots for graphs from Section \ref{sec:unlabelled} in Figure
+\ref{fig:sip_features1} show a similar story, albeit for clearer reasons. Since
+we filter out graphs that none of the algorithms were able to handle, our sample
+consists of all of the easy instances and some hardered instances that were
+solved by one or two algorithms. Harder instances typically have more vertices,
+which means they are also capable of higher values for many other features,
+hence all of the density plots are right skewed.
+
+Figure \ref{fig:proportions} shows density plots of proportions of pairs of
+vertices with distance at least $k$ for $k = 2, 3, 4$. For both databases, as
+$k$ increases, the distributions shift to the left as expected. However, there
+is one important difference: even with $k = 4$ the plot for graphs from Section
+\ref{sec:unlabelled} has its highest peak around 0.9, which means that adding
+features for $k \ge 5$ could be valuable.
+
+Finally, the density plots of $\log$-transformed ratio features are in Figures
+\ref{fig:ratio_vertices}, \ref{fig:mcs_ratio}, and \ref{fig:sip_ratio}. Almost
+all of these plots for graphs from Section \ref{sec:unlabelled} (with the
+exception of the ratio of mean degree) are clearly bimodal with one of the two
+modes centered around 0. Hence we can infer the existance of two subpopulations:
+one where pattern and target graphs have very similar properties (the majority
+for most features) and one where pattern and target graphs are very different.
+As for the graphs from Section \ref{sec:labelled}, the plot of the ratio of the
+number of vertices in Figure \ref{fig:ratio_vertices} is perfectly simetrical
+and centered around 0 since the number of vertices is a controlled variable for
+this database. Other than that, all the other plots for ratio features have most
+of the data very close to 0. Thus, the differences between pattern and target
+graphs are very small. Furthermore, all the distributions are symmetrical ---
+the pattern graphs is just as likely to be larger/denser/etc. as the opposite.
+
+%To sum up, even though the distributions are far from normal, most of them still
+%provide a good range of different values.
 
 \chapter{Machine Learning}
 After running the algorithms on all of the data for different types of labelling
