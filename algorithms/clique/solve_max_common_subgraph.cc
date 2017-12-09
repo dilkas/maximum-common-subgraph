@@ -321,9 +321,9 @@ auto main(int argc, char * argv[]) -> int
       std::make_pair(read_lad(options_vars["pattern-file"].as<std::string>()),
                      read_lad(options_vars["target-file"].as<std::string>())) :
       std::make_pair(read_vf(options_vars["pattern-file"].as<std::string>(), options_vars.count("unlabelled"),
-                             options_vars.count("no_edge_labels"), options_vars.count("undirected")),
+                             options_vars.count("no-edge-labels"), options_vars.count("undirected")),
                      read_vf(options_vars["target-file"].as<std::string>(), options_vars.count("unlabelled"),
-                             options_vars.count("no_edge_labels"), options_vars.count("undirected")));
+                             options_vars.count("no-edge-labels"), options_vars.count("undirected")));
 
     /*if (graphs.first.size * graphs.second.size >= SIZE_LIMIT) {
       std::cerr << "The graphs are too big to fit into memory" << std::endl;

@@ -31,8 +31,8 @@ rm("feature")
 features <- original_features[rep(seq_len(nrow(original_features)),
                                   each = length(p_values)),]
 rm("original_features")
-features$p <- p_values
-features$ID <- sprintf("%02d %s", features$p, features$ID)
+features$labelling <- p_values
+features$ID <- sprintf("%02d %s", features$labelling, features$ID)
 
 #Construct the performance (running time) data frame
 names <- c("ID", "nodes", "time", "size")
@@ -67,6 +67,7 @@ answers <- answers[answers$all_finished,]
 all(answers$mcsplit == answers$mcsplitdown)
 all(answers$mcsplit == answers$kdown)
 summary(answers$clique == answers$mcsplit)
+all(answers$clique <= answers$mcsplit)
 
 data <- input(features, performance, success)
 rm("features", "performance", "success")
