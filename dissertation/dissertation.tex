@@ -20,7 +20,7 @@
 \begin{document}
 \maketitle
 
-%\begin{abstract}
+%\begin{abstract} TODO: obviously
 %\end{abstract}
 
 \educationalconsent
@@ -28,61 +28,70 @@
 
 \chapter{Introduction}
 \pagenumbering{arabic}
-% TODO: write a proper introduction (and abstract)
+
+We start with a definition of graphs suitable for the empirical data described
+in Chapter \ref{chapter:problems} and used in Chapter
+\ref{chapter:generating_data}.
+
 \begin{definition}
-  An undirected \emph{multigraph} is a pair $(V, E)$, where $V$ is a set of
-  vertices and $E$ is a set of edges, together with a map $E \to V \cup V^2$,
+  Let $S$ be a set and let $k$ be a non-negative integer. Then $[S]^k$ denotes
+  the set of \emph{$k$-subets} of $S$ \cite{subset}, i.e.,
+  \[ [S]^k = \{ A \subseteq S : |A| = k \}. \]
+\end{definition}
+
+\begin{definition} \label{def:graph}
+  An \emph{undirected multigraph} is a pair $(V, E)$, where $V$ is a set of
+  vertices and $E$ is a set of edges, together with a map $E \to V \cup [V]^2$,
   which assigns one or two vertices to each edge
   \cite{DBLP:books/daglib/0030488}. If an edge is assigned to a single vertex,
   it is called a \emph{loop}. When several edges map to the same pair of
   vertices, they are referred to as \emph{multiple edges}. 
 \end{definition}
 
-We will refer to undirected multigraphs simply as graphs. The following 3
-definitions are adapted from \cite{DBLP:journals/jcamd/RaymondW02a} for
-multigraphs.
+We formulate all of the definitions in terms of undirected multigraphs as some
+of the graphs in Chapter \ref{chapter:problems} contain multiple edges and many
+contain at least one loop. In the rest of the dissertation, we will refer to
+undirected multigraphs simply as graphs. Next we adapt some basic graph theory
+definitions to work with our definition of a multigraph.
 
 \begin{definition}
   Two graphs $G_1 = (V_1, E_1)$ and $G_2 = (V_2, E_2)$ are said to be
   \emph{isomorphic} if there is a bijection $f \colon V_1 \to V_2$ such that
-  for all $v \in V_1 \cup V_1^2$, the number of edges in $E_1$ that are mapped
+  for all $v \in V_1 \cup [V_1]^2$, the number of edges in $E_1$ that are mapped
   to $v$ is equal to the number of edges in $E_2$ that are mapped to $f(v)$,
-  where $f(v) = (f(v_1), f(v_2))$ if $v$ is a tuple $(v_1, v_2) \in V_1^2$.
+  where $f(v) = \{ f(v_1), f(v_2) \}$ if $v = \{ v_1, v_2 \} \in [V_1]^2$
+  \cite{DBLP:journals/jcamd/RaymondW02a}.
 \end{definition}
-
-\begin{definition} \label{def:induced_subgraph}
-  An \emph{induced subgraph} of a graph $G = (V, E)$ is a graph $H = (S, E')$,
-  where $S \subseteq V$ is a set of vertices and $E' \subseteq E$ is a set of
-  edges that are mapped to $S \cup S^2$.
-\end{definition}
-
-\begin{definition}
-  A \emph{maximum common (induced) subgraph} between graphs $G_1$ and $G_2$ is a
-  graph $G_3 = (V_3, E_3)$ such that $G_3$ is isomorphic to induced subgraphs of
-  both $G_1$ and $G_2$ with $|V_3|$ maximised. The \emph{maximum common
-    (induced) subgraph problem} is the problem of finding a maximum common
-  subgraph between two given graphs $G_1 = (V_1, E_1)$ and $G_2 = (V_2, E_2)$,
-  usually expressed as a bijection between two subsets of vertices $U_1
-  \subseteq V_1$ and $U_2 \subseteq V_2$.
-\end{definition}
-
-Similarly to Definition \ref{def:induced_subgraph}, we define a more general
-notion of a subgraph.
 
 \begin{definition} A graph $G_2 = (V_2, E_2)$ is a \emph{subgraph} of graph $G_1
   = (V_1, E_1)$ if $V_2 \subseteq V_1$ and $E_2 \subseteq E_1$
   \cite{DBLP:books/daglib/0030488}.
 \end{definition}
 
-In this paper we will be dealing with the maximum common induced subgraph
-problem defined for undirected multigraphs, even though most of the benchmark
-instances do not have multiple edges. We will also refer to a closely related
-graph problem, the subgraph isomorphism problem.
+\begin{definition} \label{def:induced_subgraph}
+  An \emph{induced subgraph} of a graph $G = (V, E)$ is a graph $H = (S, E')$,
+  where $S \subseteq V$ is a set of vertices and $E' \subseteq E$ is a set of
+  edges that are mapped to $S \cup [S]^2$
+  \cite{DBLP:journals/jcamd/RaymondW02a}.
+\end{definition}
 
 \begin{definition}
-  Given two (finite) graphs $G_1$ and $G_2$, the \emph{subgraph isomorphism
-    problem} is the decision problem of determining whether $G_1$ is isomorphic
-  to a subgraph of $G_2$ \cite{DBLP:conf/stoc/Cook71}.
+  A \emph{clique} $C$ in a graph $G = (V, E)$ is a subset of $V$ such that
+  $\forall v_1, v_2 \in C$ with $v_1 \ne v_2$, there is an edge in $E$ mapping
+  to $\{ v_1, v_2 \}$ \cite{DBLP:journals/jgo/PardalosX94a}.
+\end{definition}
+
+Finally, we define the main problem dealt with in this project.
+
+\begin{definition}
+  A \emph{maximum common (induced) subgraph} between graphs $G_1$ and $G_2$ is a
+  graph $G_3 = (V_3, E_3)$ such that $G_3$ is isomorphic to induced subgraphs of
+  both $G_1$ and $G_2$ with $|V_3|$ maximised
+  \cite{DBLP:journals/jcamd/RaymondW02a}. The \emph{maximum common (induced)
+    subgraph problem} is the problem of finding a maximum common subgraph
+  between two given graphs $G_1 = (V_1, E_1)$ and $G_2 = (V_2, E_2)$, usually
+  expressed as a bijection between two subsets of vertices $U_1 \subseteq V_1$
+  and $U_2 \subseteq V_2$.
 \end{definition}
 
 The purpose of this project is to create and explore machine-learning-based
@@ -90,15 +99,27 @@ algorithm \emph{portfolios}, i.e., machine learning models whose main goal is to
 provide a mapping, assigning the best-performing algorithm to each problem
 instance \cite{DBLP:journals/ai/BischlKKLMFHHLT16, DBLP:journals/ac/Rice76}.
 
-\chapter{The Algorithms}
-The clique encoding \cite{DBLP:conf/cp/McCreeshNPS16} solves the maximum common
-subgraph problem by creating a new (association) graph and transforming the
-problem into an instance of maximum clique, which is then solved by a sequential
-version of the maximum clique solver by McCreesh and Prosser
-\cite{DBLP:journals/topc/McCreeshP15}, which is a branch and bound algorithm
-that uses bitsets and greedy colouring. Colouring is used to provide a quick
-upper bound: if a subgraph can be coloured with $k$ colours, then it cannot have
-a clique of size more than $k$.
+\section{The Algorithms}
+
+We consider four algorithms that were shown to be competitive in a paper by
+McCreesh \textit{et al}. \cite{DBLP:conf/ijcai/McCreeshPT17}: $k\downarrow$
+\cite{DBLP:conf/aaai/HoffmannMR17}, \textsc{McSplit},
+$\textsc{McSplit}\downarrow$ \cite{DBLP:conf/ijcai/McCreeshPT17}, and the clique
+encoding \cite{DBLP:conf/cp/McCreeshNPS16}. The way some of these algorithms
+work relates to two other problems: the maximum clique problem and the subgraph
+isomorphism problem, both defined as follows:
+
+\begin{definition}
+  Given a graph $G$, the \emph{maximum clique problem} is an optimisation problem
+  asking for a clique in $G$ with maximum cardinality
+  \cite{DBLP:journals/jgo/PardalosX94a}.
+\end{definition}
+
+\begin{definition}
+  Given two (finite) graphs $G_1$ and $G_2$, the \emph{subgraph isomorphism
+    problem} is the decision problem of determining whether $G_1$ is isomorphic
+  to a subgraph of $G_2$ \cite{DBLP:conf/stoc/Cook71}.
+\end{definition}
 
 $k\downarrow$ algorithm \cite{DBLP:conf/aaai/HoffmannMR17} starts by trying to
 solve the subgraph isomorphism problem, i.e. finding the pattern graph in the
@@ -111,6 +132,16 @@ which initially includes all vertices of the target graph and $k$ wildcards. The
 domains are filtered with various propagation techniques. Then the search begins
 with a smallest domain (not counting wildcards), a value is chosen, and domains
 are filtered again to eliminate the chosen value.
+
+% TODO: could explain colouring
+The clique encoding \cite{DBLP:conf/cp/McCreeshNPS16} solves the
+maximum common subgraph problem by creating a new (association) graph and
+transforming the problem into an instance of the maximum clique problem
+\cite{Levi1973}, which is then solved by a sequential version of the maximum
+clique solver by McCreesh and Prosser \cite{DBLP:journals/topc/McCreeshP15},
+which is a branch and bound algorithm that uses bitsets and greedy colouring.
+Colouring is used to provide a quick upper bound: if a subgraph can be coloured
+with $k$ colours, then it cannot have a clique of size more than $k$.
 
 \textsc{McSplit} \cite{DBLP:conf/ijcai/McCreeshPT17} is a branch and bound
 algorithm that builds its own bit string labels for vertices in both pattern and
@@ -269,7 +300,7 @@ minor differences from the version on Christine Solnon's website.
 \end{remark}
 % TODO: mention algorithm portfolios, SAT, constraint solving, TSP, AI planning
 
-\chapter{Generating Data}
+\chapter{Generating Data} \label{chapter:generating_data}
 A machine learning (ML) model requires data to learn from. We are using an R
 package called \textsc{Llama} \cite{kotthoff_llama_2013, llama}, which helps to train
 and evaluate ML models in order to compare algorithms and was used to create
@@ -313,8 +344,8 @@ In the rest of this section we explore and compare how the algorithms performed
 on the three different subproblems under consideration, those of having no
 labels, vertex labels, and both vertex and edge labels. We introduce
 \emph{empirical cumulative distribution function (ECDF)}
-plots \cite{10.2307/2334448}: for each unit of time on the $x$ axis, the value on
-the $y$ axis represents what part of the problem instances was solved in that
+plots \cite{10.2307/2334448}: for each unit of time on the horizontal axis, the value on
+the vertical axis represents what part of the problem instances was solved in that
 amount of time or less.
 % TODO: mention how many instances were solved by at least one algorithm in each dataset.
 
@@ -379,17 +410,17 @@ per-instance basis.
   \begin{tabular}{l r r r r}
     Dataset & clique & $k\downarrow$ & \textsc{McSplit} & $\textsc{McSplit}\downarrow$ \\
     \hline
-    \texttt{images-CVIU11} & 0 & 32 & 78 & 1080 \\
+    \texttt{images-CVIU11} & 0 & 32 & 79 & 1081 \\
     \texttt{images-PR15} & 0 & 0 & 0 & 24 \\
-    \texttt{largerGraphs} & 0 & 14 & 6 & 143 \\
-    \texttt{LV} & 85 & 12 & 256 & 206 \\
+    \texttt{largerGraphs} & 0 & 14 & 30 & 167 \\
+    \texttt{LV} & 90 & 30 & 489 & 439 \\
     \texttt{meshes-CVIU11} & 0 & 13 & 0 & 23 \\
     \texttt{phase} & 0 & 0 & 0 & 0 \\
     \texttt{scalefree} & 0 & 0 & 0 & 80 \\
-    \texttt{si} & 0 & 10 & 11 & 1044 \\
-    ARG Database & 1178 & 0 & 13511 & 18858 \\
+    \texttt{si} & 0 & 10 & 102 & 1135 \\
+    ARG Database & 1443 & 141 & 21965 & 27305 \\
     \hline
-    Total & 1263 & 81 & 13862 & 21458
+    Total & 1533 & 240 & 22665 & 30254
   \end{tabular}
   \caption{The number of times each algorithm was the best, for each dataset}
   \label{table:best}
@@ -402,21 +433,22 @@ best algorithm.
 
 \begin{remark}
   More specifically, Table \ref{table:best} shows the numbers of times that each
-  algorithm's runtime was lower than the runtimes of other algorithms.
+  algorithm's runtime was lower than or equal to the runtimes of other algorithms.
   Therefore, if 2 or more lowest runtimes are equal (as can often happen with
-  single-digit runtimes), neither algorithm is marked as winning in the table.
+  single-digit runtimes), both algorithms are marked as winning in the table.
 \end{remark}
 
-\begin{remark}
-Note that even though $k\downarrow$ performs considerably better than the clique
-encoding according to Figures \ref{fig:ecdf_unlabelled} and
-\ref{fig:runtime_heatmap}, it is almost never the best algorithm.
-\end{remark}
+%\begin{remark}
+%Note that even though $k\downarrow$ performs considerably better than the clique
+%encoding according to Figures \ref{fig:ecdf_unlabelled} and
+%\ref{fig:runtime_heatmap}, it is almost never the best algorithm.
+%\end{remark}
 
 Given this information, we would expect the ML algorithm to suggest using
-\textsc{McSplit} and $\textsc{McSplit}\downarrow$ most of the time, only
-suggesting $k\downarrow$ and the clique encoding in very specific situations.
+\textsc{McSplit} and $\textsc{McSplit}\downarrow$ most of the time, occasionally
+consider the clique encoding, and mostly forget about $k\downarrow$.
 
+% TODO: define simple graph
 \subsection{Vertex-Labelled Graphs}
 \subsection{Vertex- and Edge-Labelled Graphs}
 
@@ -705,21 +737,20 @@ many applications in chemistry are only interested in connected graphs
 \cite{WCMS:WCMS5}. Similarly, the number of loops for graphs from Section
 \ref{sec:labelled} is not plotted as it varies between two values: 0.98\% of the
 graphs have a single loops, while the remaining majority of graphs have no
-loops. On the other hand, as shown in Figure \ref{fig:loops}, some graphs
-from Section \ref{sec:unlabelled} have significantly more loops, although not
-many.
+loops. On the other hand, as shown in Figure \ref{fig:loops}, some (although not
+many) graphs from Section \ref{sec:unlabelled} have significantly more loops.
 
 Most of the features for graphs from Section \ref{sec:labelled} are displayed in
-Figure \ref{fig:mcs_features1}. Other than the plot for number of vertices,
-which is manually chosen by the creators of the database, all the other
-distributions are centered around lower values, with some outliers on the high
-end. More importantly, we have some graphs that are quite dense and some graphs
-with higher mean distance values.
+Figure \ref{fig:mcs_features1}. Other than the plot for the number of vertices,
+which is controlled by the creators of the database, all the other distributions
+are centred around lower values, with some outliers on the high end. More
+importantly, we have some graphs that are quite dense and some graphs with
+higher mean distance values.
 
 The same plots for graphs from Section \ref{sec:unlabelled} in Figure
 \ref{fig:sip_features1} show a similar story, albeit for clearer reasons. Since
 we filter out graphs that none of the algorithms were able to handle, our sample
-consists of all of the easy instances and some hardered instances that were
+consists of all of the easy instances and some harder instances that were
 solved by one or two algorithms. Harder instances typically have more vertices,
 which means they are also capable of higher values for many other features,
 hence all of the density plots are right skewed.
@@ -735,21 +766,21 @@ Finally, the density plots of $\log$-transformed ratio features are in Figures
 \ref{fig:ratio_vertices}, \ref{fig:mcs_ratio}, and \ref{fig:sip_ratio}. Almost
 all of these plots for graphs from Section \ref{sec:unlabelled} (with the
 exception of the ratio of mean degree) are clearly bimodal with one of the two
-modes centered around 0. Hence we can infer the existance of two subpopulations:
+modes centred around 0. Hence we can infer the existance of two subpopulations:
 one where pattern and target graphs have very similar properties (the majority
 for most features) and one where pattern and target graphs are very different.
 As for the graphs from Section \ref{sec:labelled}, the plot of the ratio of the
-number of vertices in Figure \ref{fig:ratio_vertices} is perfectly simetrical
-and centered around 0 since the number of vertices is a controlled variable for
-this database. Other than that, all the other plots for ratio features have most
-of the data very close to 0. Thus, the differences between pattern and target
-graphs are very small. Furthermore, all the distributions are symmetrical ---
-the pattern graphs is just as likely to be larger/denser/etc. as the opposite.
+number of vertices in Figure \ref{fig:ratio_vertices} is perfectly symmetrical
+and centred around 0, since the number of vertices is a controlled variable for
+this database. All of the remaining plots for ratio features have most of the
+data very close to 0. Thus, the differences between pattern and target graphs
+are very small. Furthermore, all the distributions are symmetrical --- the
+pattern graph is just as likely to be larger/denser/etc. as the opposite.
 
 %To sum up, even though the distributions are far from normal, most of them still
 %provide a good range of different values.
 
-\chapter{Machine Learning}
+\chapter{Machine Learning Models \& Their Evaluation}
 After running the algorithms on all of the data for different types of labelling
 and $p$ values, an ML algorithm can be trained to predict which algorithm should
 be chosen for each pair of graphs. For each pair of graphs, \textsc{Llama}
@@ -810,7 +841,7 @@ different types of ML algorithms:
     chosen based on those predictions.
   \item[Clustering] All instances of the training data are clustered and the
     best algorithm is determined for each cluster. New problem instances can
-    then be assigned to the closest cluster.
+    then be assigned to the nearest cluster.
 \end{description}
 
 \begin{figure}
@@ -876,6 +907,8 @@ memory consumption.
 
 \section{Unlabelled Graphs}
 
+\subsection{Error Rates}
+
 \begin{figure}
   \centering
   \includegraphics[scale=0.7]{images/unlabelled_forest_errors.png}
@@ -892,11 +925,11 @@ forest uses around 2/3 of the data \cite{James:2014:ISL:2517747}. The remaining
 observation in the data, we can predict the answer (the vote on which algorithm
 is expected to win) using all trees that have the observation as OOB. The
 majority vote is then declared to be the answer. The \emph{OOB error} is
-the relative frequency of incorrect predictions. As each prediction was made
-using trees that had not seen that particular observation before, OOB error is a
-valid estimate of test error. The black line in Figure
-\ref{fig:unlabelled_forest_errors} shows how the error converges with the number
-of trees to about 17\%.
+the relative frequency of incorrect predictions \cite{James:2014:ISL:2517747}.
+As each prediction was made using trees that had not seen that particular
+observation before, OOB error is a valid estimate of test error. The black line
+in Figure \ref{fig:unlabelled_forest_errors} shows how the error converges with
+the number of trees to about 17\%.
 
 % TODO: count how many times each algorithm was predicted
 The other lines in the figure, one for each algorithm, are defined as $1 -
@@ -910,10 +943,11 @@ The error rates for $\textsc{McSplit}\downarrow$, \textsc{McSplit}, the clique
 encoding, and $k\downarrow$ converge to 11\%, 29\%, 30\%, and 80\%,
 respectively. Unlike the errors of all the other classes, the error of
 $k\downarrow$ has an upward trend and converges to a very high value. Perhaps
-the model eventually learns not to predict $k\downarrow$ and the data points
-with $k\downarrow$ winning are treated as randomness in the data rather than
-statistically significant trends.
+the model eventually learns not to predict $k\downarrow$ very often and the data
+points with $k\downarrow$ winning are treated as randomness in the data more so
+than a statistically significant trend.
 
+\subsection{Variable Importance}
 % TODO: cite all of this
 Next we are going to explore how important each feature is in making
 predictions, but for that we need to introduce some new definitions. Consider a
@@ -935,10 +969,10 @@ called a \emph{region}.
 
 As we move down a tree, we want the region to be restricted to a single class.
 Then the observations from the training data that satisfy the conditions imposed
-by the parent nodes would be classified with perfect accuracy. The Gini is at
-its lowest when all the proportions $\hat{p}_{mk}$ are close to either 0 or 1,
-meaning that almost all the observations in the region belong to a single class.
-Hence the Gini index is often used to evaluate the quality of a split.
+by the parent nodes would be classified with perfect accuracy. The Gini index is
+at its lowest when all the proportions $\hat{p}_{mk}$ are close to either 0 or
+1, meaning that almost all the observations in the region belong to a single
+class. Hence the Gini index is often used to evaluate the quality of a split.
 
 \begin{remark}
   Note that $G=0$ when any single $\hat{p}_{mk}=0$, regardless of the values of
@@ -970,14 +1004,15 @@ pattern graphs are by far the most important predictors. Unsurprisingly, the
 worst predictors are the features with very low variance: number of loops and
 connectedness of both graphs. Perhaps more surprisingly, the ratio features are
 not as successful as one might have hoped: the ratio of the numbers of vertices
-is at the bottom 5th place and the best ratio feature, the mean distance ratio,
-is only 10th. Last thing to note is that features of the pattern graph are
-always behind the same features of the target graph and usually not far behind.
-Perhaps this is due to some datasets having less pattern graphs, or them having
-fewer vertices. The variable usage plot in Figure \ref{fig:unlabelled_var_used}
-tells a similar story: the orders are not identical, but there are no big
-outliers.
+is at the bottom 5\textsuperscript{th} place and the best ratio feature, the
+mean distance ratio, is only 10\textsuperscript{th}. Last thing to note is that
+features of the pattern graph are always behind the same features of the target
+graph and usually not far behind. Perhaps this is due to some datasets having
+less pattern graphs, or pattern graphs having fewer vertices. The variable usage
+plot in Figure \ref{fig:unlabelled_var_used} tells a similar story: the orders
+are not identical, but there are no big outliers.
 
+\subsection{Margins}
 \begin{definition}
   Let $c_1, \dots, c_n$ be $n$ classes and let $p$ be a data point that belongs
   to class $c_p$. Let $v_1, \dots, v_n$ denote the number of votes for each
@@ -986,6 +1021,7 @@ outliers.
   which is a number in $[-1, 1]$ \cite{forest}.
 \end{definition}
 
+% TODO: add a legend (colorbrewer)
 \begin{figure}
   \centering
   \begin{subfigure}[t]{0.49\textwidth}
@@ -1038,14 +1074,15 @@ margins are distributed for each algorithm in Figure
 \begin{itemize}
 \item Instances best handled by the clique encoding are usually recognised, but
   with significant uncertainty.
-\item We are usually wrong about $k\downarrow$ (probably because it is the
-  winning algorithm in only 0.178\% of all cases).
+\item We are usually wrong about $k\downarrow$ (probably because it is a
+  winning algorithm in only 0.44\% of all cases).
 \item When faced with an instance that is best handled by
   $\textsc{McSplit}\downarrow$, the vast majority of the trees vote correctly.
-\item \textsc{McSplit} detection rates are decent, but far behind
+\item \textsc{McSplit} detection rates are decent, but far behind those of
   $\textsc{McSplit}\downarrow$.
 \end{itemize}
 
+\subsection{Partial Dependence}
 \begin{figure}
   \centering
   \begin{subfigure}[t]{0.49\textwidth}
@@ -1070,7 +1107,7 @@ function \cite{forest} is defined as
 where:
 
 \begin{itemize}
-\item $x$ is the value on the $x$ axis (in this case standard deviation of
+\item $x$ is the value on the horizontal axis (in this case standard deviation of
   degrees in the target graph),
 \item $p_i(x)$ is the proportion of votes for class $i$ for a problem instance
   with a standard deviation of degrees in the target graph equal to $x$,
@@ -1100,6 +1137,27 @@ does not provide enough information to choose the clique encoding over
   The plots for the standard deviation of degrees of the pattern graph are
   omitted since they are identical to those of the target graph.
 \end{remark}
+
+\subsection{Runtime Comparison}
+
+\begin{figure} % TODO: update this with the real thing
+  \centering
+  \includegraphics{images/ecdf_unlabelled_llama.png}
+  \caption{\textsc{Llama} model compared to the VBS and
+    $\textsc{McSplit}\downarrow$}
+  \label{fig:ecdf_unlabelled_llama}
+\end{figure}
+
+In order to compare the \textsc{Llama} model with other algorithms, we treat the
+VBS as the upper bound and the single best solver $\textsc{McSplit}\downarrow$
+as the lower bound. Out of 45468 instances solved by at least one algorithm, our
+model managed to solve 45302, compared to 45223 solved by
+$\textsc{McSplit}\downarrow$. In other words, it was able to close 32\% of the
+gap between our lower and upper bounds. Figure \ref{fig:ecdf_unlabelled_llama}
+shows how the ML model compares to the VBS and the single best solver
+$\textsc{McSplit}\downarrow$ (note that the vertical axis starts at 0.8 rather than
+0). Unsurprisingly, the model outperforms $\textsc{McSplit}\downarrow$, but does
+not reach the best possible performance represented by the VBS.
 
 \section{Vertex-Labelled Graphs}
 

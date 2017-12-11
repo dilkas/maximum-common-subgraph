@@ -88,8 +88,8 @@ success$mcsplitdown <- success$mcsplitdown < 1000000
 
 data <- input(features, performance, success)
 rm("features", "performance", "success")
-model <- classify(makeLearner("classif.randomForest", proximity = TRUE), cvFolds(data, stratify = TRUE))
-saveRDS(model, "models/unlabelled.rds")
+model <- classify(makeLearner("classif.randomForest"), cvFolds(data, stratify = TRUE))
+#saveRDS(model, "models/unlabelled.rds")
 parallelStop()
 
 # Plots
@@ -108,21 +108,21 @@ labels <- c("clique", sprintf('k\u2193'), "McSplit", sprintf('McSplit\u2193'), "
 #axis(1, labels = labels, at = seq(0, 1, 1/(length(data$performance) - 1)), las = 2)
 
 # Tables for best algorithms
-#times <- performance[grep("data/sip-instances/images-CVIU11", performance$ID), ]
-#times <- performance[grep("data/sip-instances/images-PR15", performance$ID), ]
-#times <- performance[grep("data/sip-instances/largerGraphs", performance$ID), ]
-#times <- performance[grep("data/sip-instances/LV", performance$ID), ]
-#times <- performance[grep("data/sip-instances/meshes-CVIU11", performance$ID), ]
-#times <- performance[grep("data/sip-instances/phase", performance$ID), ]
-#times <- performance[grep("data/sip-instances/scalefree", performance$ID), ]
-#times <- performance[grep("data/sip-instances/si", performance$ID), ]
-#times <- performance[grep("data/mcs-instances", performance$ID), ]
+times <- performance[grep("data/sip-instances/images-CVIU11", performance$ID), ]
+times <- performance[grep("data/sip-instances/images-PR15", performance$ID), ]
+times <- performance[grep("data/sip-instances/largerGraphs", performance$ID), ]
+times <- performance[grep("data/sip-instances/LV", performance$ID), ]
+times <- performance[grep("data/sip-instances/meshes-CVIU11", performance$ID), ]
+times <- performance[grep("data/sip-instances/phase", performance$ID), ]
+times <- performance[grep("data/sip-instances/scalefree", performance$ID), ]
+times <- performance[grep("data/sip-instances/si", performance$ID), ]
+times <- performance[grep("data/mcs-instances", performance$ID), ]
 
 # How many times is each algorithm the best?
-#length(which(times$clique < times$kdown & times$clique < times$mcsplit & times$clique < times$mcsplitdown))
-#length(which(times$kdown < times$clique & times$kdown < times$mcsplit & times$kdown < times$mcsplitdown))
-#length(which(times$mcsplit < times$clique & times$mcsplit < times$kdown & times$mcsplit < times$mcsplitdown))
-#length(which(times$mcsplitdown < times$clique & times$mcsplitdown < times$kdown & times$mcsplitdown < times$mcsplit))
+length(which(times$clique <= times$kdown & times$clique <= times$mcsplit & times$clique <= times$mcsplitdown))
+length(which(times$kdown <= times$clique & times$kdown <= times$mcsplit & times$kdown <= times$mcsplitdown))
+length(which(times$mcsplit <= times$clique & times$mcsplit <= times$kdown & times$mcsplit <= times$mcsplitdown))
+length(which(times$mcsplitdown <= times$clique & times$mcsplitdown <= times$kdown & times$mcsplitdown <= times$mcsplit))
 
 #summary(times[!(times$clique < times$kdown & times$clique < times$mcsplit & times$clique < times$mcsplitdown) & !(times$kdown < times$clique & times$kdown < times$mcsplit & times$kdown < times$mcsplitdown) & !(times$mcsplit < times$clique & times$mcsplit < times$kdown & times$mcsplit < times$mcsplitdown) & !(times$mcsplitdown < times$clique & times$mcsplitdown < times$kdown & times$mcsplitdown < times$mcsplit), ])
 

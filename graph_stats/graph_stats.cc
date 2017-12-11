@@ -85,7 +85,7 @@ auto main(int argc, char * argv[]) -> int
       read_lad(options_vars["graph-file"].as<std::string>());
 
     /* Start the clock. */
-    //auto start_time = steady_clock::now();
+    auto start_time = steady_clock::now();
 
     unsigned edges = 0;
     unsigned loops = 0;
@@ -207,9 +207,9 @@ auto main(int argc, char * argv[]) -> int
     }
 
     /* Stop the clock. */
-    //auto overall_time = duration_cast<milliseconds>(steady_clock::now() - start_time);
+    auto overall_time = duration_cast<milliseconds>(steady_clock::now() - start_time);
 
-    //std::cout << "time = " << overall_time.count() << std::endl;
+    std::cout << overall_time.count() << std::endl;
     //std::cout << "vertices = " << graph.size() << std::endl;
     //std::cout << "edges = " << edges << std::endl;
     //std::cout << "loops = " << loops << std::endl;
@@ -229,9 +229,9 @@ auto main(int argc, char * argv[]) -> int
 
     //std::cout << "num_labels = " << graph.vertices_by_label.size() << std::endl;
     //std::cout << "graphs per label:";
-    for (unsigned i = 0; i < graph.vertices_by_label.size(); i++)
-      std::cout << "," << graph.vertices_by_label.at(i).size();
-    std::cout << std::endl;
+    //for (unsigned i = 0; i < graph.vertices_by_label.size(); i++)
+    //std::cout << "," << graph.vertices_by_label.at(i).size();
+    //std::cout << std::endl;
 
     return EXIT_SUCCESS;
   }
