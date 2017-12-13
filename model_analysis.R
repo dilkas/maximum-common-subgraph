@@ -95,7 +95,8 @@ winning_algorithms$algorithm <- unlist(
 times <- merge(times, winning_algorithms, by = "ID", all.x = TRUE)
 times$llama <- as.numeric(times[cbind(seq_along(times$algorithm),
                                       times$algorithm)])
-times$llama <- times$llama + costs$cost[costs$ID == times$ID]
+times <- merge(times, costs, by = c("ID"), all.x = TRUE)
+times$llama <- times$llama + times$cost
 
 #summary(times$llama < times$mcsplitdown)
 # how often each algorithm was predicted

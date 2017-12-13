@@ -493,14 +493,14 @@ are very similar and the maximum common subgraph has (almost) as many vertices
 as the smaller of the two graphs. Thus, for each feature $f$ in features 1--7
 (excluding the rest to avoid division by 0), we also add a feature for the ratio
 $\frac{f(G_p)}{f(G_t)}$, where $G_p$ and $G_t$ are the pattern and target
-graphs, respectively.
+graphs respectively.
 
 We analyse three different types of labelling and treat them as separate
 problems: no labels, vertex labels, vertex and edge labels. For the last two
 types, we add a feature corresponding to $p$ defined in Definition
 \ref{def:percent_labelling} and collect data for the following values of $p$:
 50\%, 33\%, 25\%, 20\%, 15\%, 10\%, 5\%. The values correspond to having about
-2, 3, 4, 5, 10, and 20 vertices/edges with the same label on average,
+2, 3, 4, 5, 10, and 20 vertices/edges with the same label on average
 respectively.
 
 \begin{remark} % TODO: could add more citations here
@@ -822,7 +822,7 @@ suggests that stratified cross-validation typically outperforms
 random-sampling-based cross-validation and results in a better model
 \cite{DBLP:conf/ijcai/Kohavi95}. Suppose we have a dataset of $N$ elements.
 \emph{Stratified sampling} partitions it into a number of subpopulations $s_1,
-\dots, s_n$ with $n_1, \dots, n_N$ elements, respectively (typically based on
+\dots, s_n$ with $n_1, \dots, n_N$ elements respectively (typically based on
 the value of some feature or collection of features). It then draws from each
 subpopulation independently, ensuring that approximately $n_i/N$ of the sample
 comes from subpopulation $s_i$ for $i = 1, \dots, n$ \cite{lohr2009sampling}. In
@@ -940,7 +940,7 @@ The other lines in the figure, one for each algorithm, are defined as $1 -
       prediction}}. \]
 
 The error rates for $\textsc{McSplit}\downarrow$, \textsc{McSplit}, the clique
-encoding, and $k\downarrow$ converge to 11\%, 29\%, 30\%, and 80\%,
+encoding, and $k\downarrow$ converge to 11\%, 29\%, 30\%, and 80\%
 respectively. Unlike the errors of all the other classes, the error of
 $k\downarrow$ has an upward trend and converges to a very high value. Perhaps
 the model eventually learns not to predict $k\downarrow$ very often and the data
