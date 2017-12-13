@@ -800,12 +800,12 @@ be chosen for each pair of graphs. For each pair of graphs, \textsc{Llama}
   instances that were not run with the clique algorithm because of their size
   are all marked as false.
 \item A dataframe, measuring the running time taken to compute each feature for
-  each problem instance. Alternatively, a single number for the approximate time
-  taken to compute all features for any instance. This parameter is taken into
-  account when comparing the algorithm portfolio against specific algorithms. As
-  the main goal of this work is to gain insight about how the algorithms compare
-  rather than to prove an algorithm portfolio as a superior approach, this
-  parameter is not used.
+  each problem instance, a single number for the approximate time taken to
+  compute all features for any instance, or a list with one or more costs per
+  problem instance. We use the last option with a single cost per instance. This
+  parameter is used to ensure a fair comparison when comparing the portfolio
+  against other algorithms: the runtime of the portfolio is defined as the
+  runtime of its chosen algorithm together with the feature extraction time.
 \end{itemize}
 
 After constructing the required dataframes as described above, the data needs to
@@ -1151,7 +1151,7 @@ does not provide enough information to choose the clique encoding over
 In order to compare the \textsc{Llama} model with other algorithms, we treat the
 VBS as the upper bound and the single best solver $\textsc{McSplit}\downarrow$
 as the lower bound. Out of 45468 instances solved by at least one algorithm, our
-model managed to solve 45302, compared to 45223 solved by
+model managed to solve 45302, compared to 45223 solved by % TODO: update the numbers
 $\textsc{McSplit}\downarrow$. In other words, it was able to close 32\% of the
 gap between our lower and upper bounds. Figure \ref{fig:ecdf_unlabelled_llama}
 shows how the ML model compares to the VBS and the single best solver

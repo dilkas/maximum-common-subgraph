@@ -3,6 +3,7 @@ library(llama)
 parallelStartSocket(64)
 parallelLibrary("llama")
 
+# TODO: update this to use costs
 labelling <- "both" # "vertex" or "both"
 p_values <- c(25, 33)
 
@@ -56,7 +57,8 @@ for (algorithm in algorithms) {
 }
 rm("algorithm", "algorithm_runtimes", "classes", "data_file", "names", "p")
 performance$mins <- as.numeric(apply(performance, 1, min))
-performance <- performance[performance$mins < 1000000, names(performance) != "mins"]
+performance <- performance[performance$mins < 1000000,
+                           names(performance) != "mins"]
 features <- features[features$ID %in% performance$ID,]
 
 success <- cbind(performance)
@@ -79,7 +81,7 @@ parallelStop()
 times <- subset(data$data, T, data$performance)
 times$vbs <- apply(times, 1, min)
 times$llama <- times[model[["predictions"]][["algorithm"]]]
-#cols <- gray(seq(1, 0, length.out = 255))
+cols <- gray(seq(1, 0, length.out = 255))
 labels <- c("clique", sprintf('k\u2193'), "McSplit", sprintf('McSplit\u2193'),
             "VBS", "Llama")
 labels <- c("clique", sprintf('k\u2193'), "McSplit", sprintf('McSplit\u2193'),
@@ -106,12 +108,25 @@ labels <- c("clique", sprintf('k\u2193'), "McSplit", sprintf('McSplit\u2193'),
 
 # How many times is each algorithm the best?
 times = performance
-length(which(times$clique < times$kdown & times$clique < times$mcsplit & times$clique < times$mcsplitdown))
-length(which(times$kdown < times$clique & times$kdown < times$mcsplit & times$kdown < times$mcsplitdown))
-length(which(times$mcsplit < times$clique & times$mcsplit < times$kdown & times$mcsplit < times$mcsplitdown))
-length(which(times$mcsplitdown < times$clique & times$mcsplitdown < times$kdown & times$mcsplitdown < times$mcsplit))
+length(which(times$clique < times$kdown & times$clique < times$mcsplit &
+               times$clique < times$mcsplitdown))
+length(which(times$kdown < times$clique & times$kdown < times$mcsplit &
+               times$kdown < times$mcsplitdown))
+length(which(times$mcsplit < times$clique & times$mcsplit < times$kdown &
+               times$mcsplit < times$mcsplitdown))
+length(which(times$mcsplitdown < times$clique &
+               times$mcsplitdown < times$kdown &
+               times$mcsplitdown < times$mcsplit))
 
-#summary(times[!(times$clique < times$kdown & times$clique < times$mcsplit & times$clique < times$mcsplitdown) & !(times$kdown < times$clique & times$kdown < times$mcsplit & times$kdown < times$mcsplitdown) & !(times$mcsplit < times$clique & times$mcsplit < times$kdown & times$mcsplit < times$mcsplitdown) & !(times$mcsplitdown < times$clique & times$mcsplitdown < times$kdown & times$mcsplitdown < times$mcsplit), ])
+summary(times[!(times$clique < times$kdown & times$clique < times$mcsplit &
+                  times$clique < times$mcsplitdown) &
+                !(times$kdown < times$clique & times$kdown < times$mcsplit &
+                    times$kdown < times$mcsplitdown) &
+                !(times$mcsplit < times$clique & times$mcsplit < times$kdown &
+                    times$mcsplit < times$mcsplitdown) &
+                !(times$mcsplitdown < times$clique &
+                    times$mcsplitdown < times$kdown &
+                    times$mcsplitdown < times$mcsplit), ])
 
 library(lattice)
 library(latticeExtra)
@@ -121,10 +136,15 @@ ecdfplot(~ clique + kdown + mcsplit + mcsplitdown + vbs, data = times,
          auto.key = list(space = "right", text = labels), xlab = "Runtime (ms)")
 
 # Heatmaps for pattern/target features. Group differently?
-#features <- subset(data$data, T, data$features)
-#nFeatures <- normalize(features)
-#graph_feature_names <- c("vertices", "edges", "loops", "mean degree", "max degree", "SD of degrees", "density", "connected", "mean distance", "max distance", "distance \u2265 2", "distance \u2265 3", "distance \u2265 4")
-#full_feature_names <- c(paste("pattern", graph_feature_names), paste("target", graph_feature_names))
-#par(mar = c(1, 10, 1, 1))
-#image(as.matrix(nFeatures$features), axes = F, col = cols)
-#axis(2, labels = full_feature_names, at = seq(0, 1, 1/(length(data$features) - 1)), las = 2)
+features <- subset(data$data, T, data$features)
+nFeatures <- normalize(features)
+graph_feature_names <- c("vertices", "edges", "loops", "mean degree",
+                         "max degree", "SD of degrees", "density", "connected",
+                         "mean distance", "max distance", "distance \u2265 2",
+                         "distance \u2265 3", "distance \u2265 4")
+full_feature_names <- c(paste("pattern", graph_feature_names),
+                        paste("target", graph_feature_names))
+par(mar = c(1, 10, 1, 1))
+image(as.matrix(nFeatures$features), axes = F, col = cols)
+axis(2, labels = full_feature_names,
+     at = seq(0, 1, 1/(length(data$features) - 1)), las = 2)

@@ -46,11 +46,13 @@ main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/images-PR15/pattern
 
 # column names: nodes, time, size
 parse:
-	sed -i 's/^\([^,]\+,\)[^0-9]\+\([0-9]\+\)[^:]\+:\s\([0-9]\+\)[^0-9]\+\([0-9]\+\).*/\1\3,\4,\2/g' results/mcsplit.csv
+	#sed -i 's/^\([^,]\+,\)[^0-9]\+\([0-9]\+\)[^:]\+:\s\([0-9]\+\)[^0-9]\+\([0-9]\+\).*/\1\3,\4,\2/g' results/mcsplit.csv
 	#sed -i 's/^\([^,]\+,\)[^0-9]\+\([0-9]\+\)[^0-9]\+\([0-9]\+\)\(\s([^)]\+)\)*\s\([0-9]\+\)/\1\2,\5,\3/g' results/clique.csv
 	#sed -i 's/^\([^,]\+,\)[^0-9]\+\([0-9]\+\)\(\s([^)]\+)\)*[^0-9]\+\([0-9]\+\)[^S]\+\(SIZE=\)\?/\1\2,\4,/g' results/kdown.csv
 	#sed -i 's/,$$/,0/g' results/kdown.csv
 	#sed -i 's/ [a-z0-9]\+ = /,/g' results/features.csv
+	sed -i 's/ \([0-9]\+\) \([0-9]\+\)/\1,\2/g' results/costs.csv
+	awk -F ',' '{print $$1","$$2+$$3}' results/costs.csv > results/costs2.csv
 
 data/sip-instances/si/%/MAKE_TARGET: data/sip-instances/si/%/pattern data/sip-instances/si/%/target
 	$(call run_sip,$^)
