@@ -21,9 +21,9 @@ fi
 endef
 
 define run_mcs
-#echo $1, `./algorithms/mcsplit/mcsp --timeout=$(TIMEOUT) -q $(MCSPLIT_HEURISTIC)$1` >> results/mcsplit.csv
+echo $1, `./algorithms/mcsplit/mcsp --timeout=$(TIMEOUT) -q $(MCSPLIT_HEURISTIC)$1` >> results/mcsplit.csv
 #echo $1, `./algorithms/kdown/solve_subgraph_isomorphism sequentialix --timeout $(TIMEOUT) --format vf --induced $1` >> results/kdown.csv
-echo $1, `ulimit -v $(MEMORY_LIMIT) ; ./algorithms/clique/solve_max_common_subgraph --unlabelled --undirected --timeout $(TIMEOUT) $1` >> results/clique.csv
+#echo $1, `ulimit -v $(MEMORY_LIMIT) ; ./algorithms/clique/solve_max_common_subgraph --unlabelled --undirected --timeout $(TIMEOUT) $1` >> results/clique.csv
 #echo $1 `./graph_stats/graph_stats --vf --distances $(firstword $1)` `./graph_stats/graph_stats --distances $(word 2,$1)` >> results/features.csv
 #echo $1 >> results/mcs_instances
 endef
@@ -32,13 +32,18 @@ define generate_pairs
 $(foreach p,$(wildcard $(1)),$(foreach t,$(wildcard $(2)),$(subst /,_,$(3).$p.$t)))
 endef
 
+filtered:
+	while read -r line; do \
+    echo $${line}, `./algorithms/mcsplit/mcsp --timeout=$(TIMEOUT) -q $(MCSPLIT_HEURISTIC) $${line}` >> results/mcsplit.csv ; \
+  done < results/filtered_instances
+
 #main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/si/*/*))
 #main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/scalefree/*))
 #main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/phase/*-target))
 #main: $(call generate_pairs,data/sip-instances/meshes-CVIU11/patterns/*,data/sip-instances/meshes-CVIU11/targets/*,MESH)
 #main: $(call generate_pairs,data/sip-instances/LV/*,data/sip-instances/LV/*,LV)
 #main: $(call generate_pairs,data/sip-instances/largerGraphs/*,data/sip-instances/largerGraphs/*,LARGER)
-main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/images-PR15/pattern*))
+#main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/images-PR15/pattern*))
 #main: $(call generate_pairs,data/sip-instances/images-CVIU11/patterns/*,data/sip-instances/images-CVIU11/targets/*,IMAGE)
 
 #main: $(addsuffix /TRGT,$(foreach f,$(wildcard data/mcs-instances/*/*/*),$(wildcard $f/*A*)))
@@ -46,13 +51,13 @@ main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/images-PR15/pattern
 
 # column names: nodes, time, size
 parse:
-	#sed -i 's/^\([^,]\+,\)[^0-9]\+\([0-9]\+\)[^:]\+:\s\([0-9]\+\)[^0-9]\+\([0-9]\+\).*/\1\3,\4,\2/g' results/mcsplit.csv
+	sed -i 's/^\([^,]\+,\)[^0-9]\+\([0-9]\+\)[^:]\+:\s\([0-9]\+\)[^0-9]\+\([0-9]\+\).*/\1\3,\4,\2/g' results/mcsplit.csv
 	#sed -i 's/^\([^,]\+,\)[^0-9]\+\([0-9]\+\)[^0-9]\+\([0-9]\+\)\(\s([^)]\+)\)*\s\([0-9]\+\)/\1\2,\5,\3/g' results/clique.csv
 	#sed -i 's/^\([^,]\+,\)[^0-9]\+\([0-9]\+\)\(\s([^)]\+)\)*[^0-9]\+\([0-9]\+\)[^S]\+\(SIZE=\)\?/\1\2,\4,/g' results/kdown.csv
 	#sed -i 's/,$$/,0/g' results/kdown.csv
 	#sed -i 's/ [a-z0-9]\+ = /,/g' results/features.csv
-	sed -i 's/ \([0-9]\+\) \([0-9]\+\)/\1,\2/g' results/costs.csv
-	awk -F ',' '{print $$1","$$2+$$3}' results/costs.csv > results/costs2.csv
+	#sed -i 's/ \([0-9]\+\) \([0-9]\+\)/\1,\2/g' results/costs.csv
+	#awk -F ',' '{print $$1","$$2+$$3}' results/costs.csv > results/costs2.csv
 
 data/sip-instances/si/%/MAKE_TARGET: data/sip-instances/si/%/pattern data/sip-instances/si/%/target
 	$(call run_sip,$^)

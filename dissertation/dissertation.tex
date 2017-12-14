@@ -330,15 +330,26 @@ value are considered to have timed out. The aforementioned node counts are
 collected but not currently used. Afterwards, the answers of different
 algorithms are checked for equality (for algorithms that did not time out).
 
-The clique algorithm requires $O(n^2m^2)$ memory for a pair of graphs with $n$
-amd $m$ vertices \cite{DBLP:conf/aaai/HoffmannMR17, DBLP:conf/cp/McCreeshNPS16}.
-To avoid segmentation faults, its virtual memory usage was limited to 7 GB with
-\texttt{ulimit -v} and the instances from Section \ref{sec:unlabelled} (which
-contain much larger graphs) were restricted to $m \times n < \num{16000}$.
+Some limitations had to be enforced to avoid running out of memory. First, the
+clique algorithm requires $O(n^2m^2)$ memory for a pair of graphs with $n$ amd
+$m$ vertices \cite{DBLP:conf/aaai/HoffmannMR17, DBLP:conf/cp/McCreeshNPS16}, so
+its virtual memory usage was limited to 7 GB with \texttt{ulimit -v} and the
+instances from Section \ref{sec:unlabelled} (which contain much larger graphs)
+were restricted to $m \times n < \num{16000}$. Second, having almost $10^5$
+problem instances and analysing 7 different kinds of labelling (according to
+Definition \ref{def:percent_labelling}) results in too much data for the ML
+algorithm. Therefore, we sample \num{30000} out of \num{81400} instances from
+Section \ref{sec:labelled}. The sample is drawn once and used for training ML
+models for both types of labelling (vertex labels and both vertex and edge
+labels). As with 50\% labelling most instances are solved within the time limit,
+sampling from the whole database still leaves us with enough relevant data.
 
 $k\downarrow$ was further modified to accept graphs with vertex labels by adding
 an additional constraint for matching labels on line 8 of the
 \texttt{klessSubgraphIsomorphism} function \cite{DBLP:conf/aaai/HoffmannMR17}.
+Likewise, different implementations of the clique algorithm were combined to
+support both the binary format of the ARG Database and the plaintext format of
+Section \ref{sec:unlabelled}.
 
 In the rest of this section we explore and compare how the algorithms performed
 on the three different subproblems under consideration, those of having no
@@ -774,7 +785,7 @@ number of vertices in Figure \ref{fig:ratio_vertices} is perfectly symmetrical
 and centred around 0, since the number of vertices is a controlled variable for
 this database. All of the remaining plots for ratio features have most of the
 data very close to 0. Thus, the differences between pattern and target graphs
-are very small. Furthermore, all the distributions are symmetrical --- the
+are very small. Furthermore, all the distributions are symmetrical---the
 pattern graph is just as likely to be larger/denser/etc. as the opposite.
 
 %To sum up, even though the distributions are far from normal, most of them still
@@ -806,7 +817,9 @@ be chosen for each pair of graphs. For each pair of graphs, \textsc{Llama}
   parameter is used to ensure a fair comparison when comparing the portfolio
   against other algorithms: the runtime of the portfolio is defined as the
   runtime of its chosen algorithm together with the feature extraction time.
-\end{itemize}
+  While costs for graphs from Section \ref{sec:unlabelled} reached up to 65 s,
+  the maximum cost for graphs from Section \ref{sec:labelled} is only 6 ms.
+\end{itemize} % TODO: could expand the last sentence
 
 After constructing the required dataframes as described above, the data needs to
 be split into training and test sets. We use a technique called 10-fold
@@ -1087,11 +1100,11 @@ margins are distributed for each algorithm in Figure
   \centering
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[scale=0.7]{images/mcsplit_partial.png}
+    \includegraphics[scale=0.5]{images/mcsplit_partial.png}
   \end{subfigure}
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[scale=0.7]{images/clique_partial.png}
+    \includegraphics[scale=0.5]{images/clique_partial.png}
   \end{subfigure}
   \caption{Partial dependence plots for the standard deviation of degrees of
     the target graph}
@@ -1151,13 +1164,14 @@ does not provide enough information to choose the clique encoding over
 In order to compare the \textsc{Llama} model with other algorithms, we treat the
 VBS as the upper bound and the single best solver $\textsc{McSplit}\downarrow$
 as the lower bound. Out of 45468 instances solved by at least one algorithm, our
-model managed to solve 45302, compared to 45223 solved by % TODO: update the numbers
-$\textsc{McSplit}\downarrow$. In other words, it was able to close 32\% of the
-gap between our lower and upper bounds. Figure \ref{fig:ecdf_unlabelled_llama}
-shows how the ML model compares to the VBS and the single best solver
-$\textsc{McSplit}\downarrow$ (note that the vertical axis starts at 0.8 rather than
-0). Unsurprisingly, the model outperforms $\textsc{McSplit}\downarrow$, but does
-not reach the best possible performance represented by the VBS.
+model managed to solve 45290, compared to 45223 solved by
+$\textsc{McSplit}\downarrow$. In other words, it was able to close 27.3\% of the
+gap between our lower and upper bounds in terms of instances solved within the
+time limit. Figure \ref{fig:ecdf_unlabelled_llama} shows how the ML model
+compares to the VBS and the single best solver $\textsc{McSplit}\downarrow$
+(note that the vertical axis starts at 0.9 rather than 0). Unsurprisingly, the
+model outperforms $\textsc{McSplit}\downarrow$, but does not reach the best
+possible performance represented by the VBS.
 
 \section{Vertex-Labelled Graphs}
 

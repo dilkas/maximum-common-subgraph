@@ -19,9 +19,13 @@
 %\emph{{[}Clearly motivate the purpose of your project; why someone would
 %care about what you are doing{]}}
 
-There are several algorithms for the maximum common subgraph problem, each
-capable of outperforming the others for some problem instances. The purpose of
-this project is to create a machine learning (ML) algorithm portfolio that can select
+Given two graphs $G_1$, $G_2$, the \emph{maximum common (induced) subgraph problem}
+asks for a graph that is isomorphic to induced subgraphs of both $G_1$ and $G_2$
+with maximum number of vertices. There are several algorithms for the maximum
+common subgraph problem, each capable of outperforming the others for some
+problem instances: $k\downarrow$, \textsc{McSplit},
+$\textsc{McSplit}\downarrow$, and the clique encoding. The purpose of this
+project is to create a machine learning (ML) algorithm portfolio that can select
 the best algorithm for each pair of graphs. Furthermore, the insights extracted
 from the ML model could be used to provide human-understandable information
 about which algorithm favours what kind of graphs and allow for meta-algorithms

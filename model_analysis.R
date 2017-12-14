@@ -105,15 +105,15 @@ times$llama <- times$llama + times$cost
 png("dissertation/images/ecdf_unlabelled_llama.png", width = 446, height = 288)
 ecdfplot(~ mcsplitdown + llama + vbs, data = times,
          auto.key = list(space = "right", text = labels), xlab = "Runtime (ms)",
-         ylim = c(0.8, 1))
+         ylim = c(0.9, 1))
 dev.off()
 
 # llama metrics
 
 library(ggplot2)
-#sum(successes(data, model))
-#sum(successes(data, vbs))
-#sum(successes(data, singleBest))
+sum(successes(data, model))
+sum(successes(data, vbs))
+sum(successes(data, singleBest))
 #sum(misclassificationPenalties(data, model))
 #mean(parscores(data, model))
 #mean(parscores(data, vbs))
