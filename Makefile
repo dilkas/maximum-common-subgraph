@@ -21,7 +21,7 @@ fi
 endef
 
 define run_mcs
-echo $1, `./algorithms/mcsplit/mcsp --timeout=$(TIMEOUT) -q $(MCSPLIT_HEURISTIC)$1` >> results/mcsplit.csv
+echo $1, `./algorithms/mcsplit/mcsp -a --timeout=$(TIMEOUT) -q $(MCSPLIT_HEURISTIC)$1` >> results/mcsplit.csv
 #echo $1, `./algorithms/kdown/solve_subgraph_isomorphism sequentialix --timeout $(TIMEOUT) --format vf --induced $1` >> results/kdown.csv
 #echo $1, `ulimit -v $(MEMORY_LIMIT) ; ./algorithms/clique/solve_max_common_subgraph --unlabelled --undirected --timeout $(TIMEOUT) $1` >> results/clique.csv
 #echo $1 `./graph_stats/graph_stats --vf --distances $(firstword $1)` `./graph_stats/graph_stats --distances $(word 2,$1)` >> results/features.csv
@@ -32,10 +32,8 @@ define generate_pairs
 $(foreach p,$(wildcard $(1)),$(foreach t,$(wildcard $(2)),$(subst /,_,$(3).$p.$t)))
 endef
 
-filtered:
-	while read -r line; do \
-    echo $${line}, `./algorithms/mcsplit/mcsp --timeout=$(TIMEOUT) -q $(MCSPLIT_HEURISTIC) $${line}` >> results/mcsplit.csv ; \
-  done < results/filtered_instances
+filtered: $(foreach f,$(shell cat results/filtered_instances_one_filename), $f/TRGT)
+#while read -r line; do \ echo $${line}, `./algorithms/mcsplit/mcsp --timeout=$(TIMEOUT) -q $(MCSPLIT_HEURISTIC) $${line}` >> results/mcsplit.csv ; \ done < results/filtered_instances
 
 #main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/si/*/*))
 #main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/scalefree/*))
