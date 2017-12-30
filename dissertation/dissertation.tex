@@ -362,7 +362,7 @@ amount of time or less.
 
 \subsection{Unlabelled Graphs}
 
-\begin{figure} % NOTE: updated with MCS data
+\begin{figure}
   \centering
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
@@ -386,7 +386,7 @@ amount of time or less.
   \label{fig:ecdf_unlabelled}
 \end{figure}
 
-\begin{figure} % NOTE: updated with MCS data
+\begin{figure}
   \centering
   \includegraphics{images/runtime_heatmap.png}
   \caption{A heatmap of $\log_{10}$ runtimes: light colours for low running
@@ -449,22 +449,14 @@ best algorithm.
   single-digit runtimes), both algorithms are marked as winning in the table.
 \end{remark}
 
-%\begin{remark}
-%Note that even though $k\downarrow$ performs considerably better than the clique
-%encoding according to Figures \ref{fig:ecdf_unlabelled} and
-%\ref{fig:runtime_heatmap}, it is almost never the best algorithm.
-%\end{remark}
-
 Given this information, we would expect the ML algorithm to suggest using
 \textsc{McSplit} and $\textsc{McSplit}\downarrow$ most of the time, occasionally
 consider the clique encoding, and mostly forget about $k\downarrow$.
 
-% TODO: define simple graph
-\subsection{Vertex-Labelled Graphs}
 \subsection{Vertex- and Edge-Labelled Graphs}
+\subsection{Vertex-Labelled Graphs}
 
 \section{Graph Features} \label{sec:features}
-%TODO: formulas for features?
 The initial set of features is based on the algorithm selection paper for the
 subgraph isomorphism problem \cite{DBLP:conf/lion/KotthoffMS16} and consists of
 the following:
@@ -618,7 +610,7 @@ respectively.
   \label{fig:sip_features1}
 \end{figure}
 
-\begin{figure} % TODO: mentioned fourth
+\begin{figure}
   \centering
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
@@ -857,7 +849,8 @@ different types of ML algorithms:
     then be assigned to the nearest cluster.
 \end{description}
 
-\begin{figure}
+\begin{figure} % TODO: this is different for different cases. plot all of them
+               % (or none)
   \centering
   \includegraphics[scale=0.7]{images/tree_sizes.png}
   \caption{A histogram of the number of nodes in each tree}
@@ -920,7 +913,7 @@ memory consumption.
 
 \section{Unlabelled Graphs}
 
-\subsection{Error Rates}
+\subsection{Error Rates} \label{sec:unlabelled_error_rates}
 
 \begin{figure}
   \centering
@@ -944,7 +937,6 @@ observation before, OOB error is a valid estimate of test error. The black line
 in Figure \ref{fig:unlabelled_forest_errors} shows how the error converges with
 the number of trees to about 17\%.
 
-% TODO: count how many times each algorithm was predicted
 The other lines in the figure, one for each algorithm, are defined as $1 -
 \text{recall}$, where, for an algorithm $A$, \emph{recall}
 \cite{citeulike:12882259} is
@@ -961,6 +953,7 @@ points with $k\downarrow$ winning are treated as randomness in the data more so
 than a statistically significant trend.
 
 \subsection{Variable Importance}
+
 % TODO: cite all of this
 Next we are going to explore how important each feature is in making
 predictions, but for that we need to introduce some new definitions. Consider a
@@ -1026,6 +1019,7 @@ plot in Figure \ref{fig:unlabelled_var_used} tells a similar story: the orders
 are not identical, but there are no big outliers.
 
 \subsection{Margins}
+
 \begin{definition}
   Let $c_1, \dots, c_n$ be $n$ classes and let $p$ be a data point that belongs
   to class $c_p$. Let $v_1, \dots, v_n$ denote the number of votes for each
@@ -1096,6 +1090,7 @@ margins are distributed for each algorithm in Figure
 \end{itemize}
 
 \subsection{Partial Dependence}
+
 \begin{figure}
   \centering
   \begin{subfigure}[t]{0.49\textwidth}
@@ -1153,7 +1148,7 @@ does not provide enough information to choose the clique encoding over
 
 \subsection{Runtime Comparison}
 
-\begin{figure} % TODO: update this with the real thing
+\begin{figure}
   \centering
   \includegraphics{images/ecdf_unlabelled_llama.png}
   \caption{\textsc{Llama} model compared to the VBS and
@@ -1173,9 +1168,39 @@ compares to the VBS and the single best solver $\textsc{McSplit}\downarrow$
 model outperforms $\textsc{McSplit}\downarrow$, but does not reach the best
 possible performance represented by the VBS.
 
-\section{Vertex-Labelled Graphs}
-
 \section{Vertex- and Edge-Labelled Graphs}
+
+\subsection{Error Rates}
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.7]{images/both_labels_forest_errors.png}
+  \caption{Convergence plot of various error measures as the number of trees in
+    a random forest increases. The plot shows the OOB error and $1 -
+    \text{recall}$ for each algorithm.}
+  \label{fig:both_labels_forest_errors}
+\end{figure}
+
+Once again we plot the error rates (defined in Section
+\ref{sec:unlabelled_error_rates}) in Figure \ref{fig:both_labels_forest_errors}.
+This time all of the errors converge downwards. The OOB error converges to ??.
+
+The other lines in the figure, one for each algorithm, are defined as $1 -
+\text{recall}$, where, for an algorithm $A$, \emph{recall}
+\cite{citeulike:12882259} is
+\[ \frac{\text{the number of instances that were correctly predicted as
+      $A$}}{\text{the number of instances where $A$ is the correct
+      prediction}}. \]
+
+The error rates for $\textsc{McSplit}\downarrow$, \textsc{McSplit}, the clique
+encoding, and $k\downarrow$ converge to 11\%, 29\%, 30\%, and 80\%
+respectively. Unlike the errors of all the other classes, the error of
+$k\downarrow$ has an upward trend and converges to a very high value. Perhaps
+the model eventually learns not to predict $k\downarrow$ very often and the data
+points with $k\downarrow$ winning are treated as randomness in the data more so
+than a statistically significant trend.
+
+\section{Vertex-Labelled Graphs}
 
 %\begin{appendices}
 %\end{appendices}
