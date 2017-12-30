@@ -344,20 +344,26 @@ models for both types of labelling (vertex labels and both vertex and edge
 labels). As with 50\% labelling most instances are solved within the time limit,
 sampling from the whole database still leaves us with enough relevant data.
 
-$k\downarrow$ was further modified to accept graphs with vertex labels by adding
-an additional constraint for matching labels on line 8 of the
+The $k\downarrow$ algorithm was further modified to accept graphs with vertex
+labels by adding an additional constraint for matching labels on line 8 of the
 \texttt{klessSubgraphIsomorphism} function \cite{DBLP:conf/aaai/HoffmannMR17}.
-Likewise, different implementations of the clique algorithm were combined to
-support both the binary format of the ARG Database and the plaintext format of
-Section \ref{sec:unlabelled}.
+After generating most of the data, it was noticed that the vertex-labelled
+version of $k\downarrow$ was winning precisely 0 times. Therefore, $k\downarrow$
+is not included in Sections \ref{sec:runtime_both} and \ref{sec:runtime_vertex}
+(dealing with the runtime analysis of algorithms for both kinds of labelling),
+nor in the machine learning models.
+
+Furthermore, different implementations of the clique algorithm had to be
+combined to support both the binary format of the ARG Database and the plaintext
+format of Section \ref{sec:unlabelled}.
 
 In the rest of this section we explore and compare how the algorithms performed
 on the three different subproblems under consideration, those of having no
 labels, vertex labels, and both vertex and edge labels. We introduce
 \emph{empirical cumulative distribution function (ECDF)}
-plots \cite{10.2307/2334448}: for each unit of time on the horizontal axis, the value on
-the vertical axis represents what part of the problem instances was solved in that
-amount of time or less.
+plots \cite{10.2307/2334448}: for each unit of time on the horizontal axis, the
+value on the vertical axis represents what part of the problem instances was
+solved in that amount of time or less.
 % TODO: mention how many instances were solved by at least one algorithm in each dataset.
 
 \subsection{Unlabelled Graphs}
@@ -453,8 +459,11 @@ Given this information, we would expect the ML algorithm to suggest using
 \textsc{McSplit} and $\textsc{McSplit}\downarrow$ most of the time, occasionally
 consider the clique encoding, and mostly forget about $k\downarrow$.
 
-\subsection{Vertex- and Edge-Labelled Graphs}
-\subsection{Vertex-Labelled Graphs}
+\subsection{Vertex- and Edge-Labelled Graphs} \label{sec:runtime_both}
+
+
+
+\subsection{Vertex-Labelled Graphs} \label{sec:runtime_vertex}
 
 \section{Graph Features} \label{sec:features}
 The initial set of features is based on the algorithm selection paper for the
@@ -982,7 +991,7 @@ class. Hence the Gini index is often used to evaluate the quality of a split.
 
 \begin{remark}
   Note that $G=0$ when any single $\hat{p}_{mk}=0$, regardless of the values of
-  other proportions. Therefore $G=0$ does not automatically imply that the tree
+  other proportions. Therefore, $G=0$ does not automatically imply that the tree
   is a good classifier.
 \end{remark}
 
@@ -1174,7 +1183,7 @@ possible performance represented by the VBS.
 
 \begin{figure}
   \centering
-  \includegraphics[scale=0.7]{images/both_labels_forest_errors.png}
+  %\includegraphics[scale=0.7]{images/both_labels_forest_errors.png}
   \caption{Convergence plot of various error measures as the number of trees in
     a random forest increases. The plot shows the OOB error and $1 -
     \text{recall}$ for each algorithm.}
