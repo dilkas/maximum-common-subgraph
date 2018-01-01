@@ -95,7 +95,7 @@ for (i in 1:length(algorithms)) {
     png(paste("dissertation/images/", type, algorithms[i], features[j], ".png",
               sep = "_"), width = 446, height = 288)
     partialPlot(forest, data[["data"]], features[j], algorithms[i],
-                main = algorithm_labels[i], xlab = feature_labels[i])
+                main = algorithm_labels[i], xlab = feature_labels[j])
     dev.off()
   }
 }

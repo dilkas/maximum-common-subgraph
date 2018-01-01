@@ -589,11 +589,14 @@ the following:
 \begin{definition}
 For a graph $G$ with $n$ vertices and $m$ edges, the \emph{(edge) density} is
 defined to be the proportion of potential edges that $G$ actually has
-\cite{DBLP:books/daglib/0030488}. The standard formula used for simple graphs is
+\cite{DBLP:books/daglib/0030488}. The standard formula used for \emph{simple}
+graphs (i.e., graphs with no multiple edges or loops
+\cite{DBLP:books/ws/NishizekiR04}) is
 \[ \frac{m}{\binom{n}{2}} = \frac{2m}{n(n-1)}. \]
 \end{definition}
-Even though some of our graphs contain multiple edges and loops, we stick to
-this formula as it was used in \cite{DBLP:conf/lion/KotthoffMS16} and it does
+
+Even though some of our graphs do contain multiple edges and loops, we stick to
+this formula as it was used in  \cite{DBLP:conf/lion/KotthoffMS16} and it does
 not break the ML algorithm in any way to have the theoretical possibility of
 density greater than 1.
 
@@ -616,12 +619,13 @@ types, we add a feature corresponding to $p$ defined in Definition
 2, 3, 4, 5, 10, and 20 vertices/edges with the same label on average,
 respectively.
 
-\begin{remark} % TODO: could add more citations here
+\begin{remark}
   When working with both vertex and edge labels, we only consider using the same
-  value of $p$ for both vertices and edges. Although this may not be ideal, it
-  reflects how the ARG Database was constructed. Furthermore, there are many
-  ways to label a graph and it is unclear which types of labelling are worth
-  investigating.
+  value of $p$ for both vertices and edges. This ``convention'' seems to have
+  originated in a paper by the creators of the ARG Database
+  \cite{DBLP:journals/jgaa/ConteFV07} and was replicated in subsequent papers on
+  maximum common subgraph algorithms \cite{DBLP:conf/cp/McCreeshNPS16,
+    DBLP:conf/cp/NdiayeS11}.
 \end{remark}
 
 \subsection{Distributions of Features}
@@ -839,7 +843,7 @@ sometimes use density plots. Furthermore, we take $\log$ transformations for
 ratio features. We also plot a heatmap of all features for all of the data in
 Figure \ref{fig:features_heatmap}. The rows that are almost completely white
 represent features that have several significantly higher values that skew the
-average.
+mean.
 
 Firstly, one feature is not plotted as by definition it has only two possible
 values. 99.81\% of graphs from Section \ref{sec:labelled} are connected,
@@ -889,9 +893,6 @@ this database. All of the remaining plots for ratio features have most of the
 data very close to 0. Thus, the differences between pattern and target graphs
 are very small. Furthermore, all the distributions are symmetrical---the
 pattern graph is just as likely to be larger/denser/etc. as the opposite.
-
-%To sum up, even though the distributions are far from normal, most of them still
-%provide a good range of different values.
 
 \chapter{Machine Learning Models \& Their Evaluation}
 After running the algorithms on all of the data for different types of labelling
@@ -944,9 +945,13 @@ comes from subpopulation $s_i$ for $i = 1, \dots, n$ \cite{lohr2009sampling}. In
 this case the data is partitioned into four groups based on which algorithm
 performed best.
 
-The cross-validation folds are then passed to the ML algorithm. \textsc{Llama}
-\cite{kotthoff_llama_2013, llama} supports algorithm portfolios based on three
-different types of ML algorithms:
+The cross-validation folds are then used to generate predictions on all of the
+data, where each prediction is made by a model that did not have that observation
+in its training data set, and for various statistics provided by the
+\textsc{Llama} package \cite{llama}. The predictions are then used to compare
+the ML model with individual algorithms and the VBS using ECDF plots and numeric
+statistics. \textsc{Llama} \cite{kotthoff_llama_2013, llama} supports algorithm
+portfolios based on three different types of ML algorithms:
 
 \begin{description}
   \item[Classification] The ML algorithm predicts which algorithm is likely to
@@ -1021,6 +1026,33 @@ multiple threads. Furthermore, the R code was heavily optimised to remove
 temporary variables as soon as they are no longer needed in order to reduce
 memory consumption.
 
+ % TODO: which is a strictly monotonic bijection for positive real numbers (define
+ % bijection, monotonic)
+As we saw in Section \ref{sec:features}, some of the feature data is highly
+skewed. Thus we should formally address the question of using transformations
+(such as $\log$ used for some of the plots or $x \mapsto 1/x$, giving
+the labelling percentage a different interpretation) before feeding the
+data into the ML algorithm. While it is a commonly held belief that
+predictor transformations are unnecessary for decision tree-based learning
+algorithms \cite{DBLP:journals/classification/Friedman06,
+  DBLP:books/lib/HastieTF09, cart}, they can affect the predictions of
+previously unseen data \cite{DBLP:journals/corr/GaliliM16}. To see this,
+consider a split between some values $x_1, x_2 > 0$ at $b =
+\frac{x_1+x_2}{2}$ (which is the type of split used by the
+\texttt{randomForest} package we are using
+\cite{DBLP:journals/corr/GaliliM16}) and consider the same situation after
+applying the transformation $x \mapsto x^2$. The new boundary is $b' =
+\frac{x_1^2+x_2^2}{2}$ and it is easy to find $x > b$ such that $x^2 < b'$.
+Then, if this is the final split and $x_1$ and $x_2$ have different predictions,
+$x$ will have different predictions with and without the transformation. In
+this project we do not use transformations as having over \num{100000} data
+points and 500 trees reduces this effect and good algorithm portfolios are
+created without even mentioning transformations
+\cite{DBLP:conf/lion/KotthoffKHT15, DBLP:conf/lion/KotthoffMS16}. However, we
+would encourage future researchers to consider $\log$-transforming highly skewed
+features, especially if using an algorithm more sensitive to the distribution of
+data.
+
 \section{Unlabelled Graphs}
 
 \subsection{Error Rates} \label{sec:unlabelled_error_rates}
@@ -1064,15 +1096,14 @@ than a statistically significant trend.
 
 \subsection{Variable Importance}
 
-% TODO: cite all of this
 Next we are going to explore how important each feature is in making
 predictions, but for that we need to introduce some new definitions. Consider a
 single tree $T$ in a random forest. The root of $T$ can be reached by any
 observation, regardless of the values of its features. After passing some node
 $n$, some feature is restricted, i.e., it is imposed an upper or lower limit on
-the kind of values it can have for it to move towards a particular child of $n$.
-The part of feature space that an observation can have while at some node $n$ is
-called a \emph{region}.
+the kind of values it can have for it to move towards a particular child of $n$
+\cite{James:2014:ISL:2517747}. We will refer to a part of feature space that an
+observation can be in while at some node $n$ as a \emph{region}.
 
 \begin{definition}
   Suppose we have $K$ classes. Consider some region $m$. The \emph{Gini index}
@@ -1138,7 +1169,6 @@ are not identical, but there are no big outliers.
   which is a number in $[-1, 1]$ \cite{forest}.
 \end{definition}
 
-% TODO: add a legend (colorbrewer)
 \begin{figure}
   \centering
   \begin{subfigure}[t]{0.49\textwidth}
@@ -1204,7 +1234,7 @@ margins are distributed for each algorithm in Figure
   $\textsc{McSplit}\downarrow$.
 \end{itemize}
 
-\subsection{Partial Dependence}
+\subsection{Partial Dependence} \label{sec:unlabelled_partial}
 
 \begin{figure}
   \centering
@@ -1216,13 +1246,13 @@ margins are distributed for each algorithm in Figure
     \centering
     \includegraphics[width=\textwidth]{images/clique_partial.png}
   \end{subfigure}
-  \caption{Partial dependence plots for the standard deviation of degrees of
-    the target graph}
+  \caption{Partial dependence plots of the standard deviation of degrees in the
+    target graph}
   \label{fig:unlabelled_partials}
 \end{figure}
 
 Since the standard deviations of degrees in both target and pattern graphs are
-the most important features, we plot partial dependence plots for the standard
+the most important features, we plot partial dependence plots of the standard
 deviation of degrees in the target graph for $\textsc{McSplit}\downarrow$ and
 the clique encoding in Figure \ref{fig:unlabelled_partials}. The plotted
 function \cite{forest} is defined as
@@ -1243,7 +1273,7 @@ Essentially, $f(x)$ compares the proportion of votes for class $k$ with the
 average value over all classes. We can deduce that a low standard deviation of
 degrees is a strong sign that \textsc{McSplit} and $\textsc{McSplit}\downarrow$
 should perform well. On the other hand, the clique encoding is expected to
-perform better on graphs with high variance of degrees. However, $\max f(x)$ for
+perform better on graphs with high variance in degrees. However, $\max f(x)$ for
 the clique encoding is just barely above 0 and much lower than $\min f(x)$ for
 $\textsc{McSplit}\downarrow$, meaning that the standard deviation of degrees
 does not provide enough information to choose the clique encoding over
@@ -1299,7 +1329,7 @@ Once again we plot the error rates (defined in Section
 This time all of the errors converge downwards and are below 50\%. The OOB error
 converges to 14\%, while the errors of \textsc{McSplit},
 $\textsc{McSplit}\downarrow$, and the clique encoding converge to 29\%, 11\%,
-and 7\%, respectively. % TODO: conclude, possibly by joining more data
+and 7\%, respectively.
 
 \begin{figure}
   \centering
@@ -1331,7 +1361,6 @@ data to reduce the Gini index (a variation of which is used by the random forest
 algorithm in choosing which predictor to split on \cite{167153}), they are
 rarely used.
 
-% TODO: add a legend (colorbrewer)
 \begin{figure}
   \centering
   \begin{subfigure}[t]{0.49\textwidth}
@@ -1375,10 +1404,81 @@ encoding and is less sure when dealing with problem instances best handled with
 
 \begin{figure}
   \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/_both_labels_clique_labelling_.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/_both_labels_mcsplit_labelling_.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/_both_labels_mcsplitdown_labelling_.png}
+  \end{subfigure}
+  \caption{Partial dependence plots of the labelling percentage}
+  \label{fig:both_labels_partials2}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/_both_labels_clique_stddeg.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/_both_labels_mcsplit_stddeg.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/_both_labels_mcsplitdown_stddeg.png}
+  \end{subfigure}
+  \caption{Partial dependence plots of the standard deviation of degrees in the
+    target graph}
+  \label{fig:both_labels_partials1}
+\end{figure}
+
+This time we show the partial dependence plots for the top 2 most influential
+predictors (the labelling percentage and the standard deviation of degrees in
+the target graph) in Figures \ref{fig:both_labels_partials1} and
+\ref{fig:both_labels_partials2}. The results for the clique encoding are the
+most straightforward to interpret. Clearly, the algorithm performs much better
+with higher labelling percentages (more different labels). The interesting bit
+(just like back in Figure \ref{fig:both_labels_linecharts}) is that the curve
+stays constant between 20\% and 50\%. In other words, anywhere above 20\%
+labelling, a higher labelling percentage does not make the clique encoding more
+preferable than it already is. The partial dependence on the standard deviation
+of degrees of the target graph says what we already knew from Section
+\ref{sec:unlabelled_partial}: the clique encoding prefers graphs with more
+variance in degrees. The one smalll difference is that this time the change is
+not as steep, but this can be easily explained by the fact that the highest
+standard deviation of degrees is around 7 in this section compared to around 70
+in Section \ref{sec:unlabelled_partial}.
+
+On the other hand, both \textsc{McSplit} and $\textsc{McSplit}\downarrow$ prefer
+lower labelling percentages. While $\textsc{McSplit}\downarrow$ prefers graphs
+with smaller standard deviations of degrees, the situation with \textsc{McSplit}
+is suddenly less clear, which is reflective of the fact that the ML model has less
+confidence about \textsc{McSplit} (compared to the other 2 algorithms).
+
+\begin{figure}
+  \centering
   \includegraphics{images/ecdf_both_labels_llama.png}
   \caption{\textsc{Llama} model compared to the other algorithms and the VBS}
   \label{fig:ecdf_both_labels_llama}
 \end{figure}
+
+For the runtime comparison, we plot the ECDF for all the individual algorithms,
+the VBS, and the \textsc{Llama} model in Figure
+\ref{fig:ecdf_both_labels_llama}. Visually, the performance of the
+\textsc{Llama} model is quite close to the upper bound and the gap between
+\textsc{Llama} and any individual algorithm (like $\textsc{McSplit}\downarrow$)
+is much wider than any gap between two individual algorithms. To add more
+numbers to this picture, out of \num{169657} problem instances solved by at
+least one algorithm, the single best algorithm $\textsc{McSplit}\downarrow$ was
+able to solve \num{160879}, while \textsc{Llama} solved \num{168639}, closing
+88\% of the difference between lower and upper bounds.
 
 \section{Vertex-Labelled Graphs}
 
