@@ -309,10 +309,10 @@ namespace
         for (unsigned v = 0 ; v < params.except ; ++v)
           target_degrees.at(wildcard_start + v) = params.high_wildcards ? target.size() + 1 : 0;
 
-      vector<vector<vector<unsigned> > > p_nds(params.cnds ? adjacency_constraints.size() * adjacency_constraints.size() : adjacency_constraints.size());
-      vector<vector<vector<unsigned> > > t_nds(params.cnds ? adjacency_constraints.size() * adjacency_constraints.size() : adjacency_constraints.size());
+      vector<vector<vector<vector<unsigned> > > > p_nds(params.cnds ? adjacency_constraints.size() * adjacency_constraints.size() : adjacency_constraints.size());
+      vector<vector<vector<vector<unsigned> > > > t_nds(params.cnds ? adjacency_constraints.size() * adjacency_constraints.size() : adjacency_constraints.size());
 
-      if (params.cnds) {
+      /*if (params.cnds) { TEMPORARY
         for (unsigned p = 0 ; p < pattern.size() ; ++p) {
           unsigned cn = 0;
           for (auto & c : adjacency_constraints) {
@@ -341,17 +341,23 @@ namespace
           }
         }
       }
-      else if (params.nds) {
-        for (unsigned p = 0 ; p < pattern.size() ; ++p) {
-          unsigned cn = 0;
-          for (auto & c : adjacency_constraints) {
-            p_nds[cn].resize(pattern.size());
-            for (unsigned q = 0 ; q < pattern.size() ; ++q)
-              if (c.first[p][q])
-                p_nds[cn][p].push_back(c.first[q].count());
-            sort(p_nds[cn][p].begin(), p_nds[cn][p].end(), greater<unsigned>());
-            ++cn;
+      else if (params.nds) {*/
+      if (params.nds) {
+        unsigned cn = 0;
+        for (auto & c : adjacency_constraints) {
+          p_nds[cn].resize(pattern.size());
+          for (unsigned p = 0 ; p < pattern.size() ; ++p) {
+            p_nds[cn][p].resize(pattern.vertices_by_label.size());
+            unsigned label = 0;
+            for (auto & label_class : pattern.vertices_by_label) {
+              for (auto & q : label_class)
+                if (c.first[p][q])
+                  p_nds[cn][p][label].push_back(c.first[q].count());
+              sort(p_nds[cn][p][label].begin(), p_nds[cn][p][label].end(), greater<unsigned>());
+              ++label;
+            }
           }
+          ++cn;
         }
       }
 
@@ -362,18 +368,23 @@ namespace
 
       while (true) {
         if (params.nds) {
-          t_nds = vector<vector<vector<unsigned> > >(adjacency_constraints.size());
+          t_nds = vector<vector<vector<vector<unsigned> > > >(adjacency_constraints.size());
 
-          for (unsigned t = 0 ; t < target.size() ; ++t) {
-            unsigned cn = 0;
-            for (auto & c : adjacency_constraints) {
-              t_nds[cn].resize(target.size());
-              for (unsigned q = 0 ; q < target.size() ; ++q)
-                if (c.second[t][q])
-                  t_nds[cn][t].push_back((c.second[q] & initial_domains_union).count());
-              sort(t_nds[cn][t].begin(), t_nds[cn][t].end(), greater<unsigned>());
-              ++cn;
+          unsigned cn = 0;
+          for (auto & c : adjacency_constraints) {
+            t_nds[cn].resize(target.size());
+            for (unsigned t = 0 ; t < target.size() ; ++t) {
+              t_nds[cn][t].resize(target.vertices_by_label.size());
+              unsigned label = 0;
+              for (auto & label_class : target.vertices_by_label) {
+                for (auto & q : label_class)
+                  if (c.second[t][q])
+                    t_nds[cn][t][label].push_back((c.second[q] & initial_domains_union).count());
+                sort(t_nds[cn][t][label].begin(), t_nds[cn][t][label].end(), greater<unsigned>());
+                ++label;
+              }
             }
+            ++cn;
           }
         }
 
@@ -415,10 +426,14 @@ namespace
             // neighbourhood degree sequences
             if (params.nds) {
               for (unsigned cn = 0 ; cn < 1 && ok ; ++cn) {
-                for (unsigned i = params.except ; i < p_nds[cn][p].size() ; ++i) {
-                  if (t_nds[cn][t][i - params.except] + params.except < p_nds[cn][p][i]) {
-                    ok = false;
-                    break;
+                for (unsigned label = 0; label < pattern.vertices_by_label.size() &&
+                       label < target.vertices_by_label.size(); ++label) {
+                  for (unsigned i = params.except ; i < p_nds[cn][p][label].size() &&
+                         i - params.except < t_nds[cn][t][label].size() ; ++i) {
+                    if (t_nds[cn][t][label][i - params.except] + params.except < p_nds[cn][p][label][i]) {
+                      ok = false;
+                      break;
+                    }
                   }
                 }
               }

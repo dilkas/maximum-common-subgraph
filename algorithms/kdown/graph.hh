@@ -87,6 +87,7 @@ public:
   auto degree(unsigned a) const -> unsigned;
 
   std::vector<unsigned> vertex_labels;
+  std::vector<std::vector<unsigned> > vertices_by_label;
 };
 
 #endif
