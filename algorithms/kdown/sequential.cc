@@ -405,7 +405,7 @@ namespace
                 ok = false;
 
               // check labels
-              if (params.vertex_labels && pattern.vertex_labels.at(p) != target.vertex_labels.at(t))
+              if (ok && params.vertex_labels && pattern.vertex_labels.at(p) != target.vertex_labels.at(t))
                 ok = false;
 
               if (! ok)
