@@ -312,7 +312,7 @@ namespace
       vector<vector<vector<vector<unsigned> > > > p_nds(params.cnds ? adjacency_constraints.size() * adjacency_constraints.size() : adjacency_constraints.size());
       vector<vector<vector<vector<unsigned> > > > t_nds(params.cnds ? adjacency_constraints.size() * adjacency_constraints.size() : adjacency_constraints.size());
 
-      /*if (params.cnds) { TEMPORARY
+      /*if (params.cnds) {
         for (unsigned p = 0 ; p < pattern.size() ; ++p) {
           unsigned cn = 0;
           for (auto & c : adjacency_constraints) {
@@ -340,9 +340,10 @@ namespace
             }
           }
         }
-      }
-      else if (params.nds) {*/
-      if (params.nds) {
+        } */
+      if (params.cnds) {
+        std::cerr << "Combined NDS is not currently supported" << std::endl;
+      } else if (params.nds) {
         unsigned cn = 0;
         for (auto & c : adjacency_constraints) {
           p_nds[cn].resize(pattern.size());
@@ -424,14 +425,35 @@ namespace
             }
 
             // neighbourhood degree sequences
-            if (params.nds) {
+            if (params.nds && ok) {
+              auto k_left = params.except;
               for (unsigned cn = 0 ; cn < 1 && ok ; ++cn) {
+                // if the pattern graph has an unmatchable neighbour, reduce k by 1
+                for (unsigned label = target.vertices_by_label.size(); label < pattern.vertices_by_label.size(); ++label) {
+                  k_left -= p_nds[cn][p][label].size();
+                  if (k_left < 0) {
+                    ok = false;
+                    goto end_of_tests;
+                  }
+                }
+
                 for (unsigned label = 0; label < pattern.vertices_by_label.size() &&
                        label < target.vertices_by_label.size(); ++label) {
-                  for (unsigned i = params.except ; i < p_nds[cn][p][label].size() &&
-                         i - params.except < t_nds[cn][t][label].size() ; ++i) {
-                    if (t_nds[cn][t][label][i - params.except] + params.except < p_nds[cn][p][label][i]) {
+                  for (unsigned current_k = (p_nds[cn][p][label].size() > t_nds[cn][t][label].size()) ?
+                         p_nds[cn][p][label].size() - t_nds[cn][t][label].size() : 0; ; ++current_k) {
+                    if (current_k > k_left) {
                       ok = false;
+                      goto end_of_tests;
+                    }
+                    bool successful = true;
+                    for (unsigned i = current_k; i < p_nds[cn][p][label].size(); ++i) {
+                      if (t_nds[cn][t][label][i - current_k] + current_k < p_nds[cn][p][label][i]) {
+                        successful = false;
+                        break;
+                      }
+                    }
+                    if (successful) {
+                      k_left -= current_k;
                       break;
                     }
                   }
@@ -439,6 +461,7 @@ namespace
               }
             }
 
+          end_of_tests:
             if (ok)
               initial_domains[p].values.set(t);
           }
