@@ -3,15 +3,20 @@
 
 \usepackage[UKenglish]{babel}
 \usepackage[UKenglish]{isodate}
-\usepackage[hidelinks]{hyperref}
-\usepackage{amsfonts, amsmath, amsthm, graphicx, subcaption}
+\PassOptionsToPackage{hyphens}{url}\usepackage[hidelinks]{hyperref}
+\usepackage{amsfonts, amsmath, amsthm, graphicx, subcaption, mathtools, cleveref}
 \usepackage[group-separator={,}]{siunitx}
+\usepackage[linesnumbered]{algorithm2e}
 
+\newtheorem{lemma}{Lemma}[chapter]
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[chapter]
 \theoremstyle{remark}
 \newtheorem{remark}{Remark}[chapter]
+
+\crefformat{footnote}{#2\footnotemark[#1]#3}
 \DeclareMathOperator{\dom}{dom}
+\newcommand{\kprec}[1]{\prescript{}{#1}{\preceq}\ }
 
 \title{Algorithm Selection for Maximum Common Subgraph}
 \author{Paulius Dilkas}
@@ -29,12 +34,12 @@
 \chapter{Introduction}
 \pagenumbering{arabic}
 
-We start with a definition of graphs suitable for the empirical data described
+We start with a definition of a graph suitable for the empirical data described
 in Chapter \ref{chapter:problems} and used in Chapter
 \ref{chapter:generating_data}.
 
 \begin{definition}
-  Let $S$ be a set and let $k$ be a non-negative integer. Then $[S]^k$ denotes
+  Let $S$ be a set and $k$ a non-negative integer. Then $[S]^k$ denotes
   the set of \emph{$k$-subets} of $S$ \cite{subset}, i.e.,
   \[ [S]^k = \{ A \subseteq S : |A| = k \}. \]
 \end{definition}
@@ -81,7 +86,7 @@ definitions to work with our definition of a multigraph.
   to $\{ v_1, v_2 \}$ \cite{DBLP:journals/jgo/PardalosX94a}.
 \end{definition}
 
-Finally, we define the main problem dealt with in this project.
+Finally, we define the main problem of this project:
 
 \begin{definition}
   A \emph{maximum common (induced) subgraph} between graphs $G_1$ and $G_2$ is a
@@ -94,12 +99,12 @@ Finally, we define the main problem dealt with in this project.
   and $U_2 \subseteq V_2$.
 \end{definition}
 
-The purpose of this project is to create and explore machine-learning-based
+The purpose of this project is to create and explore machine learning-based
 algorithm \emph{portfolios}, i.e., machine learning models whose main goal is to
 provide a mapping, assigning the best-performing algorithm to each problem
 instance \cite{DBLP:journals/ai/BischlKKLMFHHLT16, DBLP:journals/ac/Rice76}.
 
-\section{The Algorithms}
+\chapter{The Algorithms}
 
 We consider four algorithms that were shown to be competitive in a paper by
 McCreesh \textit{et al}. \cite{DBLP:conf/ijcai/McCreeshPT17}: $k\downarrow$
@@ -143,6 +148,12 @@ which is a branch and bound algorithm that uses bitsets and greedy colouring.
 Colouring is used to provide a quick upper bound: if a subgraph can be coloured
 with $k$ colours, then it cannot have a clique of size more than $k$.
 
+\begin{remark}
+  Two versions of the clique algorithm had to be combined to support both binary
+  and plaintext formats used by the databases described in Chapter
+  \ref{chapter:problems}.
+\end{remark}
+
 \textsc{McSplit} \cite{DBLP:conf/ijcai/McCreeshPT17} is a branch and bound
 algorithm that builds its own bit string labels for vertices in both pattern and
 target graphs. Once it chooses to match a vertex $u$ in graph $G_1$ with a
@@ -170,7 +181,106 @@ there are a few key differences between $\textsc{McSplit} \downarrow$ and
   more of the search tree branches.
 \end{itemize}
 
+\section{Modifications to \texorpdfstring{$k\downarrow$}{kdown}}
+
+Labelling will be formally defined in Section \ref{sec:characteristics}. For
+... TODO: introduce labelling
+
+The $k\downarrow$ algorithm was modified to accept graphs with vertex
+labels by adding an additional constraint for matching labels on line 8 of the
+\texttt{klessSubgraphIsomorphism} function \cite{DBLP:conf/aaai/HoffmannMR17}
+and extending the \texttt{Graph} class with two new fields: a \texttt{vector},
+assigning a label to each vertex, and a \texttt{vector} of \texttt{vector}s,
+which, for each label, list all vertices that have that label. After generating
+most of the data, it was noticed that the vertex-labelled version of
+$k\downarrow$ was winning precisely 0 times.
+
+In order to make $k\downarrow$ more competitive, the neighbourhood degree
+sequence filtering was improved to make use of the additional information that
+labels provide. It is also part of line 8 of the same function in the original
+paper \cite{DBLP:conf/aaai/HoffmannMR17}, however, it is not enabled by
+default\footnote{\label{foot:kdown}\url{https://github.com/ciaranm/aaai17-between-subgraph-isomorphism-and-maximum-common-subgraph-paper}}
+and is not used in the experiments of the \textsc{McSplit} paper
+\cite{DBLP:conf/ijcai/McCreeshPT17}. We take the definition directly from
+\cite{DBLP:conf/aaai/HoffmannMR17}:
+
+\begin{definition}
+  ``The \emph{neighbourhood degree sequence} (NDS) of a vertex $p$, $S(p)$, is the
+  (non-ascending) sequence of degrees of its neighbours.''
+\end{definition}
+
+\begin{definition} \label{def:prec}
+  For two sequences $S = (s_1, \dots, s_n)$ and $T = (t_1, \dots, t_m)$ and some
+  non-negative integer $k$, we say that $S \kprec{k} T$ if $n - k \le m$ and
+  there is a subsequence $S_k$ of $S$ with $|S_k| \le k$ such that
+  \cite{DBLP:conf/aaai/HoffmannMR17}
+  \[ \forall s_i \in S \setminus S_k, \text{ there exists a distinct } j \in \{
+    1, \dots, m \} \text{ such that } s_i - k \le t_j. \]
+\end{definition}
+
+As a simplification of the definition above, we state the following lemma, based
+on Corollary 1 from the $k\downarrow$ paper
+\cite{DBLP:conf/aaai/HoffmannMR17} and the C++ implementation\cref{foot:kdown}.
+
+\begin{lemma} \label{lemma1}
+  Let $S = (s_1, \dots, s_n)$ and $T = (t_1, \dots, t_m)$ be two sequences and
+  $k$ an integer such that $k \ge \max\{ 0, n - m \}$. Then $S \kprec{k} T$
+  if and only if
+  \[ s_i \le t_{i-k} + k \quad \forall i = k + 1, \dots, n. \]
+\end{lemma}
+\begin{proof}
+  A simple extension of Corollary 1 from \cite{DBLP:conf/aaai/HoffmannMR17} by a
+  reordering argument.
+\end{proof}
+
+\begin{algorithm}
+  \SetKwData{kOriginal}{kOriginal}
+  \SetKwData{kLeft}{kLeft}
+  \SetKwData{pNds}{pNds}
+  \SetKwData{tNds}{tNds}
+  \SetKwData{successful}{successful}
+  \KwData{a non-negative integer \kOriginal, a list of NDSs for each label
+    \pNds, a list of NDSs for each label \tNds}
+  \KwResult{a boolean value, indicating whether $p$ and $t$ can be matched}
+  $\kLeft \gets \kOriginal - \sum_{i = |\tNds|}^{|\pNds|-1} |\pNds[i]|$\;
+  \If{$\kLeft < 0$}{\Return{false};}
+  \For{$i \gets 0$ \KwTo $\min\{ |\pNds|, |\tNds| \} - 1$}{
+    \For{$k \gets \max \{ |\pNds[i]| - |\tNds[i]|, 0 \}$ \KwTo $\infty$}{
+      \If{$k > \kLeft$}{\Return{false};}
+      \If{$\bigwedge\limits_{j = k}^{|\pNds[i]| - 1} \tNds[i][j - k] + k \ge
+        \pNds[i][j]$}{
+        $\kLeft \gets \kLeft - k$\;
+        break\;
+      }
+    }
+  }
+  \Return{true}\;
+  \caption{NDS filtering with vertex label support}
+  \label{alg:nds}
+\end{algorithm}
+
+We extend these ideas in Algorithm \ref{alg:nds} by considering an NDS for each
+label. The algorithm checks whether a vertex $p$ in the pattern graph can be
+matched with a vertex $t$ in the target graph. \textsf{kOriginal} is the value
+of $k$ in the main $k\downarrow$ algorithm, denoting how many of the pattern
+graph vertices can be mapped to nothing. \textsf{pNds} and \textsf{tNds} store
+the non-ascending NDSs for each label of the pattern and target graph,
+respectively. Some of them can be empty and the graphs can have different
+numbers of labels. \textsf{kLeft} is our counter for how many neighbours of $p$
+we can still map to nothing. We note that if $p$ has a neighbour with label $i$
+and $t$ has no neighbours with such a label, we must use one of the $k$ values,
+i.e., reduce \textsf{kLeft} by 1. We also note that if \textsf{kLeft} becomes
+negative, then there is no way for $p$ and $t$ to be matched and we must return
+false. Then, for each label $i$, we find the smallest integer $k \in \{
+\max \{|\textsf{pNds}[i]| - |\textsf{tNds}[i]|, 0\}, \dots, \textsf{kLeft} -
+1\}$ such that $\textsf{pNds}[i] \kprec{k} \textsf{tNds}[i]$ according to Lemma
+\ref{lemma1}. If we are unable to find such a value, then there is no way for
+$p$ and $t$ to be matched and we return false. Otherwise we subtract from
+\textsf{kLeft} the number of neighbours of $p$ that could not be mapped to any
+of the neighbours of $t$ and move on to label $i + 1$.
+
 \chapter{Problem Instances} \label{chapter:problems}
+
 We use two graph databases that contain a large variety of graphs differing in
 size, various characteristics, and the way they were generated. The
 \textsc{McSplit} paper \cite{DBLP:conf/ijcai/McCreeshPT17} used the same
@@ -198,8 +308,9 @@ Furthermore, each algorithm is executed with several (3--5) different parameter
 values. The database includes 81400 pairs of labelled graphs. Their unlabelled
 versions are used as well.
 
-\subsection{Characteristics of Graph Labelling}
-For the purposes of this paper, we look at two types of labelled graphs: those
+\subsection{Characteristics of Graph Labelling} \label{sec:characteristics}
+
+For the purposes of this project, we look at two types of labelled graphs: those
 that have their vertices labelled and those that have both vertices and edges
 labelled. We define them as follows (the definitions are loosely inspired by
 \cite{abu-aisheh_2016}):
@@ -343,19 +454,6 @@ Section \ref{sec:labelled}. The sample is drawn once and used for training ML
 models for both types of labelling (vertex labels and both vertex and edge
 labels). As with 50\% labelling most instances are solved within the time limit,
 sampling from the whole database still leaves us with enough relevant data.
-
-The $k\downarrow$ algorithm was further modified to accept graphs with vertex
-labels by adding an additional constraint for matching labels on line 8 of the
-\texttt{klessSubgraphIsomorphism} function \cite{DBLP:conf/aaai/HoffmannMR17}.
-After generating most of the data, it was noticed that the vertex-labelled
-version of $k\downarrow$ was winning precisely 0 times. Therefore, $k\downarrow$
-is not included in Sections \ref{sec:runtime_both} and \ref{sec:runtime_vertex}
-(dealing with the runtime analysis of algorithms for both kinds of labelling),
-nor in the machine learning models.
-
-Furthermore, different implementations of the clique algorithm had to be
-combined to support both the binary format of the ARG Database and the plaintext
-format of Section \ref{sec:unlabelled}.
 
 In the rest of this section we explore and compare how the algorithms performed
 on the three different subproblems under consideration, those of having no
