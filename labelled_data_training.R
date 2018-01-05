@@ -3,14 +3,14 @@ library(llama)
 parallelStartSocket(64)
 parallelLibrary("llama")
 
-labelling <- "both" # "vertex" or "both"
-type <- "both_labels"
+labelling <- "vertex" # "vertex" or "both"
+type <- "vertex_labels"
 p_values <- c(5, 10, 15, 20, 25, 33, 50)
 
 algorithms <- c("clique", "mcsplit", "mcsplitdown")
-if (labelling == "vertex") {
-  algorithms <- c(algorithms, "kdown")
-}
+#if (labelling == "vertex") {
+#  algorithms <- c(algorithms, "kdown")
+#}
 
 filtered_instances <- readLines("results/filtered_instances")
 
@@ -51,7 +51,7 @@ features$ID <- sprintf("%02d %s", features$labelling, features$ID)
 names <- c("ID", "nodes", "time", "size")
 classes <- c("character", "NULL", "integer", "integer")
 performance <- data.frame(ID = sort(features$ID))
-#answers <- data.frame(ID = sort(features$ID))
+answers <- data.frame(ID = sort(features$ID))
 for (algorithm in algorithms) {
   print(paste("Loading", algorithm))
   algorithm_runtimes <- data.frame()
@@ -66,7 +66,7 @@ for (algorithm in algorithms) {
   }
   algorithm_runtimes$time <- pmin(algorithm_runtimes$time, 1000000)
   performance[, algorithm] <- algorithm_runtimes$time
-#  answers[, algorithm] <- algorithm_runtimes$size
+  answers[, algorithm] <- algorithm_runtimes$size
 }
 rm("algorithm", "algorithm_runtimes", "classes", "data_file",
    "filtered_instances", "names", "p")
@@ -87,12 +87,12 @@ costs <- costs[costs$ID %in% features$ID,]
 
 success <- cbind(performance)
 success[, -1] <- success[, -1] < 1000000
-#answers <- answers[answers$ID %in% performance$ID,]
-#answers$all_finished <- apply(success[, -1], 1, all)
-#answers <- answers[answers$all_finished,]
-#all(answers$mcsplit == answers$mcsplitdown)
+answers <- answers[answers$ID %in% performance$ID,]
+answers$all_finished <- apply(success[, -1], 1, all)
+answers <- answers[answers$all_finished,]
+all(answers$mcsplit == answers$mcsplitdown)
 #all(answers$mcsplit == answers$kdown)
-#all(answers$clique == answers$mcsplit)
+all(answers$clique == answers$mcsplit)
 
 data <- input(features, performance, success,
               list(groups = list(group1 = colnames(features)[-1]),

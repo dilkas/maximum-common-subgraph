@@ -53,6 +53,31 @@ in Chapter \ref{chapter:problems} and used in Chapter
   vertices, they are referred to as \emph{multiple edges}. 
 \end{definition}
 
+For the purposes of this project, we look at two types of labelled graphs: those
+that have their vertices labelled and those that have both vertices and edges
+labelled. We define them as follows (the definitions are loosely inspired by
+\cite{abu-aisheh_2016}):
+
+\begin{definition} \label{def:vertex_label}
+  A graph $G = (V, E)$ is a \emph{(vertex) labelled graph} if it has an associated
+  vertex labelling function $\mu \colon V \to \{ 0, \dots, N - 1 \}$ for some $N
+  \in \{2, \dots, |V| \}$.
+\end{definition}
+
+\begin{definition} \label{def:edge_label}
+  A graph $G = (V, E)$ is a \emph{fully labelled graph} if it is a vertex labelled
+  graph and it has an associated edge labelling function $\zeta \colon E \to
+  \{ 0, \dots, M - 1 \}$ for some $M \in \{ 2, \dots, |E| \}$.
+\end{definition}
+
+Specifically, note that:
+
+\begin{itemize}
+\item If a graph is labelled, then all its vertices (and possibly edges) are
+  assigned a label.
+\item We are only considering finite sets of labels, represented by non-negative integers.
+\end{itemize}
+
 We formulate all of the definitions in terms of undirected multigraphs as some
 of the graphs in Chapter \ref{chapter:problems} contain multiple edges and many
 contain at least one loop. In the rest of the dissertation, we will refer to
@@ -183,9 +208,6 @@ there are a few key differences between $\textsc{McSplit} \downarrow$ and
 
 \section{Modifications to \texorpdfstring{$k\downarrow$}{kdown}}
 
-Labelling will be formally defined in Section \ref{sec:characteristics}. For
-... TODO: introduce labelling
-
 The $k\downarrow$ algorithm was modified to accept graphs with vertex
 labels by adding an additional constraint for matching labels on line 8 of the
 \texttt{klessSubgraphIsomorphism} function \cite{DBLP:conf/aaai/HoffmannMR17}
@@ -310,41 +332,18 @@ versions are used as well.
 
 \subsection{Characteristics of Graph Labelling} \label{sec:characteristics}
 
-For the purposes of this project, we look at two types of labelled graphs: those
-that have their vertices labelled and those that have both vertices and edges
-labelled. We define them as follows (the definitions are loosely inspired by
-\cite{abu-aisheh_2016}):
-
-\begin{definition}
-  A graph $G = (V, E)$ is a \emph{(vertex) labelled graph} if it has an associated
-  vertex labelling function $\mu \colon V \to \{ 0, \dots, N - 1 \}$ for some $N
-  \in \{2, \dots, |V| \}$.
-\end{definition}
-
-\begin{definition}
-  A graph $G = (V, E)$ is a \emph{fully labelled graph} if it is a vertex labelled
-  graph and it has an associated edge labelling function $\zeta \colon E \to
-  \{ 0, \dots, M - 1 \}$ for some $M \in \{ 2, \dots, |E| \}$.
-\end{definition}
-
-Specifically, note that:
-
-\begin{itemize}
-\item If a graph is labelled, then all its vertices (and possibly edges) are
-  assigned a label.
-\item We are only considering finite sets of labels, represented by non-negative integers.
-\end{itemize}
-
-Now we need a way to choose $N$ and $M$. For that we formally define how
-labelling is implemented in the ARG database:
+In Definitions \ref{def:vertex_label} and \ref{def:edge_label} we used $N$ and
+$M$ to denote the number of different labels for vertices and edges,
+respectively. The ARG Database supports interpreting the same graphs to have
+different numbers of different labels via this
+parameter\footnote{\url{http://mivia.unisa.it/datasets/graph-database/arg-database/documentation/},
+``How to read labeled graphs''}:
 
 \begin{definition} \label{def:percent_labelling}
   A graph $G = (V, E)$ is said to have a \emph{$p\%$ (vertex) labelling} if
   \[ N = \max \left\{ 2^n : n \in \mathbb{N},\, 2^n < \left\lfloor \frac{p}{100\%}
         \times |V| \right\rfloor \right\}. \]
 \end{definition}
-
-The default value for $p$ is 33\%.
 
 \begin{figure}
   \centering
@@ -354,13 +353,14 @@ The default value for $p$ is 33\%.
   \label{figure:labelling_histogram}
 \end{figure}
 
-The publications associated with the database \cite{foggia2001-2, DBLP:journals/prl/SantoFSV03}
-say nothing about how the labels are distributed among the $N$ values. We
-calculate the number of vertices that were assigned each label for each graph
-(represented by $C$) and compare those values with the numbers we would expect
-from a uniform distribution (represented by $E(C)$). We plot a histogram of the
-difference $E(C) - C$ in Figure \ref{figure:labelling_histogram} and observe
-that the difference is normally distributed around 0.
+The default value for $p$ is 33\%. The publications associated with the database
+\cite{foggia2001-2, DBLP:journals/prl/SantoFSV03} say nothing about how the
+labels are distributed among the $N$ values. We calculate the number of vertices
+that were assigned each label for each graph (represented by $C$) and compare
+those values with the numbers we would expect from a uniform distribution
+(represented by $E(C)$). We plot a histogram of the difference $E(C) - C$ in
+Figure \ref{figure:labelling_histogram} and observe that the difference is
+normally distributed around 0.
 
 \section{Unlabelled Graphs} \label{sec:unlabelled}
 We also include a collection of benchmark instances for the subgraph isomorphism
