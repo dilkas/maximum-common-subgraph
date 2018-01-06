@@ -4,7 +4,7 @@ library(RColorBrewer)
 library(lattice)
 library(latticeExtra)
 
-type <- "both_labels"
+type <- "vertex_labels"
 p_values <- c(5, 10, 15, 20, 25, 33, 50)
 
 model <- readRDS(paste0("models/", type, ".rds"))

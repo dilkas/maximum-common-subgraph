@@ -426,35 +426,27 @@ namespace
 
             // neighbourhood degree sequences
             if (params.nds && ok) {
-              auto k_left = params.except;
               for (unsigned cn = 0 ; cn < 1 && ok ; ++cn) {
-                // if the pattern graph has an unmatchable neighbour, reduce k by 1
-                for (unsigned label = target.vertices_by_label.size(); label < pattern.vertices_by_label.size(); ++label) {
-                  k_left -= p_nds[cn][p][label].size();
-                  if (k_left < 0) {
+                unsigned neighbours_unique_to_pattern = 0;
+                for (unsigned label = 0; label < pattern.vertices_by_label.size() &&
+                       label < target.vertices_by_label.size(); ++label) {
+                  int list_size_difference = p_nds[cn][p][label].size() - t_nds[cn][t][label].size();
+                  // avoids segmentation faults
+                  if ((int)params.except < list_size_difference) {
                     ok = false;
                     goto end_of_tests;
                   }
-                }
-
-                for (unsigned label = 0; label < pattern.vertices_by_label.size() &&
-                       label < target.vertices_by_label.size(); ++label) {
-                  for (unsigned current_k = (p_nds[cn][p][label].size() > t_nds[cn][t][label].size()) ?
-                         p_nds[cn][p][label].size() - t_nds[cn][t][label].size() : 0; ; ++current_k) {
-                    if (current_k > k_left) {
+                  if (list_size_difference > 0) {
+                    neighbours_unique_to_pattern += list_size_difference;
+                    if (neighbours_unique_to_pattern > params.except) {
                       ok = false;
                       goto end_of_tests;
                     }
-                    bool successful = true;
-                    for (unsigned i = current_k; i < p_nds[cn][p][label].size(); ++i) {
-                      if (t_nds[cn][t][label][i - current_k] + current_k < p_nds[cn][p][label][i]) {
-                        successful = false;
-                        break;
-                      }
-                    }
-                    if (successful) {
-                      k_left -= current_k;
-                      break;
+                  }
+                  for (unsigned i = params.except ; i < p_nds[cn][p][label].size() ; ++i) {
+                    if (t_nds[cn][t][label][i - params.except] + params.except < p_nds[cn][p][label][i]) {
+                      ok = false;
+                      goto end_of_tests;
                     }
                   }
                 }

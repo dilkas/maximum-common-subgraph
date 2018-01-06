@@ -8,9 +8,9 @@ type <- "vertex_labels"
 p_values <- c(5, 10, 15, 20, 25, 33, 50)
 
 algorithms <- c("clique", "mcsplit", "mcsplitdown")
-#if (labelling == "vertex") {
-#  algorithms <- c(algorithms, "kdown")
-#}
+if (labelling == "vertex") {
+  algorithms <- c(algorithms, "kdown")
+}
 
 filtered_instances <- readLines("results/filtered_instances")
 
