@@ -4,7 +4,8 @@
 \usepackage[UKenglish]{babel}
 \usepackage[UKenglish]{isodate}
 \PassOptionsToPackage{hyphens}{url}\usepackage[hidelinks]{hyperref}
-\usepackage{amsfonts, amsmath, amsthm, graphicx, subcaption, mathtools, cleveref}
+\usepackage{amsfonts, amsmath, amsthm, graphicx, subcaption, mathtools,
+  cleveref}
 \usepackage[group-separator={,}]{siunitx}
 \usepackage[linesnumbered]{algorithm2e}
 
@@ -558,112 +559,114 @@ Given this information, we would expect the ML algorithm to suggest using
 \textsc{McSplit} and $\textsc{McSplit}\downarrow$ most of the time, occasionally
 consider the clique encoding, and mostly forget about $k\downarrow$.
 
-\subsection{Vertex- and Edge-Labelled Graphs} \label{sec:runtime_both}
+\subsection{Labelled Graphs} \label{sec:labelled_runtimes}
+
+We are analysing two different subproblems, dealing with graphs with just vertex
+labels and with both vertex and edge labels. However, since the results are
+fairly similar, we describe them in the same section to highlight the
+differences.
 
 \begin{figure}
   \centering
-  \includegraphics[scale=0.7]{images/ecdf_both_labels.png}
-  \caption{The cumulative plot with the vertical axis starting at 0.9}
-  \label{fig:ecdf_both_labels}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/ecdf_vertex_labels.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/ecdf_both_labels.png}
+  \end{subfigure}
+  \caption{Cumulative plots with the vertical axis starting at 0.8}
+  \label{fig:ecdfs}
 \end{figure}
 
-We note some interesting observations from the ECDF plot in Figure
-\ref{fig:ecdf_both_labels}. First, the gap between the VBS curve and the curve
-of any other algorithm is much wider than any gap between two algorithms. This
-shows that different algorithms are winning for different problem instances and
-that an ML model has plenty of room to outperform individual algorithms (cf.
-unlabelled data). Second, the clique algorithm is briefly winning for shorter
-timeout values, then is between $\textsc{McSplit}\downarrow$ and
+We plot the ECDFs in Figure \ref{fig:ecdfs}. The situation with vertex-labelled
+graphs is quite straightforward: $\textsc{McSplit}\downarrow$ is slight better
+than \textsc{McSplit}, which is better than the clique encoding. Moreover, the
+VBS curve is significantly higher, providing plenty of room for an ML model to
+outperform individual algorithms (unlike with unlabelled data). This latter fact
+is true for graphs with both vertex and edge labels as well, whereas the other 3
+curves provide a more interesting story. The clique algorithm is briefly winning
+for shorter timeout values, then is between $\textsc{McSplit}\downarrow$ and
 \textsc{McSplit} until it drops to the 3\textsuperscript{rd} place right before
 the final timeout at \num{1000000} ms. This is likely because the clique
 encoding is better with higher labelling percentages (we will see this shortly)
 and such graphs are generally easier to solve (because there are fewer
 ``matchable'' combinations of vertices, each pair of vertices is likely to have
-different labels). Third, the gap between $\textsc{McSplit}\downarrow$ and
-\textsc{McSplit} remains about the same throughout different timeout values and
-is in favour of $\textsc{McSplit}\downarrow$.
+different labels).
 
 \begin{figure}
   \centering
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{images/both_labels_linechart.png}
-    \caption{proportion of instances solved within the time limit}
-    \label{fig:both_labels_linechart1}
+    \includegraphics[width=\textwidth]{images/vertex_labels_linechart.png}
+    \includegraphics[width=\textwidth]{images/vertex_labels_linechart2.png}
+    \includegraphics[width=\textwidth]{images/vertex_labels_linechart3.png}
   \end{subfigure}
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
+    \includegraphics[width=\textwidth]{images/both_labels_linechart.png}
     \includegraphics[width=\textwidth]{images/both_labels_linechart2.png}
-    \caption{total running time}
-    \label{fig:both_labels_linechart2}
+    \includegraphics[width=\textwidth]{images/both_labels_linechart3.png}
   \end{subfigure}
-  \caption{How the performance of algorithms changes with different labelling
-    percentages}
-  \label{fig:both_labels_linecharts}
+  \caption{For both types of labelling and for the 3 algorithms we plot how the
+    3 characteristics change with respect to the labelling percentage:
+    proportion of instances solved within the time limit, total runtime, and
+    number of times each algorithm outperformed the others}
+  \label{fig:linecharts}
 \end{figure}
 
 Just like with unlabelled graphs we could split the data into different subsets
 based on how (and by whom) the graphs were generated, now we can analyse how the
-situation changes with different labelling percentages. For this reason we plot
-two statistics in Figure \ref{fig:both_labels_linecharts}: the proportion of
-problem instances solved within the time limit and the total time taken to solve
-all the instances. First note that we plotted two statistics representing
-performance to get a more complete picture, however, the information is exactly
-the same in both of them: Figure \ref{fig:both_labels_linechart2} is the vertical
-reflection of Figure \ref{fig:both_labels_linechart1} with some changes in distances
-between the lines (note that high values are desirable in the former, while low
-values are desirable in the latter). With 15\% labelling and higher the
-situation stays the same: the clique encoding is better than \textsc{McSplit},
-which is (very slightly) better than $\textsc{McSplit}\downarrow$. Whereas with
-lower levels of labelling, two differences emerge: $\textsc{McSplit}\downarrow$
-surpasses \textsc{McSplit} and the difference between them grows larger, and the
-performance of the clique algorithm starts to drop exponentially. The latter is
-exactly what makes the clique encoding finish last in Figure
-\ref{fig:ecdf_both_labels}, even though it is in the lead for most labelling
-percentages.
+situation changes with different labelling percentages. In Figure
+\ref{fig:linecharts} we analyse two performance measures (proportion of
+instances solved and total runtime) as well as the number of times each
+algorithm ``wins'', for each labelling percentage. The two performance
+statistics tell exactly the same story, and it is the same for both types of
+labelling. The only difference is that the clique algorithm's major drop in
+performance starts at 20\% for vertex-labelled graphs and at 15\% for both
+vertex- and edge-labelled graphs. With higher labelling percentages, the clique
+encoding is better than \textsc{McSplit}, which is marginally better than
+$\textsc{McSplit}\downarrow$. Whereas with lower levels of labelling, two
+differences emerge: \textsc{McSplit} experiences a drop in performance below
+$\textsc{McSplit}\downarrow$, and the performance of the clique algorithm starts
+to drop exponentially. The latter is exactly what makes the clique encoding
+finish last in Figure \ref{fig:ecdfs}, even though it is in the lead for most
+labelling percentages.
 
 \begin{remark}
-Note that in both cases, for each labelling percentage, we are only considering
-instances solved by at least one algorithm. Out of the \num{30,000} instances
-selected by our random sampling procedure, the number of such instances ranges
-from \num{17565} (58.55\%) for 5\% labelling to \num{29532} (98.44\%) for 50\%
-labelling. Thus a (roughly) horizontal line should not be interpreted as the
-algorithm performing equally well for different labelling percentages: the
-performance of all algorithms improves with higher labelling percentages as the
-problem becomes significantly easier. In this case we are more interested in the
-differences between individual algorithms.
+Note that we are only considering instances solved by at least one algorithm.
+Out of the \num{30,000} instances selected by our random sampling procedure, the
+number of such instances ranges from 56\% with 5\% labelling to 99\% with 50\%
+labelling for vertex-labelled graphs (the percentages for both vertex and edge
+labels are similar). Thus a (roughly) horizontal line should not be interpreted
+as the algorithm performing equally well for different labelling percentages:
+the performance of all algorithms improves with higher labelling percentages as
+the problem becomes significantly easier. In this case we are more interested in
+the differences between individual algorithms.
 \end{remark}
 
-\begin{figure}
-  \centering
-  \includegraphics[scale=0.7]{images/both_labels_linechart3.png}
-  \caption{The number of times each algorithm was the best for different levels
-    of labelling}
-  \label{fig:both_labels_linechart3}
-\end{figure}
-
-Similarly to Table \ref{table:best}, in Figure \ref{fig:both_labels_linechart3}
-we plot how many times each algorithm outperformed others, for each labelling
-percentage. While the clique algorithm steadily rises from least freqeuently
-winning to most frequently winning as the number of different labels decreases
-as expected, the curves of \textsc{McSplit} and $\textsc{McSplit}\downarrow$ no
-longer cross, with \textsc{McSplit} winning more often than
-$\textsc{McSplit}\downarrow$, for all labelling percentages. By definition,
-$\textsc{McSplit}\downarrow$ is better at handling problem instances with a big
-answer. With a smaller labelling percentage, \textsc{McSplit} is more likely to
-time out on those instances, contributing to $\textsc{McSplit}\downarrow$
-solving more instances than \textsc{McSplit}. Perhaps
-$\textsc{McSplit}\downarrow$ is also much faster on those instances, ensuring
-its lower total runtime, while consistenly falling slightly behind
-\textsc{McSplit} on easier instances, resulting in a lower win count. Whatever
-the reason may be, the main observation from this plot is that the peak of all 3
-lines is only at \num{18031}, just slightly above half of the number of
-instances (\num{30000}), while there are only two points below \num{10000} (also
-belonging to the clique encoding): at 577 and 4195. Thus all of the algorithms
-end up winning for many instances, making this a perfect problem for an
-algorithm portfolio.
-
-\subsection{Vertex-Labelled Graphs} \label{sec:runtime_vertex}
+As for the last two plots of Figure \ref{fig:linecharts}, \textsc{McSplit} is
+winning more often than $\textsc{McSplit}\downarrow$. This is not surprising for
+higher labelling percentages (based on the other two types of plots), but this
+remains true for lower percentages as well. Perhaps this is because by
+definition $\textsc{McSplit}\downarrow$ is better at handling problem instances
+with a big answer. With a smaller labelling percentage, \textsc{McSplit} is more
+likely to time out on those instances, contributing to
+$\textsc{McSplit}\downarrow$ solving more instances than \textsc{McSplit}.
+Perhaps $\textsc{McSplit}\downarrow$ is also much faster on those instances,
+ensuring its lower total runtime, while consistenly falling slightly behind
+\textsc{McSplit} on easier instances, resulting in a lower win count. The one
+significant difference between the two types of labelling is that the clique
+encoding wins slightly less than $\textsc{McSplit}\downarrow$ with vertex
+labels, but slightly more than \textsc{McSplit} with both vertex and edge
+labels, for 25\%--33\% labelling. Finally, the main observation from this plot
+is that the overall highest point is only at \num{16401} (\num{18031}) for
+vertex-labelled graphs (both vertex and edge labels), just slightly above half
+of the number of instances (\num{30000}) and other than the clique encoding
+falling behind with $\le 15\%$ labelling, the 3 algorithms winning rates stay
+similar. This makes the problem especially potent for a algorithm selection
+approach.
 
 \section{Graph Features} \label{sec:features}
 The initial set of features is based on the algorithm selection paper for the
@@ -1063,21 +1066,14 @@ portfolios based on three different types of ML algorithms:
     then be assigned to the nearest cluster.
 \end{description}
 
-\begin{figure} % TODO: this is different for different cases. plot all of them
-               % (or none)
-  \centering
-  \includegraphics[scale=0.7]{images/tree_sizes.png}
-  \caption{A histogram of the number of nodes in each tree}
-  \label{fig:tree_size}
-\end{figure}
-
 We are using a classification algorithm called random forests
 \cite{DBLP:journals/ml/Breiman01} and its implementation in R
 \cite{randomforest}. We chose this algorithm as it is recommended in the
 \textsc{Llama} manual \cite{kotthoff_llama_2013} and successfully used in a
 similar study \cite{DBLP:conf/lion/KotthoffMS16}. We use the default number of
-trees (500), and the number of nodes per tree is plotted in Figure
-\ref{fig:tree_size}.
+trees (500), and our trees have about \num{6000}, \num{20000}, and \num{21000}
+vertices on average for unlabelled, vertex-labelled, and both vertex- and
+edge-labelled cases.
 
 In order to discuss and analyse the ML algorithm in more detail, we introduce
 some new terminology. Each problem instance with features and running times in
@@ -1228,17 +1224,19 @@ class. Hence the Gini index is often used to evaluate the quality of a split.
 
 \begin{figure}
   \centering
-  \includegraphics{images/unlabelled_variable_importance.png}
-  \caption{Dotchart of variable importance calculated based on the Gini index
-    and sorted from most important to least important}
-  \label{fig:unlabelled_variable_importance}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \includegraphics{images/unlabelled_var_used.png}
-  \caption{How often was each variable used to make splitting decisions?}
-  \label{fig:unlabelled_var_used}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/unlabelled_variable_importance.png}
+    \caption{Dotchart of variable importance calculated based on the Gini index
+      and sorted from most important to least important}
+    \label{fig:unlabelled_variable_importance}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/unlabelled_var_used.png}
+    \caption{How often was each variable used to make splitting decisions?}
+    \label{fig:unlabelled_var_used}
+  \end{subfigure}
 \end{figure}
 
 The variable importance measure of feature $f$ in Figure
@@ -1394,7 +1392,7 @@ does not provide enough information to choose the clique encoding over
 
 \begin{figure}
   \centering
-  \includegraphics{images/ecdf_unlabelled_llama.png}
+  \includegraphics[scale=0.7]{images/ecdf_unlabelled_llama.png}
   \caption{\textsc{Llama} model compared to the VBS and
     $\textsc{McSplit}\downarrow$}
   \label{fig:ecdf_unlabelled_llama}
@@ -1412,48 +1410,89 @@ compares to the VBS and the single best solver $\textsc{McSplit}\downarrow$
 model outperforms $\textsc{McSplit}\downarrow$, but does not reach the best
 possible performance represented by the VBS.
 
-\section{Vertex- and Edge-Labelled Graphs}
+\section{Labelled Graphs}
 
 \begin{figure}
   \centering
-  \includegraphics[scale=0.7]{images/both_labels_forest_errors.png}
-  \caption{Convergence plot of various error measures as the number of trees in
-    a random forest increases. The plot shows the OOB error and $1 -
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/vertex_labels_forest_errors.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/both_labels_forest_errors.png}
+  \end{subfigure}
+  \caption{Convergence plots of various error measures as the number of trees in
+    a random forest increases. The plots show the OOB error and $1 -
     \text{recall}$ for each algorithm.}
-  \label{fig:both_labels_forest_errors}
+  \label{fig:forest_errors}
 \end{figure}
+
+\begin{table}
+  \centering
+  \begin{tabular}{l | c c}
+    Error type & Final value for vertex labels (\%) & Final value for both labels (\%) \\
+    \hline
+    OOB & 13 & 14 \\
+    clique & 8 & 7 \\
+    \textsc{McSplit} & 22 & 29 \\
+    $\textsc{McSplit}\downarrow$ & 11 & 11
+  \end{tabular}
+  \caption{The values that all 4 errors (approximately) converge to, for both
+    types of labelling}
+  \label{table:errors}
+\end{table}
 
 Once again we plot the error rates (defined in Section
-\ref{sec:unlabelled_error_rates}) in Figure \ref{fig:both_labels_forest_errors}.
-This time all of the errors converge downwards and are below 50\%. The OOB error
-converges to 14\%, while the errors of \textsc{McSplit},
-$\textsc{McSplit}\downarrow$, and the clique encoding converge to 29\%, 11\%,
-and 7\%, respectively.
+\ref{sec:unlabelled_error_rates}) in Figure \ref{fig:forest_errors}. The final
+(approximately limit) values are summarized in Table \ref{table:errors}.
+This time all of the errors converge downwards and are below 50\%. Comparing
+vertex-labelled and both vertex- and edge-labelled subproblems, the only
+noticable difference is that \textsc{McSplit} has a lower error rate for
+vertex-labelled graphs, which is also the worst-recognised algorithm for both
+types of labelling.
 
 \begin{figure}
   \centering
-  \includegraphics{images/both_labels_variable_importance.png}
-  \caption{A dotchart of variable importance, sorted from most to least important}
-  \label{fig:both_labels_variable_importance}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/vertex_labels_variable_importance.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/both_labels_variable_importance.png}
+  \end{subfigure}
+  \caption{Variable importance for both types of labelling, sorted from most to
+    least important}
+  \label{fig:variable_importance}
 \end{figure}
 
 \begin{figure}
   \centering
-  \includegraphics{images/both_labels_var_used.png}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/vertex_labels_var_used.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/both_labels_var_used.png}
+  \end{subfigure}
   \caption{How often was each variable used to make splitting decisions?}
-  \label{fig:both_labels_var_used}
+  \label{fig:var_used}
 \end{figure}
 
 According to the variable importance measures plotted in Figure
-\ref{fig:both_labels_variable_importance}, the standard deviation of degrees for
+\ref{fig:variable_importance}, the standard deviation of degrees for
 both pattern and target graphs still act as top predictors, however, they are
 overshadowed by the labelling feature, which is to be expected considering how
 impactful it is to the performance of the clique algorithm and the difficulty of
-the problem in general. Another big change from the unlabelled subproblem is the
-rise of vertex/edge counts as the next four most important predictors. Comparing
-this with the variable usage statistic in Figure \ref{fig:both_labels_var_used},
-the top 3 spots remain the same, the numbers of edges drop to the middle of the
-list, and the numbers of vertices drop to the
+the problem in general. For graphs with both vertex and edge labels, the
+vertex/edge counts make up the next most important predictors, while for
+vertex-labelled graphs, the number of vertices in the target graph is seems to
+be less important (perhaps simply due to chance). Comparing this with the
+variable usage statistic in Figure \ref{fig:var_used} (which is almost identical
+for the two subproblems), the top 3 spots remain the same, the numbers of
+edges drop to the middle of the list, and the numbers of vertices drop to the
 6\textsuperscript{th}--7\textsuperscript{th} places from the bottom. Apparently,
 even though all 4 of these predictors end up doing a great job at splitting the
 data to reduce the Gini index (a variation of which is used by the random forest
@@ -1464,42 +1503,43 @@ rarely used.
   \centering
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{images/both_labels_margin.png}
-    \caption{Sorted}
+    \includegraphics[width=\textwidth]{images/vertex_labels_margin.png}
+    \includegraphics[width=\textwidth]{images/vertex_labels_margin2.png}
   \end{subfigure}
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
+    \includegraphics[width=\textwidth]{images/both_labels_margin.png}
     \includegraphics[width=\textwidth]{images/both_labels_margin2.png}
-    \caption{Unsorted}
   \end{subfigure}
-  \caption{Margins of all the data points}
-  \label{fig:both_labels_margins}
+  \caption{Sorted and unsorted margins of all data points, for both types of
+    labelling}
+  \label{fig:margins}
 \end{figure}
 
 \begin{figure}
   \centering
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
+    \includegraphics[width=\textwidth]{images/vertex_labels_clique_hist.png}
+    \includegraphics[width=\textwidth]{images/vertex_labels_mcsplit_hist.png}
+    \includegraphics[width=\textwidth]{images/vertex_labels_mcsplitdown_hist.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
     \includegraphics[width=\textwidth]{images/both_labels_clique_hist.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
     \includegraphics[width=\textwidth]{images/both_labels_mcsplit_hist.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
     \includegraphics[width=\textwidth]{images/both_labels_mcsplitdown_hist.png}
   \end{subfigure}
-  \caption{Histograms of margins for each algorithm}
-  \label{fig:both_labels_margin_hist}
+  \caption{Histograms of margins, for each algorithm and type of labelling}
+  \label{fig:margin_hist}
 \end{figure}
 
 We show the margin scatter plots and histograms in Figures
-\ref{fig:both_labels_margins} and \ref{fig:both_labels_margin_hist}. Note that
-there are plenty of data points in all 3 colours and the ML model is usually
-very convinced when predicting $\textsc{McSplit}\downarrow$ and the clique
-encoding and is less sure when dealing with problem instances best handled with
-\textsc{McSplit}.
+\ref{fig:margins} and \ref{fig:margin_hist}. Again, the data for both types of
+labelling is close to identical. Note that there are plenty of data points in
+all 3 colours and the ML models are usually very convinced when predicting
+$\textsc{McSplit}\downarrow$ and the clique encoding and are less sure when
+dealing with problem instances best handled with \textsc{McSplit}.
 
 \begin{figure}
   \centering
@@ -1538,13 +1578,14 @@ encoding and is less sure when dealing with problem instances best handled with
   \label{fig:both_labels_partials1}
 \end{figure}
 
+% TODO: this needs updating!
 This time we show the partial dependence plots for the top 2 most influential
 predictors (the labelling percentage and the standard deviation of degrees in
 the target graph) in Figures \ref{fig:both_labels_partials1} and
 \ref{fig:both_labels_partials2}. The results for the clique encoding are the
 most straightforward to interpret. Clearly, the algorithm performs much better
 with higher labelling percentages (more different labels). The interesting bit
-(just like back in Figure \ref{fig:both_labels_linecharts}) is that the curve
+(just like back in Figure \ref{fig:linecharts}) is that the curve
 stays constant between 20\% and 50\%. In other words, anywhere above 20\%
 labelling, a higher labelling percentage does not make the clique encoding more
 preferable than it already is. The partial dependence on the standard deviation
@@ -1563,23 +1604,29 @@ confidence about \textsc{McSplit} (compared to the other 2 algorithms).
 
 \begin{figure}
   \centering
-  \includegraphics{images/ecdf_both_labels_llama.png}
-  \caption{\textsc{Llama} model compared to the other algorithms and the VBS}
-  \label{fig:ecdf_both_labels_llama}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/ecdf_vertex_labels_llama.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/ecdf_both_labels_llama.png}
+  \end{subfigure}
+  \caption{\textsc{Llama} models compared to the other algorithms and the VBS}
+  \label{fig:ecdf_llama}
 \end{figure}
 
-For the runtime comparison, we plot the ECDF for all the individual algorithms,
-the VBS, and the \textsc{Llama} model in Figure
-\ref{fig:ecdf_both_labels_llama}. Visually, the performance of the
-\textsc{Llama} model is quite close to the upper bound and the gap between
-\textsc{Llama} and any individual algorithm (like $\textsc{McSplit}\downarrow$)
-is much wider than any gap between two individual algorithms. To add more
-numbers to this picture, out of \num{169657} problem instances solved by at
-least one algorithm, the single best algorithm $\textsc{McSplit}\downarrow$ was
-able to solve \num{160879}, while \textsc{Llama} solved \num{168639}, closing
-88\% of the difference between lower and upper bounds.
-
-\section{Vertex-Labelled Graphs}
+Finally, for the runtime comparison, we plot the ECDFs for all individual
+algorithms, the VBS, and the \textsc{Llama} models in Figure
+\ref{fig:ecdf_llama}. While there are important differences among individual
+algorithms' curves (discussed in Section \ref{sec:labelled_runtimes}), the way
+\textsc{Llama} behaves with respect to the VBS and $\textsc{McSplit}\downarrow$
+curves is about the same: \textsc{Llama}'s curve is quite close to optimal, and
+the gap between \textsc{Llama} and $\textsc{McSplit}\downarrow$ is significantly
+wider than the gap between $\textsc{McSplit}\downarrow$ and \textsc{McSplit}. To
+add more numbers to this picture, \textsc{Llama} closed 86\% and 88\% of the
+difference between its lower and upper bounds for vertex-labelled and both
+vertex- and edge-labelled graphs, respectively.
 
 %\begin{appendices}
 %\end{appendices}
