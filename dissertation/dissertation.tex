@@ -5,13 +5,15 @@
 \usepackage[UKenglish]{isodate}
 \PassOptionsToPackage{hyphens}{url}\usepackage[hidelinks]{hyperref}
 \usepackage{amsfonts, amsmath, amsthm, graphicx, subcaption, mathtools,
-  cleveref}
+  cleveref, tikz}
 \usepackage[group-separator={,}]{siunitx}
 \usepackage[linesnumbered]{algorithm2e}
+\usetikzlibrary{positioning}
 
 \newtheorem{lemma}{Lemma}[chapter]
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[chapter]
+\newtheorem{example}{Example}[chapter]
 \theoremstyle{remark}
 \newtheorem{remark}{Remark}[chapter]
 
@@ -60,49 +62,83 @@ labelled. We define them as follows (the definitions are loosely inspired by
 \cite{abu-aisheh_2016}):
 
 \begin{definition} \label{def:vertex_label}
-  A graph $G = (V, E)$ is a \emph{(vertex) labelled graph} if it has an associated
-  vertex labelling function $\mu \colon V \to \{ 0, \dots, N - 1 \}$ for some $N
-  \in \{2, \dots, |V| \}$.
+  A \emph{(vertex-)labelled graph} is a 3-tuple $G = (V, E, \mu)$, where $V$,
+  $E$ are as in Definition \ref{def:graph} and $\mu \colon V \to \{ 0, \dots, N
+  - 1 \}$ is a vertex labelling function, for some $N \in \{1, \dots, |V| \}$.
 \end{definition}
 
 \begin{definition} \label{def:edge_label}
-  A graph $G = (V, E)$ is a \emph{fully labelled graph} if it is a vertex labelled
-  graph and it has an associated edge labelling function $\zeta \colon E \to
-  \{ 0, \dots, M - 1 \}$ for some $M \in \{ 2, \dots, |E| \}$.
+  A \emph{fully labelled graph} is a 4-tuple $G = (V, E, \mu, \zeta)$, where the
+  first three elements are as in Definition \ref{def:vertex_label} and $\zeta
+  \colon E \to \{ 0, \dots, M - 1 \}$ is an edge labelling function, for some $M
+  \in \{ 1, \dots, |E| \}$.
 \end{definition}
 
 Specifically, note that:
 
-\begin{itemize}
+\begin{itemize} % TODO: use the term fully labelled
 \item If a graph is labelled, then all its vertices (and possibly edges) are
   assigned a label.
-\item We are only considering finite sets of labels, represented by non-negative integers.
+\item We are only considering finite sets of labels, represented by non-negative
+  integers.
+\item A vertex-labelled graph is just a special case of a fully labelled graph
+  with $M = 1$.
+\item An unlabelled graph is just a special case of of a vertex-labelled graph
+  with $N = 1$.
 \end{itemize}
 
-We formulate all of the definitions in terms of undirected multigraphs as some
-of the graphs in Chapter \ref{chapter:problems} contain multiple edges and many
-contain at least one loop. In the rest of the dissertation, we will refer to
-undirected multigraphs simply as graphs. Next we adapt some basic graph theory
-definitions to work with our definition of a multigraph.
+% TODO: rephrase this in a better way
+The last two observations allow us to tailor subsequent definitions to fully
+labelled graphs without having to define everything 3 times for the three cases
+of labelling. We formulate all of the definitions in terms of undirected
+multigraphs as some of the graphs in Chapter \ref{chapter:problems} contain
+multiple edges and many contain at least one loop. In the rest of the
+dissertation, we will use the word ``graph'' to denote undirected multigraphs.
+When vertex and/or edge labels are immaterial to a definition, we will omit the
+labelling functions from the full 4-tuple and denote a graph as just $G = (V,
+E)$. Next we adapt some basic graph theory definitions to work with our
+definition of graphs and labelling. As most definitions in the literature are
+typically defined for simple graphs with no labels, the cited sources are
+heavily adapted to the full generality of graphs relevant to this
+dissertatation.
 
 \begin{definition}
-  Two graphs $G_1 = (V_1, E_1)$ and $G_2 = (V_2, E_2)$ are said to be
-  \emph{isomorphic} if there is a bijection $f \colon V_1 \to V_2$ such that
-  for all $v \in V_1 \cup [V_1]^2$, the number of edges in $E_1$ that are mapped
-  to $v$ is equal to the number of edges in $E_2$ that are mapped to $f(v)$,
-  where $f(v) = \{ f(v_1), f(v_2) \}$ if $v = \{ v_1, v_2 \} \in [V_1]^2$
-  \cite{DBLP:journals/jcamd/RaymondW02a}.
+  Two graphs $G_1 = (V_1, E_1, \mu_1, \zeta_1)$ and $G_2 = (V_2, E_2, \mu_2,
+  \zeta_2)$ are said to be \emph{isomorphic} if there are bijections $f \colon
+  V_1 \to V_2$, $g \colon E_1 \to E_2$ such that
+  \cite{DBLP:journals/jcamd/RaymondW02a}:
+  \begin{itemize}
+  \item $\forall e \in E_1$, if $e$ maps to some $v \in V_1 \cup [V_1]^2$, then
+    $g(e)$ maps to $f(v)$, where $f(v) = \{ f(v_1), f(v_2) \}$ if $v = \{ v_1,
+    v_2 \}$ (preserving the structure);
+  \item $\forall v \in V_1$, $\mu_2(f(v)) = \mu_1(v)$ (preserving vertex labels)
+    \cite{DBLP:journals/siamcomp/BabaiES80};
+  \item $\forall e \in E_1$, $\zeta_2(g(e)) = \zeta_1(e)$ (preserving edge
+    labels).
+  \end{itemize}
 \end{definition}
 
-\begin{definition} A graph $G_2 = (V_2, E_2)$ is a \emph{subgraph} of graph $G_1
-  = (V_1, E_1)$ if $V_2 \subseteq V_1$ and $E_2 \subseteq E_1$
-  \cite{DBLP:books/daglib/0030488}.
+\begin{definition}
+  Let $f \colon X \to Y$ be a function. Then the \emph{restriction} of $f$ to $A
+  \subseteq X$ is a function $f|_A \colon A \to Y$ such that $\forall a \in A$,
+  $f|_A(a) = f(a)$ \cite{stoll1979set}.
+\end{definition}
+
+\begin{definition} A graph $G_2 = (V_2, E_2, \mu_2, \zeta_2)$ is a
+  \emph{subgraph} of graph $G_1 = (V_1, E_1, \mu_1, \zeta_1)$ if
+  \cite{DBLP:books/daglib/0030488}:
+  \begin{itemize}
+  \item $V_2 \subseteq V_1$,
+  \item $E_2 \subseteq E_1$ (with the edge-mapping function restricted to
+    $E_2$),
+  \item $\mu_2 = \mu_1|_{V_2}$,
+  \item $\zeta_2 = \zeta_1|_{E_2}$.
+  \end{itemize}
 \end{definition}
 
 \begin{definition} \label{def:induced_subgraph}
-  An \emph{induced subgraph} of a graph $G = (V, E)$ is a graph $H = (S, E')$,
-  where $S \subseteq V$ is a set of vertices and $E' \subseteq E$ is a set of
-  edges that are mapped to $S \cup [S]^2$
+  An \emph{induced subgraph} of a graph $G = (V, E)$ is a subgraph $H = (S,
+  E')$, where $E' \subseteq E$ is a set of edges mapped to $S \cup [S]^2$
   \cite{DBLP:journals/jcamd/RaymondW02a}.
 \end{definition}
 
@@ -152,8 +188,52 @@ isomorphism problem, both defined as follows:
   to a subgraph of $G_2$ \cite{DBLP:conf/stoc/Cook71}.
 \end{definition}
 
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+    \begin{scope}[every node/.style={circle,draw}]
+      \node (u1) [fill=gray] at (0, 4) {$u_1$};
+      \node (u2) at (0, 2) {$u_2$};
+      \node (u3) at (0, 0) {$u_3$};
+      \node (u4) at (2, 3) {$u_4$};
+      \node (u5) at (2, 1) {$u_5$};
+    \end{scope}
+    \path (u1) [color=blue,thick] edge node {} (u2);
+    \path (u1) edge node {} (u4);
+    \path (u1) edge node {} (u5);
+    \path (u2) edge node {} (u4);
+    \path (u3) edge node {} (u4);
+    \path (u3) edge node {} (u5);
+    \begin{scope}[every node/.style={circle, draw},xshift=6cm]
+      \node (v1) at (0, 4) {$v_1$};
+      \node (v2) at (0, 2) {$v_2$};
+      \node (v3) at (0, 0) {$v_3$};
+      \node (v4) [fill=gray] at (2, 3) {$v_4$};
+      \node (v5) [fill=gray] at (2, 1) {$v_5$};
+    \end{scope}
+    \begin{scope}[color=blue,thick]
+      \path (v1) edge node {} (v2);
+      \path (v1) edge node {} (v4);
+      \path (v2) edge node {} (v4);
+      \path (v2) edge node {} (v5);
+    \end{scope}
+  \end{tikzpicture}
+  \caption{Two graphs with binary ($\protect{\{ 0, 1 \}}$) labels on both vertices
+    and edges with pattern graph ($G_p$) on the left and target graph ($G_t$) on the
+    right. Grey vertices and thick blue edges represent label 1.}
+  \label{fig:graphs}
+\end{figure}
+
+We will illustrate how each algorithm works by considering the graphs in Figure
+\ref{fig:graphs}. Since $G_p$ has only one blue edge, while all edges of $G_t$
+are blue, any common subgraph can have up to one edge. It is then obvious that
+the maximum common subgraph is isomorphic to the subgraph induced by $\{ u_1,
+u_2, u_3 \}$ in $G_p$ and it is isomorphic to multiple induced subgraphs of
+$G_t$.
+
+% TODO: how do we handle kdown?
 $k\downarrow$ algorithm \cite{DBLP:conf/aaai/HoffmannMR17} starts by trying to
-solve the subgraph isomorphism problem, i.e. finding the pattern graph in the
+solve the subgraph isomorphism problem, i.e., finding the pattern graph in the
 target graph. If that fails, it allows a single vertex of the pattern graph to
 not match any of the target graph vertices and tries again, allowing smaller and
 smaller pattern graphs until it finds a solution. The number of vertices of the
