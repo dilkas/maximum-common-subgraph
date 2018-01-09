@@ -25,12 +25,12 @@ rm("graph_feature_names", "selected_features")
 
 # From random forest
 
-png(paste0("dissertation/images/", type, "_forest_errors.png"), width = 480,
-    height = 320)
-plot(forest, main = type_label)
-legend("right", c("OOB", "clique", "McSplit", "McSplit\u2193"),
-       fill = 1:4, xpd = TRUE)
-dev.off()
+#png(paste0("dissertation/images/", type, "_forest_errors.png"), width = 480,
+#    height = 320)
+#plot(forest, main = type_label)
+#legend("right", c("OOB", "clique", "McSplit", "McSplit\u2193"),
+#       fill = 1:4, xpd = TRUE)
+#dev.off()
 # 
 # importance <- importance(forest)
 # row.names(importance) <- full_feature_names
@@ -48,10 +48,10 @@ dev.off()
 # dev.off()
 # 
 
-trees <- data.frame(type = "unlabelled", size = unlabelled)
-trees <- rbind(trees, data.frame(type = "vertex", size = vertex))
-trees <- rbind(trees, data.frame(type = "both", size = both))
-boxplot(size ~ type, data = trees)
+#trees <- data.frame(type = "unlabelled", size = unlabelled)
+#trees <- rbind(trees, data.frame(type = "vertex", size = vertex))
+#trees <- rbind(trees, data.frame(type = "both", size = both))
+#boxplot(size ~ type, data = trees)
 # 
 # margin <- margin(forest)
 # png(paste0("dissertation/images/", type, "_margin.png"), width = 480,
@@ -107,55 +107,55 @@ for (j in 1:length(features)) {
 
 # ECDF
 
-filtered_instances <- readLines("results/filtered_instances")
-costs <- read.csv("results/costs.csv", header = FALSE)
-colnames(costs) <- c("ID", "cost")
-costs <- subset(costs, costs$ID %in% filtered_instances)
-costs <- costs[rep(seq_len(nrow(costs)), each = length(p_values)),]
-costs$labelling <- p_values
-costs$ID <- sprintf("%02d %s", costs$labelling, costs$ID)
-costs <- costs[, c("ID", "cost")]
+#filtered_instances <- readLines("results/filtered_instances")
+#costs <- read.csv("results/costs.csv", header = FALSE)
+#colnames(costs) <- c("ID", "cost")
+#costs <- subset(costs, costs$ID %in% filtered_instances)
+#costs <- costs[rep(seq_len(nrow(costs)), each = length(p_values)),]
+#costs$labelling <- p_values
+#costs$ID <- sprintf("%02d %s", costs$labelling, costs$ID)
+#costs <- costs[, c("ID", "cost")]
 
-labels <- c("clique", "k\u2193", "McSplit", "McSplit\u2193", "VBS", "Llama")
-times <- subset(data$data, T, c("ID", data$performance))
-times$vbs <- apply(times[,-1], 1, min)
-winning_algorithms <- model$predictions[model$predictions$score == 1,
-                                        c("ID", "algorithm")]
-winning_algorithms$algorithm <- unlist(
-  lapply(winning_algorithms$algorithm,
-         function(x) which(colnames(times) == x)))
-times <- merge(times, winning_algorithms, by = "ID", all.x = TRUE)
-times$llama <- as.numeric(times[cbind(seq_along(times$algorithm),
-                                      times$algorithm)])
-times <- merge(times, costs, by = c("ID"), all.x = TRUE)
-times$llama <- times$llama + times$cost
+#labels <- c("clique", "k\u2193", "McSplit", "McSplit\u2193", "VBS", "Llama")
+#times <- subset(data$data, T, c("ID", data$performance))
+#times$vbs <- apply(times[,-1], 1, min)
+#winning_algorithms <- model$predictions[model$predictions$score == 1,
+#                                        c("ID", "algorithm")]
+#winning_algorithms$algorithm <- unlist(
+#  lapply(winning_algorithms$algorithm,
+#         function(x) which(colnames(times) == x)))
+#times <- merge(times, winning_algorithms, by = "ID", all.x = TRUE)
+#times$llama <- as.numeric(times[cbind(seq_along(times$algorithm),
+#                                      times$algorithm)])
+#times <- merge(times, costs, by = c("ID"), all.x = TRUE)
+#times$llama <- times$llama + times$cost
 
-summary(times$llama < 10e6)
-summary(times$mcsplitdown < 10e6)
-sum(startsWith(times$ID, "50 "))
+#summary(times$llama < 10e6)
+#summary(times$mcsplitdown < 10e6)
+#sum(startsWith(times$ID, "50 "))
 
-png(paste0("dissertation/images/ecdf_", type, "_llama.png"), width = 480, height = 320)
-plt <- ecdfplot(~ mcsplitdown + vbs + llama, data = times,
-                auto.key = list(space = "right", text = c("McSplit\u2193", "VBS", "Llama")),
-                xlab = "Runtime (ms)", ylim = c(0.9, 1), main = type_label)
-update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8, name = "Dark2")))
-dev.off()
-png(paste0("dissertation/images/ecdf_", type, ".png"), width = 480, height = 320)
-plt <- ecdfplot(~ clique + kdown + mcsplit + mcsplitdown + vbs, data = times,
-                auto.key = list(space = "right", text = labels[-6]),
-                xlab = "Runtime (ms)", ylim = c(0.4, 1), main = type_label)
-update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8, name = "Dark2")))
-dev.off()
+#png(paste0("dissertation/images/ecdf_", type, "_llama.png"), width = 480, height = 320)
+#plt <- ecdfplot(~ mcsplitdown + vbs + llama, data = times,
+#                auto.key = list(space = "right", text = c("McSplit\u2193", "VBS", "Llama")),
+#                xlab = "Runtime (ms)", ylim = c(0.9, 1), main = type_label)
+#update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8, name = "Dark2")))
+#dev.off()
+#png(paste0("dissertation/images/ecdf_", type, ".png"), width = 480, height = 320)
+#plt <- ecdfplot(~ clique + kdown + mcsplit + mcsplitdown + vbs, data = times,
+#                auto.key = list(space = "right", text = labels[-6]),
+#                xlab = "Runtime (ms)", ylim = c(0.4, 1), main = type_label)
+#update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8, name = "Dark2")))
+#dev.off()
 
 
-times2 <- times[startsWith(as.character(times$ID), "data/sip-instances/"),]
-times2 <- times[startsWith(as.character(times$ID), "data/mcs-instances/"),]
-png("dissertation/images/ecdf_mcs.png", width = 480, height = 320)
-plt <- ecdfplot(~ clique + kdown + mcsplit + mcsplitdown, data = times2,
-                auto.key = list(space = "right", text = c("clique", "k\u2193", "McSplit", "McSplit\u2193")),
-                xlab = "Runtime (ms)", main = "Unlabelled")
-update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8, name = "Dark2")))
-dev.off()
+#times2 <- times[startsWith(as.character(times$ID), "data/sip-instances/"),]
+#times2 <- times[startsWith(as.character(times$ID), "data/mcs-instances/"),]
+#png("dissertation/images/ecdf_mcs.png", width = 480, height = 320)
+#plt <- ecdfplot(~ clique + kdown + mcsplit + mcsplitdown, data = times2,
+#                auto.key = list(space = "right", text = c("clique", "k\u2193", "McSplit", "McSplit\u2193")),
+#                xlab = "Runtime (ms)", main = "Unlabelled")
+#update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8, name = "Dark2")))
+#dev.off()
 
 # llama metrics
 
@@ -179,7 +179,7 @@ dev.off()
 #dev.off()
 
 # Line graphs
-algorithms <- c("clique", "mcsplit", "mcsplitdown")
+#algorithms <- c("clique", "mcsplit", "mcsplitdown")
 # colours <- rainbow(length(algorithms))
 # solved <- expand.grid(algorithm = algorithms, labelling = p_values)
 # solved$proportion <- apply(solved, 1, function(row)
@@ -218,24 +218,24 @@ algorithms <- c("clique", "mcsplit", "mcsplitdown")
 # dev.off()
 # rm("cumulative")
 # 
-mins <- data$data[, c("labelling", algorithms)]
-mins$min <- apply(mins[,algorithms], 1, min)
-won <- expand.grid(algorithm = algorithms, labelling = p_values)
-won$count <- apply(won, 1, function(row)
-  sum(mins$labelling == as.numeric(row[2]) & mins[row[1]] == mins$min))
-png(paste0("dissertation/images/", type, "_linechart3.png"), width = 480,
-    height = 320)
-plot(range(won$labelling), range(won$count),
-     xlab = "Labelling (%)", ylab = "Times won", type = "n", main = type_label)
-for (i in 1:length(algorithms)) {
-  individual_results <- subset(won, won$algorithm == algorithms[i])
-  lines(individual_results$labelling, individual_results$count,
-        col = colours[i])
-}
-legend("bottomright", c("clique", "McSplit", "McSplit\u2193"), fill = colours)
-dev.off()
-rm("mins", "won", "individual_results")
-won$count[won$algorithm == "clique" & won$labelling == 50]
+#mins <- data$data[, c("labelling", algorithms)]
+#mins$min <- apply(mins[,algorithms], 1, min)
+#won <- expand.grid(algorithm = algorithms, labelling = p_values)
+#won$count <- apply(won, 1, function(row)
+#  sum(mins$labelling == as.numeric(row[2]) & mins[row[1]] == mins$min))
+#png(paste0("dissertation/images/", type, "_linechart3.png"), width = 480,
+#    height = 320)
+#plot(range(won$labelling), range(won$count),
+#     xlab = "Labelling (%)", ylab = "Times won", type = "n", main = type_label)
+#for (i in 1:length(algorithms)) {
+#  individual_results <- subset(won, won$algorithm == algorithms[i])
+#  lines(individual_results$labelling, individual_results$count,
+#        col = colours[i])
+#}
+#legend("bottomright", c("clique", "McSplit", "McSplit\u2193"), fill = colours)
+#dev.off()
+#rm("mins", "won", "individual_results")
+#won$count[won$algorithm == "clique" & won$labelling == 50]
 
 # Log runtimes by solver and instance
 #png(paste0("dissertation/images/", type, "_runtime_heatmap.png"), width = 480,
