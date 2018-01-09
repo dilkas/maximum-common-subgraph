@@ -5,19 +5,20 @@
 \usepackage[UKenglish]{isodate}
 \PassOptionsToPackage{hyphens}{url}\usepackage[hidelinks]{hyperref}
 \usepackage{amsfonts, amsmath, amsthm, graphicx, subcaption, mathtools,
-  cleveref, tikz}
+  tikz, cancel}
 \usepackage[group-separator={,}]{siunitx}
 \usepackage[linesnumbered]{algorithm2e}
 \usetikzlibrary{positioning}
 
 \newtheorem{lemma}{Lemma}[chapter]
+\newtheorem{proposition}{Proposition}[chapter]
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[chapter]
 \newtheorem{example}{Example}[chapter]
 \theoremstyle{remark}
 \newtheorem{remark}{Remark}[chapter]
 
-\crefformat{footnote}{#2\footnotemark[#1]#3}
+% TODO: don't use this!
 \DeclareMathOperator{\dom}{dom}
 \newcommand{\kprec}[1]{\prescript{}{#1}{\preceq}\ }
 
@@ -231,7 +232,6 @@ the maximum common subgraph is isomorphic to the subgraph induced by $\{ u_1,
 u_2, u_3 \}$ in $G_p$ and it is isomorphic to multiple induced subgraphs of
 $G_t$.
 
-% TODO: how do we handle kdown?
 $k\downarrow$ algorithm \cite{DBLP:conf/aaai/HoffmannMR17} starts by trying to
 solve the subgraph isomorphism problem, i.e., finding the pattern graph in the
 target graph. If that fails, it allows a single vertex of the pattern graph to
@@ -286,102 +286,6 @@ there are a few key differences between $\textsc{McSplit} \downarrow$ and
 \item Having a big goal size allows the heuristic to be more selective and prune
   more of the search tree branches.
 \end{itemize}
-
-\section{Modifications to \texorpdfstring{$k\downarrow$}{kdown}}
-
-The $k\downarrow$ algorithm was modified to accept graphs with vertex
-labels by adding an additional constraint for matching labels on line 8 of the
-\texttt{klessSubgraphIsomorphism} function \cite{DBLP:conf/aaai/HoffmannMR17}
-and extending the \texttt{Graph} class with two new fields: a \texttt{vector},
-assigning a label to each vertex, and a \texttt{vector} of \texttt{vector}s,
-which, for each label, list all vertices that have that label. After generating
-most of the data, it was noticed that the vertex-labelled version of
-$k\downarrow$ was winning precisely 0 times.
-
-TODO: replace with the new version once we know it's correct
-In order to make $k\downarrow$ more competitive, the neighbourhood degree
-sequence filtering was improved to make use of the additional information that
-labels provide. It is also part of line 8 of the same function in the original
-paper \cite{DBLP:conf/aaai/HoffmannMR17}, however, it is not enabled by
-default\footnote{\label{foot:kdown}\url{https://github.com/ciaranm/aaai17-between-subgraph-isomorphism-and-maximum-common-subgraph-paper}}
-and is not used in the experiments of the \textsc{McSplit} paper
-\cite{DBLP:conf/ijcai/McCreeshPT17}. We take the definition directly from
-\cite{DBLP:conf/aaai/HoffmannMR17}:
-
-\begin{definition}
-  ``The \emph{neighbourhood degree sequence} (NDS) of a vertex $p$, $S(p)$, is the
-  (non-ascending) sequence of degrees of its neighbours.''
-\end{definition}
-
-\begin{definition} \label{def:prec}
-  For two sequences $S = (s_1, \dots, s_n)$ and $T = (t_1, \dots, t_m)$ and some
-  non-negative integer $k$, we say that $S \kprec{k} T$ if $n - k \le m$ and
-  there is a subsequence $S_k$ of $S$ with $|S_k| \le k$ such that
-  \cite{DBLP:conf/aaai/HoffmannMR17}
-  \[ \forall s_i \in S \setminus S_k, \text{ there exists a distinct } j \in \{
-    1, \dots, m \} \text{ such that } s_i - k \le t_j. \]
-\end{definition}
-
-As a simplification of the definition above, we state the following lemma, based
-on Corollary 1 from the $k\downarrow$ paper
-\cite{DBLP:conf/aaai/HoffmannMR17} and the C++ implementation\cref{foot:kdown}.
-
-\begin{lemma} \label{lemma1}
-  Let $S = (s_1, \dots, s_n)$ and $T = (t_1, \dots, t_m)$ be two sequences and
-  $k$ an integer such that $k \ge \max\{ 0, n - m \}$. Then $S \kprec{k} T$
-  if and only if
-  \[ s_i \le t_{i-k} + k \quad \forall i = k + 1, \dots, n. \]
-\end{lemma}
-\begin{proof}
-  A simple extension of Corollary 1 from \cite{DBLP:conf/aaai/HoffmannMR17} by a
-  reordering argument.
-\end{proof}
-
-\begin{algorithm}
-  \SetKwData{kOriginal}{kOriginal}
-  \SetKwData{kLeft}{kLeft}
-  \SetKwData{pNds}{pNds}
-  \SetKwData{tNds}{tNds}
-  \SetKwData{successful}{successful}
-  \KwData{a non-negative integer \kOriginal, a list of NDSs for each label
-    \pNds, a list of NDSs for each label \tNds}
-  \KwResult{a boolean value, indicating whether $p$ and $t$ can be matched}
-  $\kLeft \gets \kOriginal - \sum_{i = |\tNds|}^{|\pNds|-1} |\pNds[i]|$\;
-  \If{$\kLeft < 0$}{\Return{false};}
-  \For{$i \gets 0$ \KwTo $\min\{ |\pNds|, |\tNds| \} - 1$}{
-    \For{$k \gets \max \{ |\pNds[i]| - |\tNds[i]|, 0 \}$ \KwTo $\infty$}{
-      \If{$k > \kLeft$}{\Return{false};}
-      \If{$\bigwedge\limits_{j = k}^{|\pNds[i]| - 1} \tNds[i][j - k] + k \ge
-        \pNds[i][j]$}{
-        $\kLeft \gets \kLeft - k$\;
-        break\;
-      }
-    }
-  }
-  \Return{true}\;
-  \caption{NDS filtering with vertex label support}
-  \label{alg:nds}
-\end{algorithm}
-
-We extend these ideas in Algorithm \ref{alg:nds} by considering an NDS for each
-label. The algorithm checks whether a vertex $p$ in the pattern graph can be
-matched with a vertex $t$ in the target graph. \textsf{kOriginal} is the value
-of $k$ in the main $k\downarrow$ algorithm, denoting how many of the pattern
-graph vertices can be mapped to nothing. \textsf{pNds} and \textsf{tNds} store
-the non-ascending NDSs for each label of the pattern and target graph,
-respectively. Some of them can be empty and the graphs can have different
-numbers of labels. \textsf{kLeft} is our counter for how many neighbours of $p$
-we can still map to nothing. We note that if $p$ has a neighbour with label $i$
-and $t$ has no neighbours with such a label, we must use one of the $k$ values,
-i.e., reduce \textsf{kLeft} by 1. We also note that if \textsf{kLeft} becomes
-negative, then there is no way for $p$ and $t$ to be matched and we must return
-false. Then, for each label $i$, we find the smallest integer $k \in \{
-\max \{|\textsf{pNds}[i]| - |\textsf{tNds}[i]|, 0\}, \dots, \textsf{kLeft} -
-1\}$ such that $\textsf{pNds}[i] \kprec{k} \textsf{tNds}[i]$ according to Lemma
-\ref{lemma1}. If we are unable to find such a value, then there is no way for
-$p$ and $t$ to be matched and we return false. Otherwise we subtract from
-\textsf{kLeft} the number of neighbours of $p$ that could not be mapped to any
-of the neighbours of $t$ and move on to label $i + 1$.
 
 \chapter{Problem Instances} \label{chapter:problems}
 
@@ -1104,7 +1008,7 @@ be chosen for each pair of graphs. For each pair of graphs, \textsc{Llama}
   runtime of its chosen algorithm together with the feature extraction time.
   While costs for graphs from Section \ref{sec:unlabelled} reached up to 65 s,
   the maximum cost for graphs from Section \ref{sec:labelled} is only 6 ms.
-\end{itemize} % TODO: could expand the last sentence
+\end{itemize}
 
 After constructing the required dataframes as described above, the data needs to
 be split into training and test sets. We use a technique called 10-fold
@@ -1201,8 +1105,6 @@ multiple threads. Furthermore, the R code was heavily optimised to remove
 temporary variables as soon as they are no longer needed in order to reduce
 memory consumption.
 
- % TODO: which is a strictly monotonic bijection for positive real numbers (define
- % bijection, monotonic)
 As we saw in Section \ref{sec:features}, some of the feature data is highly
 skewed. Thus we should formally address the question of using transformations
 (such as $\log$ used for some of the plots or $x \mapsto 1/x$, giving
@@ -1636,7 +1538,7 @@ dealing with problem instances best handled with \textsc{McSplit}.
     \includegraphics[width=\textwidth]{images/both_labels_mcsplitdown_labelling.png}
   \end{subfigure}
   \caption{Partial dependence plots of the labelling percentage}
-  \label{fig:both_labels_partials2}
+  \label{fig:labelling_partials}
 \end{figure}
 
 \begin{figure}
@@ -1655,32 +1557,39 @@ dealing with problem instances best handled with \textsc{McSplit}.
   \end{subfigure}
   \caption{Partial dependence plots of the standard deviation of degrees in the
     target graph}
-  \label{fig:both_labels_partials1}
+  \label{fig:stddeg_partials}
 \end{figure}
 
-% TODO: this needs updating!
-This time we show the partial dependence plots for the top 2 most influential
-predictors (the labelling percentage and the standard deviation of degrees in
-the target graph) in Figures \ref{fig:both_labels_partials1} and
-\ref{fig:both_labels_partials2}. The results for the clique encoding are the
-most straightforward to interpret. Clearly, the algorithm performs much better
-with higher labelling percentages (more different labels). The interesting bit
-(just like back in Figure \ref{fig:linecharts}) is that the curve
-stays constant between 20\% and 50\%. In other words, anywhere above 20\%
-labelling, a higher labelling percentage does not make the clique encoding more
-preferable than it already is. The partial dependence on the standard deviation
-of degrees of the target graph says what we already knew from Section
-\ref{sec:unlabelled_partial}: the clique encoding prefers graphs with more
-variance in degrees. The one smalll difference is that this time the change is
-not as steep, but this can be easily explained by the fact that the highest
-standard deviation of degrees is around 7 in this section compared to around 70
-in Section \ref{sec:unlabelled_partial}.
+This time we show the partial dependence plots for the top top 2 most
+important predictors (the labelling percentage and the standard deviation of
+degrees in the target graph\footnote{The second most important predictor for the
+fully labelled case is the standard deviation of degrees in the pattern graph,
+but the difference is negligible and very likely to be due to randomness.}) in
+Figures \ref{fig:labelling_partials} and \ref{fig:stddeg_partials},
+respectively. In both cases there is little difference between the plots for
+vertex-labelled and fully labelled graphs. Consider the labelling plots first.
+The results for the clique encoding are the most straightforward to interpret.
+Clearly, the algorithm performs much better with higher labelling percentages
+(more different labels). The interesting bit (just like back in Figure
+\ref{fig:linecharts}) is that the curve stays constant between 20\% and 50\%. In
+other words, anywhere above 20\% labelling, a higher labelling percentage does
+not make the clique encoding more preferable than it already is. Furthermore,
+once again we can recognise how the curve descends more slowly for both labels
+than it does for vertex labels. On the other hand, both \textsc{McSplit} and
+$\textsc{McSplit}\downarrow$ prefer lower labelling percentages.
 
-On the other hand, both \textsc{McSplit} and $\textsc{McSplit}\downarrow$ prefer
-lower labelling percentages. While $\textsc{McSplit}\downarrow$ prefers graphs
-with smaller standard deviations of degrees, the situation with \textsc{McSplit}
-is suddenly less clear, which is reflective of the fact that the ML model has less
-confidence about \textsc{McSplit} (compared to the other 2 algorithms).
+The partial dependence on the standard deviation of degrees of the target graph
+says what we already knew from Section \ref{sec:unlabelled_partial}: the clique
+encoding prefers graphs with more variance in degrees. The one smalll difference
+is that this time the change is not as steep, but this can be easily explained
+by the fact that the highest standard deviation of degrees is around 7 in this
+section compared to around 70 in Section \ref{sec:unlabelled_partial}. While
+$\textsc{McSplit}\downarrow$ prefers graphs with smaller standard deviations of
+degrees, the situation with \textsc{McSplit} is suddenly less clear, which is
+reflective of the fact that the ML models have less confidence about
+\textsc{McSplit} (compared to the other 2 algorithms). While small standard
+deviations are still preferred, there is a significant drop between the values
+of 1 and 2.
 
 \begin{figure}
   \centering
@@ -1707,6 +1616,113 @@ wider than the gap between $\textsc{McSplit}\downarrow$ and \textsc{McSplit}. To
 add more numbers to this picture, \textsc{Llama} closed 86\% and 88\% of the
 difference between its lower and upper bounds for vertex-labelled and both
 vertex- and edge-labelled graphs, respectively.
+
+\chapter{Further Experiments}
+\section{Modifications to \texorpdfstring{$k\downarrow$}{kdown}}
+
+The $k\downarrow$ algorithm was modified to accept graphs with vertex
+labels by adding an additional constraint for matching labels on line 8 of the
+\texttt{klessSubgraphIsomorphism} function \cite{DBLP:conf/aaai/HoffmannMR17}
+and extending the \texttt{Graph} class with two new fields: a \texttt{vector},
+assigning a label to each vertex, and a \texttt{vector} of \texttt{vector}s,
+which, for each label, list all vertices that have that label. After generating
+most of the data, it was noticed that the vertex-labelled version of
+$k\downarrow$ was winning precisely 0 times.
+
+In order to make $k\downarrow$ more competitive, the neighbourhood degree
+sequence filtering was improved to make use of the additional information that
+labels provide. It is also part of line 8 of the same function in the original
+paper \cite{DBLP:conf/aaai/HoffmannMR17}, however, it is not enabled by
+default\footnote{\url{https://github.com/ciaranm/aaai17-between-subgraph-isomorphism-and-maximum-common-subgraph-paper}}
+and is not used in the experiments of the \textsc{McSplit} paper
+\cite{DBLP:conf/ijcai/McCreeshPT17}. We take the definition directly from
+\cite{DBLP:conf/aaai/HoffmannMR17}:
+
+\begin{definition}
+  ``The \emph{neighbourhood degree sequence} (NDS) of a vertex $p$, $S(p)$, is the
+  (non-ascending) sequence of degrees of its neighbours.''
+\end{definition}
+
+\begin{definition} \label{def:prec}
+  For two sequences $S = (s_1, \dots, s_n)$ and $T = (t_1, \dots, t_m)$ and some
+  non-negative integer $k$, we say that $S \kprec{k} T$ if $n - k \le m$ and
+  there is a subsequence $S_k$ of $S$ with $|S_k| \le k$ such that
+  \cite{DBLP:conf/aaai/HoffmannMR17}
+  \[ \forall s_i \in S \setminus S_k, \text{ there exists a distinct } j \in \{
+    1, \dots, m \} \text{ such that } s_i - k \le t_j. \]
+\end{definition}
+
+As a simplification of the definition above, we state the following lemma, based
+on Corollary 1 from the $k\downarrow$ paper \cite{DBLP:conf/aaai/HoffmannMR17}.
+
+\begin{lemma} \label{lemma1}
+  Let $S = (s_1, \dots, s_n)$ and $T = (t_1, \dots, t_m)$ be two sequences and
+  $k$ an integer such that $k \ge \max\{ 0, n - m \}$. Then $S \kprec{k} T$
+  if and only if
+  \[ s_i \le t_{i-k} + k \quad \forall i = k + 1, \dots, n. \]
+\end{lemma}
+\begin{proof}
+  A simple extension of Corollary 1 from \cite{DBLP:conf/aaai/HoffmannMR17} by a
+  reordering argument.
+\end{proof}
+
+We also have Proposition 3 from \cite{DBLP:conf/aaai/HoffmannMR17}, which is
+useful to our proposed algorithm:
+\begin{proposition} \label{prop:kdown}
+  Given some $k$, if a pattern graph vertex $p$ is mapped to a target graph
+  vertex $t$ in a subgraph isomorphism that excludes up to $k$ vertices from the
+  pattern graph, then
+  \[ S(p) \kprec{k} S(t). \]
+\end{proposition}
+
+\begin{algorithm}
+  \SetKwData{pNds}{pNds}
+  \SetKwData{tNds}{tNds}
+  \SetKwData{neighbours}{NeighboursUniqueToPattern}
+  \KwData{a non-negative integer $k$, a list of NDSs for each label
+    \pNds, a list of NDSs for each label \tNds}
+  \KwResult{a boolean value, indicating whether $p$ and $t$ can be matched}
+  $\neighbours \gets \sum_{i=|\tNds|}^{|\pNds| - 1} |\pNds[i]|$\;
+  \If{$\neighbours > k$}{\Return{false};}
+  \For{$i \gets 0$ \KwTo $\min\{ |\pNds|, |\tNds| \} - 1$}{
+    \If{$|\pNds[i]| - |\tNds[i]| > 0$}{
+      $\neighbours \gets \neighbours + |\pNds[i]| - |\tNds[i]|$\;
+      \If{$\neighbours > k$}{\Return{false};}
+    }
+    \If{$\pNds[i] \cancel{\kprec{k}} \tNds[i]$}{\Return{false};}
+  }
+  \Return{true}\;
+  \caption{NDS filtering with vertex label support}
+  \label{alg:nds}
+\end{algorithm}
+
+% TODO: name the pattern and target graphs
+We extend these ideas in Algorithm \ref{alg:nds} by considering an NDS for each
+label. The algorithm checks whether a vertex $p$ in the pattern graph can be
+matched with a vertex $t$ in the target graph.
+\textsf{NeighboursUniqueToPattern} tracks the number of neighbours of $p$ that
+have to be excluded, i.e., whenever the pattern graph has more neighbours with a
+particular label than the target graph, we can add the difference to
+\textsf{NeighboursUniqueToPattern}, and if it ever becomes larger than $k$, we
+know that it is impossible to map $p$ to $t$. The other exit early exit
+condition is the contrapositive of Proposition \ref{prop:kdown}. If neither of
+these conditions is satisfied throughout the \textbf{for} loop that starts on
+line 5, then $p$ and $t$ are compatible for this value of $k$.
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.5]{images/ecdf_kdown.png}
+  \caption{Cumulative plot of all algorithms with 10\% vertex labelling}
+  \label{fig:ecdf_kdown}
+\end{figure}
+
+As this improvement is an afterthought after the main experiments, the resulting
+algorithm was run on a smaller subset of all data: \num{30000} instances with
+10\% labelling. The ECDF plot in Figure \ref{fig:ecdf_kdown} shows the new
+$k\downarrow$ to be just slightly behind the clique encoding and it outperforms
+other algorithms in 193 instances, making it considerable for an inclusion in
+a portfolio, although it might achieve similar results as with unlabelled
+graphs, where it wins too infrequently to be a valuable inclusion.
 
 %\begin{appendices}
 %\end{appendices}

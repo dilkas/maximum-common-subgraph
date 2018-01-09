@@ -428,11 +428,20 @@ namespace
             if (params.nds && ok) {
               for (unsigned cn = 0 ; cn < 1 && ok ; ++cn) {
                 unsigned neighbours_unique_to_pattern = 0;
+                for (unsigned label = target.vertices_by_label.size();
+                     label < pattern.vertices_by_label.size(); ++label) {
+                  neighbours_unique_to_pattern += p_nds[cn][p][label].size();
+                  if (neighbours_unique_to_pattern > params.except) {
+                    ok = false;
+                    goto end_of_tests;
+                  }
+                }
+
                 for (unsigned label = 0; label < pattern.vertices_by_label.size() &&
                        label < target.vertices_by_label.size(); ++label) {
                   int list_size_difference = p_nds[cn][p][label].size() - t_nds[cn][t][label].size();
-                  // avoids segmentation faults
                   if ((int)params.except < list_size_difference) {
+                    // avoids segmentation faults
                     ok = false;
                     goto end_of_tests;
                   }

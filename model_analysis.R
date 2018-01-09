@@ -95,9 +95,9 @@ features <- c("labelling", "target.stddeg")
 feature_labels <- c("Labelling (%)", "Target SD of degrees")
 for (j in 1:length(features)) {
   for (i in 1:length(algorithms)) {
-    png(paste0("text/dissertation/images/", type, "_", algorithms[i], "_", features[j], ".png"),
-	width = 480, height = 320)
-    partialPlot(forest, data[["data"]], features[j], algorithms[i],
+    png(paste0("text/dissertation/images/", type, "_", algorithms[i], "_",
+               features[j], ".png"), width = 480, height = 320)
+    partialPlot(forest, data$data, features[j], algorithms[i],
                 main = paste(type_label, algorithm_labels[i], sep = ", "),
                 xlab = feature_labels[j], ylab = "Partial dependence")
     dev.off()
@@ -106,47 +106,48 @@ for (j in 1:length(features)) {
 
 # ECDF
 
-#filtered_instances <- readLines("results/filtered_instances")
-#costs <- read.csv("results/costs.csv", header = FALSE)
-#colnames(costs) <- c("ID", "cost")
-#costs <- subset(costs, costs$ID %in% filtered_instances)
-#costs <- costs[rep(seq_len(nrow(costs)), each = length(p_values)),]
-#costs$labelling <- p_values
-#costs$ID <- sprintf("%02d %s", costs$labelling, costs$ID)
-#costs <- costs[, c("ID", "cost")]
+filtered_instances <- readLines("results/filtered_instances")
+costs <- read.csv("results/costs.csv", header = FALSE)
+colnames(costs) <- c("ID", "cost")
+costs <- subset(costs, costs$ID %in% filtered_instances)
+costs <- costs[rep(seq_len(nrow(costs)), each = length(p_values)),]
+costs$labelling <- p_values
+costs$ID <- sprintf("%02d %s", costs$labelling, costs$ID)
+costs <- costs[, c("ID", "cost")]
 
-#labels <- c("clique", "k\u2193", "McSplit", "McSplit\u2193", "VBS", "Llama")
-#times <- subset(data$data, T, c("ID", data$performance))
-#times$vbs <- apply(times[,-1], 1, min)
-#winning_algorithms <- model$predictions[model$predictions$score == 1,
-#                                        c("ID", "algorithm")]
-#winning_algorithms$algorithm <- unlist(
-#  lapply(winning_algorithms$algorithm,
-#         function(x) which(colnames(times) == x)))
-#times <- merge(times, winning_algorithms, by = "ID", all.x = TRUE)
-#times$llama <- as.numeric(times[cbind(seq_along(times$algorithm),
-#                                      times$algorithm)])
-#times <- merge(times, costs, by = c("ID"), all.x = TRUE)
-#times$llama <- times$llama + times$cost
+labels <- c("clique", "k\u2193", "McSplit", "McSplit\u2193", "VBS", "Llama")
+times <- subset(data$data, T, c("ID", data$performance))
+times$vbs <- apply(times[,-1], 1, min)
+winning_algorithms <- model$predictions[model$predictions$score == 1,
+                                       c("ID", "algorithm")]
+winning_algorithms$algorithm <- unlist(
+ lapply(winning_algorithms$algorithm,
+        function(x) which(colnames(times) == x)))
+times <- merge(times, winning_algorithms, by = "ID", all.x = TRUE)
+times$llama <- as.numeric(times[cbind(seq_along(times$algorithm),
+                                     times$algorithm)])
+times <- merge(times, costs, by = c("ID"), all.x = TRUE)
+times$llama <- times$llama + times$cost
 
-#summary(times$llama < 10e6)
-#summary(times$mcsplitdown < 10e6)
-#sum(startsWith(times$ID, "50 "))
+summary(times$llama < 10e6)
+summary(times$mcsplitdown < 10e6)
+sum(startsWith(times$ID, "50 "))
 
-#png(paste0("dissertation/images/ecdf_", type, "_llama.png"), width = 480, height = 320)
-#plt <- ecdfplot(~ mcsplitdown + vbs + llama, data = times,
-#                auto.key = list(space = "right", text = c("McSplit\u2193", "VBS", "Llama")),
-#                xlab = "Runtime (ms)", ylim = c(0.9, 1), main = type_label)
-#update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8, name = "Dark2")))
-#dev.off()
-#png(paste0("dissertation/images/ecdf_", type, ".png"), width = 480, height = 320)
-#plt <- ecdfplot(~ clique + kdown + mcsplit + mcsplitdown + vbs, data = times,
-#                auto.key = list(space = "right", text = labels[-6]),
-#                xlab = "Runtime (ms)", ylim = c(0.4, 1), main = type_label)
-#update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8, name = "Dark2")))
-#dev.off()
+png(paste0("dissertation/images/ecdf_", type, "_llama.png"), width = 480, height = 320)
+plt <- ecdfplot(~ mcsplitdown + vbs + llama, data = times,
+               auto.key = list(space = "right", text = c("McSplit\u2193", "VBS", "Llama")),
+               xlab = "Runtime (ms)", ylim = c(0.9, 1), main = type_label)
+update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8, name = "Dark2")))
+dev.off()
+png(paste0("dissertation/images/ecdf_", type, ".png"), width = 480, height = 320)
+plt <- ecdfplot(~ clique + kdown + mcsplit + mcsplitdown + vbs, data = times,
+               auto.key = list(space = "right", text = labels[-6]),
+               xlab = "Runtime (ms)", ylim = c(0.4, 1), main = type_label)
+update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8, name = "Dark2")))
+dev.off()
 
-
+sum(times$kdown <= times$vbs)
+sum(times$clique <= times$vbs)
 #times2 <- times[startsWith(as.character(times$ID), "data/sip-instances/"),]
 #times2 <- times[startsWith(as.character(times$ID), "data/mcs-instances/"),]
 #png("dissertation/images/ecdf_mcs.png", width = 480, height = 320)

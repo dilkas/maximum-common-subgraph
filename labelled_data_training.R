@@ -5,7 +5,7 @@ parallelLibrary("llama")
 
 labelling <- "vertex" # "vertex" or "both"
 type <- "vertex_labels"
-p_values <- c(5, 10, 15, 20, 25, 33, 50)
+p_values <- c(10)
 
 algorithms <- c("clique", "mcsplit", "mcsplitdown")
 if (labelling == "vertex") {
@@ -91,7 +91,7 @@ answers <- answers[answers$ID %in% performance$ID,]
 answers$all_finished <- apply(success[, -1], 1, all)
 answers <- answers[answers$all_finished,]
 all(answers$mcsplit == answers$mcsplitdown)
-#all(answers$mcsplit == answers$kdown)
+all(answers$mcsplit == answers$kdown)
 all(answers$clique == answers$mcsplit)
 
 data <- input(features, performance, success,
