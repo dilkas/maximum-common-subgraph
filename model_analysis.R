@@ -94,15 +94,14 @@ algorithm_labels <- c("clique", "McSplit", "McSplit\u2193")
 features <- c("labelling", "target.stddeg")
 feature_labels <- c("Labelling (%)", "Target SD of degrees")
 for (j in 1:length(features)) {
-  png(paste0("dissertation/images/", type, "_", features[j], ".png"),
-      width = 480, height = 320)
   for (i in 1:length(algorithms)) {
+    png(paste0("text/dissertation/images/", type, "_", algorithms[i], "_", features[j], ".png"),
+	width = 480, height = 320)
     partialPlot(forest, data[["data"]], features[j], algorithms[i],
-                main = paste(type_label, feature_labels[j], sep = ", "),
-                xlab = feature_labels[j], ylab = "Partial dependence", add = i > 1, col = i)
+                main = paste(type_label, algorithm_labels[i], sep = ", "),
+                xlab = feature_labels[j], ylab = "Partial dependence")
+    dev.off()
   }
-  legend("right", algorithm_labels, fill = 1:3)
-  dev.off()
 }
 
 # ECDF
