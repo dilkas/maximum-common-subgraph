@@ -5,6 +5,7 @@
 \usepackage[UKenglish]{babel}
 \usepackage[UKenglish]{isodate}
 \usepackage[style=authoryear]{biblatex}
+\usepackage[group-separator={,}]{siunitx}
 
 \usetheme{PaloAlto}
 \usecolortheme{orchid}
@@ -18,9 +19,9 @@
 \begin{document}
 \maketitle
 
-\begin{frame}{Outline}
-\tableofcontents
-\end{frame}
+%\begin{frame}{Outline}
+%\tableofcontents
+%\end{frame}
 
 \section{Algorithm selection}
 \begin{frame}{Algorithm selection} % m is running time
@@ -39,45 +40,6 @@
   \end{figure}
 \end{frame}
 
-\section{Labelling}
-\begin{frame}{Labelling}
-  Data from \cite{foggia2001-2, DBLP:journals/prl/SantoFSV03}
-  \pause
-  \begin{definition}
-    A graph $G = (V, E)$ is said to have a \emph{$p\%$ (vertex) labelling} if
-    \[ N = \max \left\{ 2^n : n \in \mathbb{N},\, 2^n < \left\lfloor \frac{p}{100\%}
-          \times |V| \right\rfloor \right\}. \]
-  \end{definition}
-  \pause
-  \begin{itemize}
-  \item 5\% labelling - 20 vertices per label (on average)
-  \item 50\% labelling - 2 vertices per label (on average)
-    \pause
-  \item 3 subproblems
-    \begin{itemize}
-    \item no labels
-    \item vertex labels
-    \item vertex and edge labels
-    \end{itemize}
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Distribution of vertices per label}
-  \begin{figure}
-    \centering
-    \includegraphics[scale=0.4]{../dissertation/images/labelling_histogram.png}
-  \end{figure}
-  For each graph and label
-  \begin{itemize}
-  \item $C$ is the number of vertices with that label
-  \item $E(C)$ is the number we would expect from a (discrete) uniform distribution
-  \end{itemize}
-\end{frame}
-
-\section{Features}
-\begin{frame}{Features}
-\end{frame}
-
 \section{Algorithms}
 \begin{frame}{Algorithms}
   \begin{itemize}
@@ -94,6 +56,80 @@
     \item \parencite{DBLP:conf/aaai/HoffmannMR17}
     \end{itemize}
   \end{itemize}
+\end{frame}
+
+\section{Labelling}
+\begin{frame}{Labelling}
+  Data from \cite{foggia2001-2, DBLP:journals/prl/SantoFSV03} (\num{81400} pairs
+  of graphs)
+  \pause
+  \begin{definition}
+    A \emph{vertex-labelled graph} is a 3-tuple $G = (V, E, \mu)$, where $\mu
+    \colon V \to \{ 0, \dots, N - 1 \}$ is a vertex labelling function, for some
+    $N \in \{ 1, \dots, |V| \}$.
+  \end{definition}
+  \pause
+  \begin{definition}
+    A graph $G = (V, E, \mu)$ is said to have a \emph{$p\%$ (vertex) labelling} if
+    \[ N = \max \left\{ 2^n : n \in \mathbb{N},\, 2^n < \left\lfloor \frac{p}{100\%}
+          \times |V| \right\rfloor \right\}. \]
+  \end{definition}
+\end{frame}
+
+\begin{frame}{Labelling}
+  \begin{definition}
+    A graph $G = (V, E, \mu)$ is said to have a \emph{$p\%$ (vertex) labelling} if
+    \[ N = \max \left\{ 2^n : n \in \mathbb{N},\, 2^n < \left\lfloor \frac{p}{100\%}
+          \times |V| \right\rfloor \right\}. \]
+  \end{definition}
+  \begin{itemize}
+  \item 5\% labelling - 20 vertices per label on average
+  \item 50\% labelling - 2 vertices per label on average
+    \pause
+  \item Typical values explored: 33\%, 50\%, 75\%
+    \begin{itemize}
+    \item Often just 33\%
+    \end{itemize}
+    \pause
+  \item In my data: 5\%, 10\%, 15\%, 20\%, 25\%, 33\%, 50\%
+    \pause
+  \item 3 subproblems
+    \begin{itemize}
+    \item no labels
+    \item vertex labels
+    \item vertex and edge labels
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+%\begin{frame}{Distribution of vertices per label}
+%  \begin{figure}
+%    \centering
+%    \includegraphics[scale=0.4]{../dissertation/images/labelling_histogram.png}
+%  \end{figure}
+%  For each graph and label
+%  \begin{itemize}
+%  \item $C$ is the number of vertices with that label
+%  \item $E(C)$ is the number we would expect from a (discrete) uniform distribution
+%  \end{itemize}
+%\end{frame}
+
+\section{Features}
+\begin{frame}{Features (34 in total)}
+  The first 9 are from \cite{DBLP:conf/lion/KotthoffMS16}
+  \begin{enumerate}
+  \item number of vertices
+  \item number of edges
+  \item mean/max degree
+  \item density
+  \item mean/max distance between pairs of vertices
+  \item standard deviation of degrees
+  \item number of loops
+  \item proportion of vertex pairs with distance $\ge$ 2, 3, 4
+  \item connectedness
+  \item labelling percentage
+  \item ratios of features 1--5
+  \end{enumerate}
 \end{frame}
 
 \section{Random forests}
@@ -148,15 +184,15 @@
   \end{figure}
 \end{frame}
 
-\begin{frame}{Results}
-  \begin{itemize}
-  \item Most important features
-    \begin{itemize}
-    \item labelling percentage
-    \item standard deviation of degrees (for both graphs)
-    \end{itemize}
-  \end{itemize}
-\end{frame}
+%\begin{frame}{Other observations}
+%  \begin{itemize}
+%  \item Most important features
+%    \begin{itemize}
+%    \item labelling percentage
+%    \item standard deviation of degrees (for both graphs)
+%    \end{itemize}
+%  \end{itemize}
+%\end{frame}
 
 \begin{frame}{Errors}
   \begin{itemize}
@@ -210,6 +246,17 @@
       \end{figure}
     \end{column}
   \end{columns}
+\end{frame}
+
+\section{Future work}
+\begin{frame}{Future work}
+  \begin{itemize}
+  \item Can $k\downarrow$ be made competitive for vertex labels?
+  \item Relationships between clique algorithm's runtime and properties of the
+    association graph
+  \item How the association graph changes after making a decision
+  \item Merging $k\downarrow$ and clique
+  \end{itemize}
 \end{frame}
 
 %\begin{frame}{Margins}
