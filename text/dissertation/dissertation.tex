@@ -1704,10 +1704,10 @@ matched with a vertex $t$ in the target graph.
 have to be excluded, i.e., whenever the pattern graph has more neighbours with a
 particular label than the target graph, we can add the difference to
 \textsf{NeighboursUniqueToPattern}, and if it ever becomes larger than $k$, we
-know that it is impossible to map $p$ to $t$. The other exit early exit
-condition is the contrapositive of Proposition \ref{prop:kdown}. If neither of
-these conditions is satisfied throughout the \textbf{for} loop that starts on
-line 5, then $p$ and $t$ are compatible for this value of $k$.
+know that it is impossible to map $p$ to $t$. The other early exit condition is
+the contrapositive of Proposition \ref{prop:kdown}. If neither of these
+conditions is satisfied throughout the \textbf{for} loop that starts on line 5,
+then $p$ and $t$ are compatible for this value of $k$.
 
 \begin{figure}
   \centering
