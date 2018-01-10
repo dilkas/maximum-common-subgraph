@@ -20,8 +20,6 @@ using std::chrono::steady_clock;
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 
-const int SIZE_LIMIT = 16000; // limits the product of the orders of graphs to avoid running out of memory
-
 namespace
 {
   class GraphFileError :
@@ -54,7 +52,7 @@ namespace
     return unsigned(a) | (unsigned(b) << 8);
   }
 
-  auto read_vf(const std::string & filename, bool unlabelled, bool no_edge_labels, bool undirected) -> VFGraph
+  auto read_vf(const std::string & filename, bool unlabelled, bool no_edge_labels, bool undirected, unsigned labelling) -> VFGraph
   {
     VFGraph result;
 
@@ -67,7 +65,7 @@ namespace
       throw GraphFileError{ filename, "error reading size" };
 
     // to be like the CP 2011 labelling scheme...
-    int m = result.size * 33 / 100;
+    int m = result.size * labelling / 100;
     int p = 1, k1 = 0, k2 = 0;
     while (p < m && k1 < 16) {
       p *= 2;
@@ -262,6 +260,7 @@ auto main(int argc, char * argv[]) -> int
       ("timeout",            po::value<int>(),  "Abort after this many seconds")
       ("unlabelled",                            "Make the graph unlabelled)")
       ("no-edge-labels",                        "Get rid of edge labels, but keep vertex labels")
+      ("labelling",     po::value<unsigned>(),  "The labelling percentage (33 by default)")
       ("undirected",                            "Make the graph undirected")
       ("connected",                             "Only find connected subgraphs")
       ("prime",              po::value<int>(),  "Set initial incumbent size")
@@ -316,19 +315,15 @@ auto main(int argc, char * argv[]) -> int
       return EXIT_FAILURE;
     }
 
+    unsigned labelling = (options_vars.count("labelling")) ? options_vars["labelling"].as<unsigned>() : 33;
     /* Create graphs */
     auto graphs = (options_vars.count("lad")) ?
       std::make_pair(read_lad(options_vars["pattern-file"].as<std::string>()),
                      read_lad(options_vars["target-file"].as<std::string>())) :
       std::make_pair(read_vf(options_vars["pattern-file"].as<std::string>(), options_vars.count("unlabelled"),
-                             options_vars.count("no-edge-labels"), options_vars.count("undirected")),
+                             options_vars.count("no-edge-labels"), options_vars.count("undirected"), labelling),
                      read_vf(options_vars["target-file"].as<std::string>(), options_vars.count("unlabelled"),
-                             options_vars.count("no-edge-labels"), options_vars.count("undirected")));
-
-    /*if (graphs.first.size * graphs.second.size >= SIZE_LIMIT) {
-      std::cerr << "The graphs are too big to fit into memory" << std::endl;
-      return EXIT_FAILURE;
-      }*/
+                             options_vars.count("no-edge-labels"), options_vars.count("undirected"), labelling));
 
     unsigned e1 = 0, e2 = 0;
     for (unsigned v = 0 ; v < graphs.first.size ; ++v)

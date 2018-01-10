@@ -80,11 +80,11 @@ namespace
       ++degrees[f.first];
       ++degrees[f.second];
     }
-    /*for (auto & d : degrees)
-      std::cout << d << " ";
-      std::cout << std::endl;*/
 
     for (unsigned i = 0 ; i < association.size(); ++i) {
+      if (degrees[i] % 2 == 1)
+        throw 0;
+      degrees[i] /= 2;
       auto deg = degrees[i];
       total_deg += deg;
       max_deg = std::max<unsigned>(max_deg, deg);
@@ -187,7 +187,7 @@ namespace
         }
       }
 
-    std::cout << "vertices = " << association.size() << std::endl;
+    /*std::cout << "vertices = " << association.size() << std::endl;
     std::cout << "edges = " << num_edges << std::endl;
     std::cout << "meandeg = " << mean_deg << std::endl;
     std::cout << "maxdeg = " << max_deg << std::endl;
@@ -198,7 +198,11 @@ namespace
     std::cout << "maxdistance = " << max_distance << std::endl;
     std::cout << "proportiondistancege2 = " << ((0.0 + distancege2) / (association.size() * association.size() + 0.0)) << std::endl;
     std::cout << "proportiondistancege3 = " << ((0.0 + distancege3) / (association.size() * association.size() + 0.0)) << std::endl;
-    std::cout << "proportiondistancege4 = " << ((0.0 + distancege4) / (association.size() * association.size() + 0.0)) << std::endl;
+    std::cout << "proportiondistancege4 = " << ((0.0 + distancege4) / (association.size() * association.size() + 0.0)) << std::endl;*/
+    std::cout << association.size() << "," << num_edges << "," << mean_deg << "," << max_deg << "," << std_deg << ","
+              << ((0.0 + 2 * num_edges) / (association.size() * (association.size() - 1))) << "," << is_connected << ","
+              << ((0.0 + sum_distances) / (0.0 + distance_count)) << "," << max_distance << ","
+              << ((0.0 + distancege2) / (association.size() * association.size() + 0.0)) << std::endl;
     exit(0);
 
     return { association, edges };
