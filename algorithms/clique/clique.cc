@@ -65,14 +65,6 @@ namespace
     unsigned num_edges = 0;
     unsigned max_deg = 0;
     unsigned total_deg = 0;
-    bool is_connected = true;
-    unsigned distancege2 = 0;
-    unsigned distancege3 = 0;
-    unsigned distancege4 = 0;
-    unsigned distancege5 = 0;
-    unsigned sum_distances = 0;
-    unsigned max_distance = 0;
-    unsigned distance_count = 0;
 
     // pre-calculate degrees
     std::vector<int> degrees;
@@ -103,111 +95,8 @@ namespace
       throw 0;
     num_edges /= 2;
 
-    std::vector<VertexInformation> vertices(association.size());
-
-    for (auto & d : vertices) {
-      d.firsts.resize(association.size() + 1);
-      for (auto & f : d.firsts)
-        f = -1;
-
-      d.distances.resize(association.size());
-    }
-
-    /* build up distance 1 lists */
-    unsigned i = 0;
-    for (auto & i_elem : association) {
-      int prev = -1;
-      unsigned j = 0;
-      for (auto & j_elem : association) {
-        if (i == j) {
-          vertices[i].firsts[0] = i;
-          vertices[i].distances[j].distance = 0;
-          vertices[i].distances[j].next = -1;
-        }
-        else if (find(edges.begin(), edges.end(), std::make_pair(i_elem.second, j_elem.second)) != edges.end()) {
-          if (-1 == vertices[i].firsts[1]) {
-            vertices[i].firsts[1] = j;
-            vertices[i].distances[j].distance = 1;
-            vertices[i].distances[j].next = -1;
-            prev = j;
-          }
-          else {
-            vertices[i].distances[prev].next = j;
-            vertices[i].distances[j].distance = 1;
-            vertices[i].distances[j].next = -1;
-            prev = j;
-          }
-        }
-        else {
-          vertices[i].distances[j].distance = -1;
-          vertices[i].distances[j].next = -1;
-        }
-        ++j;
-      }
-      ++i;
-    }
-
-    /* build up distance k lists */
-    for (unsigned k = 2 ; k <= association.size() ; ++k) {
-      // for each vertex i...
-      for (unsigned i = 0 ; i < association.size() ; ++i) {
-        int prev = -1;
-        // for each vertex a at distance k - 1 from i...
-        for (int a = vertices[i].firsts[k - 1] ; a != -1 ; a = vertices[i].distances[a].next) {
-          // for each vertex j at distance 1 from a...
-          for (int j = vertices[a].firsts[1] ; j != -1 ; j = vertices[a].distances[j].next) {
-            // are i and j currently infinitely far apart?
-            if (vertices[i].distances[j].distance == -1) {
-              // distance from i to j is now k, via a.
-              vertices[i].distances[j].distance = k;
-              if (-1 == prev)
-                vertices[i].firsts[k] = j;
-              else
-                vertices[i].distances[prev].next = j;
-              prev = j;
-            }
-          }
-        }
-      }
-    }
-
-    for (unsigned i = 0 ; i < association.size() ; ++i)
-      for (unsigned j = 0 ; j < association.size() ; ++j) {
-        int dist = vertices[i].distances[j].distance;
-        if (0 == dist) {
-        }
-        else if (dist < 0)
-          is_connected = false;
-        else {
-          ++distance_count;
-          sum_distances += dist;
-          max_distance = std::max(max_distance, unsigned(dist));
-          if (dist >= 2) ++distancege2;
-          if (dist >= 3) ++distancege3;
-          if (dist >= 4) ++distancege4;
-          if (dist >= 5) ++distancege5;
-        }
-      }
-
-    /*std::cout << "vertices = " << association.size() << std::endl;
-    std::cout << "edges = " << num_edges << std::endl;
-    std::cout << "meandeg = " << mean_deg << std::endl;
-    std::cout << "maxdeg = " << max_deg << std::endl;
-    std::cout << "stddeg = " << std_deg << std::endl;
-    std::cout << "density = " << ((0.0 + 2 * num_edges) / (association.size() * (association.size() - 1))) << std::endl;
-    std::cout << "isconnected = " << is_connected << std::endl;
-    std::cout << "meandistance = " << ((0.0 + sum_distances) / (0.0 + distance_count)) << std::endl;
-    std::cout << "maxdistance = " << max_distance << std::endl;
-    std::cout << "proportiondistancege2 = " << ((0.0 + distancege2) / (association.size() * association.size() + 0.0)) << std::endl;
-    std::cout << "proportiondistancege3 = " << ((0.0 + distancege3) / (association.size() * association.size() + 0.0)) << std::endl;
-    std::cout << "proportiondistancege4 = " << ((0.0 + distancege4) / (association.size() * association.size() + 0.0)) << std::endl;*/
     std::cout << association.size() << "," << num_edges << "," << mean_deg << "," << max_deg << "," << std_deg << ","
-              << ((0.0 + 2 * num_edges) / (association.size() * (association.size() - 1))) << "," << is_connected << ","
-              << ((0.0 + sum_distances) / (0.0 + distance_count)) << "," << max_distance << ","
-              << ((0.0 + distancege2) / (association.size() * association.size() + 0.0)) << ","
-              << ((0.0 + distancege3) / (association.size() * association.size() + 0.0)) << ","
-              << ((0.0 + distancege4) / (association.size() * association.size() + 0.0)) << ","
-              << ((0.0 + distancege5) / (association.size() * association.size() + 0.0)) << std::endl;
+              << ((0.0 + 2 * num_edges) / (association.size() * (association.size() - 1))) << std::endl;
     exit(0);
 
     return { association, edges };
