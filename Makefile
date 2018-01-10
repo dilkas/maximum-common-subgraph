@@ -1,6 +1,6 @@
 MCSPLIT_HEURISTIC := min_max # min_max or min_product
 TIMEOUT := 1000
-LABELLINGS := 50 100
+LABELLINGS := 5 10 15 20 25 33 50
 
 # limits for clique (>= and <)
 MIN_SIZE := 0
@@ -28,7 +28,7 @@ define run_mcs
 #echo $1 `./graph_stats/graph_stats --vf --distances $(firstword $1)` `./graph_stats/graph_stats --distances $(word 2,$1)` >> results/features.csv
 #echo $1 >> results/mcs_instances
 for l in $(LABELLINGS) ; do \
-    echo $1,`ulimit -v $(MEMORY_LIMIT) ; ./algorithms/clique/solve_max_common_subgraph --undirected --labelling $$l --timeout $(TIMEOUT) $1` >> results/association.both.labels.$$l.csv ; \
+    echo $1,`ulimit -v $(MEMORY_LIMIT) ; ./algorithms/clique/solve_max_common_subgraph --undirected --no-edge-labels --labelling $$l --timeout $(TIMEOUT) $1` >> results/association.vertex.labels.$$l.csv ; \
 done
 endef
 
