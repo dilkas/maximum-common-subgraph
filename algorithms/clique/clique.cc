@@ -69,6 +69,7 @@ namespace
     unsigned distancege2 = 0;
     unsigned distancege3 = 0;
     unsigned distancege4 = 0;
+    unsigned distancege5 = 0;
     unsigned sum_distances = 0;
     unsigned max_distance = 0;
     unsigned distance_count = 0;
@@ -184,6 +185,7 @@ namespace
           if (dist >= 2) ++distancege2;
           if (dist >= 3) ++distancege3;
           if (dist >= 4) ++distancege4;
+          if (dist >= 5) ++distancege5;
         }
       }
 
@@ -202,7 +204,10 @@ namespace
     std::cout << association.size() << "," << num_edges << "," << mean_deg << "," << max_deg << "," << std_deg << ","
               << ((0.0 + 2 * num_edges) / (association.size() * (association.size() - 1))) << "," << is_connected << ","
               << ((0.0 + sum_distances) / (0.0 + distance_count)) << "," << max_distance << ","
-              << ((0.0 + distancege2) / (association.size() * association.size() + 0.0)) << std::endl;
+              << ((0.0 + distancege2) / (association.size() * association.size() + 0.0)) << ","
+              << ((0.0 + distancege3) / (association.size() * association.size() + 0.0)) << ","
+              << ((0.0 + distancege4) / (association.size() * association.size() + 0.0)) << ","
+              << ((0.0 + distancege5) / (association.size() * association.size() + 0.0)) << std::endl;
     exit(0);
 
     return { association, edges };
