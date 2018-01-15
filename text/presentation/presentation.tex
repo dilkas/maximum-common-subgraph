@@ -5,7 +5,6 @@
 \usepackage[UKenglish]{babel}
 \usepackage[UKenglish]{isodate}
 \usepackage[style=authoryear]{biblatex}
-\usepackage[group-separator={,}]{siunitx}
 
 \usetheme{PaloAlto}
 \usecolortheme{orchid}
@@ -24,7 +23,7 @@
 %\end{frame}
 
 \section{Algorithm selection}
-\begin{frame}{Algorithm selection} % m is running time
+\begin{frame}{Algorithm selection}
   \begin{definition}[\cite{DBLP:journals/ai/BischlKKLMFHHLT16}]
     Given a set $\mathcal{I}$ of problem instances, a space of algorithms
     $\mathcal{A}$, and a performance measure $m \colon \mathcal{I} \times
@@ -33,7 +32,7 @@
     $\mathbb{E}[m(i, s(i))]$.
   \end{definition}
   \pause
-  \textsc{Llama} \parencite{kotthoff_llama_2013}
+  \centering{\textsc{Llama} \parencite{kotthoff_llama_2013}}
   \begin{figure}
     \centering
     \includegraphics[scale=0.5]{llama.jpg}
@@ -60,13 +59,13 @@
 
 \section{Labelling}
 \begin{frame}{Labelling}
-  Data from \cite{foggia2001-2, DBLP:journals/prl/SantoFSV03} (\num{81400} pairs
+  Data from \cite{foggia2001-2, DBLP:journals/prl/SantoFSV03} (81400 pairs
   of graphs)
   \pause
   \begin{definition}
     A \emph{vertex-labelled graph} is a 3-tuple $G = (V, E, \mu)$, where $\mu
     \colon V \to \{ 0, \dots, N - 1 \}$ is a vertex labelling function, for some
-    $N \in \{ 1, \dots, |V| \}$.
+    $N \in \mathbb{N}$.
   \end{definition}
   \pause
   \begin{definition}
@@ -87,9 +86,6 @@
   \item 50\% labelling - 2 vertices per label on average
     \pause
   \item Typical values explored: 33\%, 50\%, 75\%
-    \begin{itemize}
-    \item Often just 33\%
-    \end{itemize}
     \pause
   \item In my data: 5\%, 10\%, 15\%, 20\%, 25\%, 33\%, 50\%
     \pause
@@ -116,24 +112,24 @@
 
 \section{Features}
 \begin{frame}{Features (34 in total)}
-  The first 9 are from \cite{DBLP:conf/lion/KotthoffMS16}
+  1--8 are from \cite{DBLP:conf/lion/KotthoffMS16}
   \begin{enumerate}
   \item number of vertices
   \item number of edges
   \item mean/max degree
   \item density
   \item mean/max distance between pairs of vertices
-  \item standard deviation of degrees
   \item number of loops
   \item proportion of vertex pairs with distance $\ge$ 2, 3, 4
   \item connectedness
+  \item standard deviation of degrees
   \item labelling percentage
   \item ratios of features 1--5
   \end{enumerate}
 \end{frame}
 
 \section{Random forests}
-\begin{frame}{Random forests} % mention: robust to transformations, votes
+\begin{frame}{Random forests \parencite{DBLP:journals/ml/Breiman01}}
   \begin{figure}
     \centering
     \includegraphics[scale=0.5]{random_forests_2.png} \\
@@ -196,11 +192,14 @@
 
 \begin{frame}{Errors}
   \begin{itemize}
-  \item Out-of-bag
-  \item (for each algorithm) $1 - \text{recall}$
+  \item Out-of-bag error
+  \item For each algorithm
+    \begin{itemize}
+    \item $1 - \text{recall}$
+    \end{itemize}
   \end{itemize}
   \begin{definition}
-    For an algorithm $A$, \emph{recall} is
+    For an algorithm $A$, \emph{recall} (sensitivity) is
     \[ \frac{\text{the number of instances that were correctly predicted as
           $A$}}{\text{the number of instances where $A$ is the correct
           prediction}}. \]
@@ -251,8 +250,8 @@
 \section{Future work}
 \begin{frame}{Future work}
   \begin{itemize}
-  \item Relationships between clique algorithm's runtime and properties of the
-    association graph
+  \item Relationships between clique algorithm's performance and properties of
+    the association graph
   \item How the association graph changes after making a decision
   \item Can $k\downarrow$ and clique work together?
   \end{itemize}

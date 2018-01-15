@@ -27,9 +27,10 @@ define run_mcs
 #echo $1, `ulimit -v $(MEMORY_LIMIT) ; ./algorithms/clique/solve_max_common_subgraph --undirected --timeout $(TIMEOUT) $1` >> results/clique.csv
 #echo $1 `./graph_stats/graph_stats --vf --distances $(firstword $1)` `./graph_stats/graph_stats --distances $(word 2,$1)` >> results/features.csv
 #echo $1 >> results/mcs_instances
-for l in $(LABELLINGS) ; do \
-    echo $1,`ulimit -v $(MEMORY_LIMIT) ; ./algorithms/clique/solve_max_common_subgraph --undirected --no-edge-labels --labelling $$l --timeout $(TIMEOUT) $1` >> results/association.vertex.labels.$$l.csv ; \
-done
+#for l in $(LABELLINGS) ; do \
+#    echo $1,`ulimit -v $(MEMORY_LIMIT) ; ./algorithms/clique/solve_max_common_subgraph --undirected --no-edge-labels --labelling $$l --timeout $(TIMEOUT) $1` >> results/association.vertex.labels.$$l.csv ; \
+#done
+echo $1,`ulimit -v $(MEMORY_LIMIT) ; ./algorithms/clique/solve_max_common_subgraph --undirected --unlabelled $1` >> results/association.mcs.csv
 endef
 
 define generate_pairs
