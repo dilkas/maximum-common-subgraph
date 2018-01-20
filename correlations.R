@@ -1,10 +1,11 @@
+library(corrgram)
+
 p.values <- c(5, 10, 15, 20, 25, 33, 50)
 runtime.names <- c("ID", "nodes", "time", "size")
 runtime.classes <- c("character", "NULL", "integer", "NULL")
 feature.names <- c("ID", "vertices", "edges", "meandeg", "maxdeg", "stddeg",
                    "density")
-nice.feature.names <- c("ID", "Number of vertices", "Number of edges",
-                        "Mean degree", "Max degree",
+nice.feature.names <- c("ID", "Vertices", "Edges", "Mean degree", "Max degree",
                         "Standard deviation of degrees", "Density")
 
 ReadFiles <- function(feature.filename, runtime.filename) {
@@ -31,19 +32,25 @@ for (p in p.values) {
 }
 data$time[is.na(data$time)] <- 1e6
 rm("local.data")
+#data <- subset(data, time < 1e6)
 
-# TODO: plot densities
-for (i in 2:length(colnames(data))) {
-  png(paste0("text/dissertation/images/", feature, "_density.png"),
+# Density plots
+for (i in 2:length(feature.names)) {
+  png(paste0("text/dissertation/images/", feature.names[i], "_density.png"),
       width = 480, height = 320)
-  plot(density(data[, feature]), main = "")
+  plot(density(data[, feature.names[i]]), main = nice.feature.names[i])
   dev.off()
 }
+png("text/dissertation/images/edges_density.png", width = 480, height = 320)
+plot(density(log(data$edges)), main = "Log of the number of edges")
+dev.off()
+png("text/dissertation/images/time_density.png", width = 480, height = 320)
+plot(density(log(data$time)), main = "Log of runtime")
+dev.off()
 
-library(corrgram)
-corrgram(data)
-#library(Hmisc)
-cor(data[, -1])
-
-data.no.timeouts <- subset(data, time < 1e6)
-cor(data.no.timeouts[, -1])
+# Correlation plot
+png("text/dissertation/images/correlations.png", width = 480, height = 320)
+corrgram(data[, -1], labels = c(nice.feature.names[2:5], "SD of degrees",
+                                "Density", "Time"), lower.panel = NULL,
+         panel = panel.cor, cor.method = "spearman", cex = 1.2)
+dev.off()

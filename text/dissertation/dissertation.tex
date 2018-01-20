@@ -5,7 +5,7 @@
 \usepackage[UKenglish]{isodate}
 \PassOptionsToPackage{hyphens}{url}\usepackage[hidelinks]{hyperref}
 \usepackage{amsfonts, amsmath, amsthm, graphicx, subcaption, mathtools,
-  tikz, cancel}
+  tikz, cancel, bm}
 \usepackage[group-separator={,}]{siunitx}
 \usepackage[linesnumbered]{algorithm2e}
 \usetikzlibrary{positioning}
@@ -1680,8 +1680,97 @@ other algorithms in 193 instances, making it considerable for an inclusion in
 a portfolio, although it might achieve similar results as with unlabelled
 graphs, where it wins too infrequently to be a valuable inclusion.
 
-\section{Clique Algorithm and the Association Graph}
+\section{The Clique Algorithm and the Association Graph}
+% TODO: intro the whole ordeal once it's done
 
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/vertices_density.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/edges_density.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/meandeg_density.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/maxdeg_density.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/stddeg_density.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/density_density.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/time_density.png}
+  \end{subfigure}
+  \caption{Density plots of the selected features of the association graph and
+    the clique algorithm's runtime. Note that the number of edges and runtime
+    were $\log$-transformed in order to improve clarity.}
+  \label{fig:densities}
+\end{figure}
+
+The next question we want to answer is ``how does the clique algorithm's running
+time depend on properties of the association graph?'' To answer this question we
+record some of the features from Section \ref{sec:features} about the
+association graph. More specifically, we record the features that are easy to
+compute (since association graphs can get quite big) and can be informative:
+number of vertices, number of edges, mean degree, max degree, standard deviation
+of degrees, and density. We record this information for association graphs
+created for all unlabelled instances from Section \ref{sec:labelled} (since the
+graphs from Section \ref{sec:unlabelled} often stretch the memory limits of the
+algorithm) as well as the \num{30000} instances previously selected for
+experiments with labelled graphs, for all 7 labelling percentages. As the
+timed-out experiments would make interpreting any results much harder, we remove
+them from the data and are left with about \num{300000} (instead of about
+\num{500000}) observations. The distribution of each column of the remaining
+dataset is plotted in Figure \ref{fig:densities}.
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.5]{images/correlations.png}
+  \caption{Spearman's rank correlation coefficients between the measured
+    variables}
+  \label{fig:correlations}
+\end{figure}
+
+To keep things simple and not violate assumptions about independent variables,
+we will only consider correlations between the variables instead of trying to
+fit some kind of a regression model. Even though research suggests that
+Pearson's correlation coefficient can be quite robust to violations of the data
+normality assumption \cite{article} (which is clearly violated with our data),
+we choose Spearman's correlation coefficient as the more appropriate
+alternative.
+
+\begin{definition}
+  \emph{Spearman's rank correlation coefficient} \cite{mood1974introduction}
+  between vectors $\bm{x}, \bm{y} \in \mathbb{R}^n$ is defined as
+\[ S = \frac{\sum_i [r(x_i) - \overline{r}(\bm{x})][r(y_i) -
+    \overline{r}(\bm{y})]}{\sqrt{\sum_i [r(x_i) -
+      \overline{r}(\bm{x})]^2\sum_i [r(y_i) -
+      \overline{r}(\bm{y})]^2}} \],
+where $\overline{r}(\bm{x}) = \sum_i r(x_i)/n$, $\overline{r}(\bm{y})
+= \sum_i r(y_i)/n$, and $r$ is a rank function, which, for each of the two
+vectors, assigns a natural number to each element such that $x_i > x_j \implies
+r(x_i) > r(x_j)$, for any two elements of $\bm{x}$.
+\end{definition}
+
+The resulting correlations are in Figure \ref{fig:correlations}. Note that all
+variables are positively correlated: some correlations are very strong, some
+average, and one very weak (between density and the standard deviation of
+degrees). More specifically, all measured characteristics of the association
+graph are positively correlated with the algorithm's running time.
+
+% At what point does clique become better than the other algorithms?
 
 %\begin{appendices}
 %\end{appendices}
