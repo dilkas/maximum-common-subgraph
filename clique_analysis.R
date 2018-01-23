@@ -47,4 +47,20 @@ for (i in 2:length(feature.names)) {
 
 wilcox.test(data$vertices[data$clique.won], data$vertices[!data$clique.won])
 
-# TODO: ...
+# Bins
+for (i in 2:length(feature.names)) {
+  print(i)
+  bin.name <- paste(feature.names[i], "bin", sep = ".")
+  data[, bin.name] <- cut(data[, feature.names[i]], 100)
+  ratios <- data.frame(bin = sort(unique(data[, bin.name])))
+  ratios$total <- apply(ratios, 1, function(x) sum(data[, bin.name] == x[1]))
+  ratios$won <- apply(ratios, 1, function(x) sum(data[, bin.name] == x[1] &
+                                                   data$clique.won))
+  png(paste0("text/dissertation/images/", feature.names[i], "_bins.png"),
+      width = 480, height = 320)
+  plot(ratios$won / ratios$total, type = "l", xaxt = "n",
+       ylab = "Clique winning rate", xlab = nice.feature.names[i])
+  s <- seq(1, nrow(ratios), by = 10)
+  axis(1, at = s, labels = ratios$bin[s])
+  dev.off()
+}

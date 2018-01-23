@@ -167,7 +167,7 @@ Finally, we define the main problem of this project:
   and $U_2 \subseteq V_2$.
 \end{definition}
 
-\chapter{The Algorithms}
+\chapter{Algorithms}
 
 We consider four algorithms that were shown to be competitive in a paper by
 McCreesh, Prosser and Trimble \cite{DBLP:conf/ijcai/McCreeshPT17}: $k\downarrow$
@@ -1680,7 +1680,7 @@ other algorithms in 193 instances, making it considerable for an inclusion in
 a portfolio, although it might achieve similar results as with unlabelled
 graphs, where it wins too infrequently to be a valuable inclusion.
 
-\section{The Clique Algorithm and the Association Graph}
+\section{The Clique Algorithm and its Association Graph}
 % TODO: intro the whole ordeal once it's done
 
 \begin{figure}
@@ -1770,7 +1770,57 @@ average, and one very weak (between density and the standard deviation of
 degrees). More specifically, all measured characteristics of the association
 graph are positively correlated with the algorithm's running time.
 
-% At what point does clique become better than the other algorithms?
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/vertices_bins.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/edges_bins.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/meandeg_bins.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/maxdeg_bins.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/stddeg_bins.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/density_bins.png}
+  \end{subfigure}
+  \caption{How often does the clique encoding outperform other algorithms at
+    different values of properties of the association graph?}
+  \label{fig:bins}
+\end{figure}
+
+The next question we ought to explore is ``can we predict the instances where
+the clique encoding is better than other algorithms based on properties of the
+association graph?'' For each of the 6 measured properties, we divide its range
+of values to 100 bins of equal size (some of them turn out to be empty) and plot
+the proportion of instances in that range where the clique encoding outperformed
+other algorithms in Figure \ref{fig:bins}. We can make 3 observations:
+\begin{itemize}
+\item For all measured properties except density, the clique algorithm is not
+  just overall faster, but also faster than other algorithms (i.e., more likely
+  to win) with smaller vales.
+\item The situation with density is less clear. Other than higher winning rates
+  with density smaller than 0.3, density of the association graph tells us
+  little about the algorithm's winrate.
+\item Except for the low density values described in the previous point, the
+  clique algorithm's winning rate stays below 0.5, meaning that simply looking
+  at each measured property of the association graph is not enough to identify
+  values of those properties that would provide a clear indication that
+  re-encoding the maximum common subgraph instance into an instance of maximum
+  clique would provide clear benefits.
+\end{itemize}
 
 %\begin{appendices}
 %\end{appendices}
