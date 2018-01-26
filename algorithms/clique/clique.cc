@@ -60,7 +60,9 @@ namespace
 
                   edges.push_back({association.find({v1, v2})->second, association.find({w1, w2})->second});
                 }
+    std::cout << edges.size() << std::endl;
 
+    /*
     // Record features/statistics
     unsigned num_edges = 0;
     unsigned max_deg = 0;
@@ -85,7 +87,7 @@ namespace
     }
     double mean_deg = ((0.0 + total_deg) / (0.0 + association.size()));
 
-    /* calculate standard deviation */
+    // calculate standard deviation
     double std_deg = 0;
     for (unsigned i = 0; i < association.size(); i++)
       std_deg += pow(degrees[i] - mean_deg, 2);
@@ -97,7 +99,7 @@ namespace
 
     std::cout << association.size() << "," << num_edges << "," << mean_deg << "," << max_deg << "," << std_deg << ","
               << ((0.0 + 2 * num_edges) / (association.size() * (association.size() - 1))) << std::endl;
-    exit(0);
+    exit(0);*/
 
     return { association, edges };
   }

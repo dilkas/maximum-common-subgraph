@@ -20,9 +20,6 @@ using std::chrono::steady_clock;
 
 namespace
 {
-  using Association = std::map<std::pair<unsigned, unsigned>, unsigned>;
-  using AssociatedEdges = std::vector<std::pair<unsigned, unsigned> >;
-
   struct VertexDistance
   {
     int distance;
@@ -417,10 +414,16 @@ namespace
   };
 }
 
+auto mcsplit_run(std::pair<Association, AssociatedEdges> product,
+                 const Params & params, VFGraph & g0) -> Result
+{
+  return select_graph_size<Apply<CliqueConnectedMCS>::template Type,
+                           Result>(AllGraphSizes(), product, params, g0);
+}
+
 auto clique_subgraph_isomorphism(const std::pair<VFGraph, VFGraph> & graphs, const Params & params) -> Result
 {
   auto product = modular_product(graphs.first, graphs.second);
-
   return select_graph_size<Apply<CliqueConnectedMCS>::template Type, Result>(AllGraphSizes(), product, params, graphs.first);
 }
 

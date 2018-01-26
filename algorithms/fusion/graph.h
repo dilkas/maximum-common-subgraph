@@ -12,5 +12,6 @@ struct Graph {
 
 Graph induced_subgraph(struct Graph& g, std::vector<int> vv);
 
-Graph readGraph(char* filename, char format, bool directed, bool edge_labelled, bool vertex_labelled);
+Graph readGraph(char* filename, char format, bool directed, bool edge_labelled,
+                bool vertex_labelled, int labelling);
 

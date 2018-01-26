@@ -9,7 +9,6 @@ MAX_SIZE := 30000
 # memory limits for clique
 MEMORY_LIMIT := 7340032
 
-# add -a to mcsplit to make it use vertex and edge labels
 define run_sip
 #echo $1, `./algorithms/mcsplit/mcsp --timeout=$(TIMEOUT) -l -q $(MCSPLIT_HEURISTIC)$1` >> results/mcsplit.csv
 #echo $1, `./algorithms/kdown/solve_subgraph_isomorphism sequentialix --timeout $(TIMEOUT) --format lad --induced $1` >> results/kdown.csv
@@ -27,17 +26,17 @@ define run_mcs
 #echo $1, `ulimit -v $(MEMORY_LIMIT) ; ./algorithms/clique/solve_max_common_subgraph --undirected --timeout $(TIMEOUT) $1` >> results/clique.csv
 #echo $1 `./graph_stats/graph_stats --vf --distances $(firstword $1)` `./graph_stats/graph_stats --distances $(word 2,$1)` >> results/features.csv
 #echo $1 >> results/mcs_instances
-#for l in $(LABELLINGS) ; do \
-#    echo $1,`ulimit -v $(MEMORY_LIMIT) ; ./algorithms/clique/solve_max_common_subgraph --undirected --no-edge-labels --labelling $$l --timeout $(TIMEOUT) $1` >> results/association.vertex.labels.$$l.csv ; \
-#done
-echo $1,`ulimit -v $(MEMORY_LIMIT) ; ./algorithms/clique/solve_max_common_subgraph --undirected --unlabelled $1` >> results/association.mcs.csv
+for l in $(LABELLINGS) ; do \
+    echo $1,`ulimit -v $(MEMORY_LIMIT) ; ./algorithms/fusion/mcsp -a -e 1 -n $$l -q -t $(TIMEOUT) $(MCSPLIT_HEURISTIC)$1` >> results/fusion2.both.labels.$$l.csv ; \
+done
+#echo $1,`ulimit -v $(MEMORY_LIMIT) ; ./algorithms/clique/solve_max_common_subgraph --undirected --unlabelled $1` >> results/association.mcs.csv
 endef
 
 define generate_pairs
 $(foreach p,$(wildcard $(1)),$(foreach t,$(wildcard $(2)),$(subst /,_,$(3).$p.$t)))
 endef
 
-filtered: $(foreach f,$(shell cat results/filtered_instances_one_filename), $f/TRGT)
+filtered: $(foreach f,$(shell cat results/filtered_instances2), $f/TRGT)
 #while read -r line; do \ echo $${line}, `./algorithms/mcsplit/mcsp --timeout=$(TIMEOUT) -q $(MCSPLIT_HEURISTIC) $${line}` >> results/mcsplit.csv ; \ done < results/filtered_instances
 
 #main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/si/*/*))

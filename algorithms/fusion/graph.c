@@ -130,7 +130,7 @@ int read_word(FILE *fp) {
 }
 
 struct Graph readBinaryGraph(char* filename, bool directed, bool edge_labelled,
-        bool vertex_labelled)
+                             bool vertex_labelled, int labelling)
 {
     struct Graph g(0);
     FILE* f;
@@ -143,7 +143,7 @@ struct Graph readBinaryGraph(char* filename, bool directed, bool edge_labelled,
 
     // Labelling scheme: see
     // https://github.com/ciaranm/cp2016-max-common-connected-subgraph-paper/blob/master/code/solve_max_common_subgraph.cc
-    int m = g.n * 33 / 100;
+    int m = g.n * labelling / 100;
     int p = 1;
     int k1 = 0;
     int k2 = 0;
@@ -171,11 +171,13 @@ struct Graph readBinaryGraph(char* filename, bool directed, bool edge_labelled,
     return g;
 }
 
-struct Graph readGraph(char* filename, char format, bool directed, bool edge_labelled, bool vertex_labelled) {
+struct Graph readGraph(char* filename, char format, bool directed,
+                       bool edge_labelled, bool vertex_labelled, int labelling) {
     struct Graph g(0);
     if (format=='D') g = readDimacsGraph(filename, directed, vertex_labelled);
     else if (format=='L') g = readLadGraph(filename, directed);
-    else if (format=='B') g = readBinaryGraph(filename, directed, edge_labelled, vertex_labelled);
+    else if (format=='B') g = readBinaryGraph(filename, directed, edge_labelled,
+                                              vertex_labelled, labelling);
     else fail("Unknown graph format\n");
     return g;
 }

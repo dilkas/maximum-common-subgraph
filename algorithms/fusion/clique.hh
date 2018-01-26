@@ -17,6 +17,10 @@ struct VFGraph
     std::vector<std::vector<unsigned> > edges;
 };
 
-auto clique_subgraph_isomorphism(const std::pair<VFGraph, VFGraph> & graphs, const Params & params) -> Result;
+using Association = std::map<std::pair<unsigned, unsigned>, unsigned>;
+using AssociatedEdges = std::vector<std::pair<unsigned, unsigned> >;
 
+auto clique_subgraph_isomorphism(const std::pair<VFGraph, VFGraph> & graphs, const Params & params) -> Result;
+auto mcsplit_run(std::pair<Association, AssociatedEdges> product,
+                 const Params & params, VFGraph & g0) -> Result;
 #endif
