@@ -416,11 +416,9 @@ void run_clique(const Graph & g0, const Graph & g1, vector<VtxPair> & incumbent,
           g1.adjmat.at(a2.first.second).at(a1.first.second))
         edges.push_back({a1.second, a2.second});
 
-  // vertices_by_label is only used to construct the association graph,
-  // so we don't have to initialise it
+  // fields related to labels are not used and don't have to be initialised
   VFGraph first_graph;
   first_graph.size = g0.n;
-  //first_graph.vertex_labels = g0.label;
   first_graph.edges = g0.adjmat;
 
   Params params;

@@ -28,8 +28,9 @@
 \begin{document}
 \maketitle
 
-%\begin{abstract} TODO: obviously
-%\end{abstract}
+\begin{abstract}
+  TODO: obviously
+\end{abstract}
 
 \educationalconsent
 \tableofcontents
@@ -37,16 +38,14 @@
 \chapter{Introduction}
 \pagenumbering{arabic}
 
-TODO: introduce algorithm selection more formally
-
 The purpose of this project is to create and explore machine learning-based
 algorithm \emph{portfolios}, i.e., machine learning models whose main goal is to
 provide a mapping, assigning the best-performing algorithm to each problem
 instance \cite{DBLP:journals/ai/BischlKKLMFHHLT16, DBLP:journals/ac/Rice76}.
 
 We begin with a definition of a graph suitable for the empirical data described
-in Chapter \ref{chapter:problems} and used in Chapter
-\ref{chapter:generating_data}.
+in Chapter~\ref{chapter:problems} and used in
+Chapter~\ref{chapter:generating_data}.
 
 \begin{definition}
   Let $S$ be a set and $k$ a non-negative integer. Then $[S]^k$ denotes
@@ -69,13 +68,13 @@ as follows (the definitions are loosely inspired by \cite{abu-aisheh_2016}):
 
 \begin{definition} \label{def:vertex_label}
   A \emph{(vertex-)labelled graph} is a 3-tuple $G = (V, E, \mu)$, where $V$,
-  $E$ are as in Definition \ref{def:graph} and $\mu \colon V \to \{ 0, \dots, N
+  $E$ are as in Definition~\ref{def:graph} and $\mu \colon V \to \{ 0, \dots, N
   - 1 \}$ is a vertex labelling function, for some $N \in \mathbb{N}$.
 \end{definition}
 
 \begin{definition} \label{def:edge_label}
   A \emph{fully labelled graph} is a 4-tuple $G = (V, E, \mu, \zeta)$, where the
-  first three elements are as in Definition \ref{def:vertex_label} and $\zeta
+  first three elements are as in Definition~\ref{def:vertex_label} and $\zeta
   \colon E \to \{ 0, \dots, M - 1 \}$ is an edge labelling function, for some $M
   \in \mathbb{N}$.
 \end{definition}
@@ -99,8 +98,8 @@ vertex-labelled graphs as well. When vertex and/or edge labels are immaterial to
 a definition, we will omit the labelling function from the full 4-tuple and
 denote a graph as just $G = (V, E)$.
 
-We formulate all definitions in terms of undirected multigraphs as some of the
-graphs in Chapter \ref{chapter:problems} contain multiple edges and many contain
+We formulate all definitions in terms of undirected multigraphs, as some of the
+graphs in Chapter~\ref{chapter:problems} contain multiple edges, and many contain
 at least one loop. In the rest of the dissertation, we will use the word
 ``graph'' to denote undirected multigraphs. Next we adapt some basic graph
 theory definitions to work with our definitions of graphs and labelling. As most
@@ -126,20 +125,14 @@ relevant to this dissertation.
 
 \begin{definition}
   Let $f \colon X \to Y$ be a function. Then the \emph{restriction} of $f$ to $A
-  \subseteq X$ is a function $f|_A \colon A \to Y$ such that $\forall a \in A$,
+  \subseteq X$ is the function $f|_A \colon A \to Y$ such that $\forall a \in A$,
   $f|_A(a) = f(a)$ \cite{stoll1979set}.
 \end{definition}
 
-\begin{definition} A graph $G_2 = (V_2, E_2, \mu_2, \zeta_2)$ is a
-  \emph{subgraph} of graph $G_1 = (V_1, E_1, \mu_1, \zeta_1)$ if
-  \cite{DBLP:books/daglib/0030488}:
-  \begin{itemize}
-  \item $V_2 \subseteq V_1$,
-  \item $E_2 \subseteq E_1$ (with the edge-mapping function restricted to
-    $E_2$),
-  \item $\mu_2 = \mu_1|_{V_2}$,
-  \item $\zeta_2 = \zeta_1|_{E_2}$.
-  \end{itemize}
+\begin{definition} A graph $G' = (V', E', \mu', \zeta')$ is a
+  \emph{subgraph} of graph $G = (V, E, \mu, \zeta)$ if: $V' \subseteq V$, $E'
+  \subseteq E$ (with the edge-mapping function restricted to $E'$), $\mu' =
+  \mu|_{V'}$, $\zeta' = \zeta|_{E'}$ \cite{DBLP:books/daglib/0030488}.
 \end{definition}
 
 \begin{definition} \label{def:induced_subgraph}
@@ -154,8 +147,10 @@ relevant to this dissertation.
   to $\{ v_1, v_2 \}$ \cite{DBLP:journals/jgo/PardalosX94a}.
 \end{definition}
 
-Finally, we define the main problem of this project:
+\noindent Finally, we define the main problem of this project:
 
+% TODO: split into CIS and MCIS
+% TODO: state that it is NP-C/-Hard
 \begin{definition}
   A \emph{maximum common (induced) subgraph} between graphs $G_1$ and $G_2$ is a
   graph $G_3 = (V_3, E_3)$ such that $G_3$ is isomorphic to induced subgraphs of
@@ -169,12 +164,13 @@ Finally, we define the main problem of this project:
 
 \chapter{Algorithms}
 
-We consider four algorithms that were shown to be competitive in a paper by
-McCreesh, Prosser and Trimble \cite{DBLP:conf/ijcai/McCreeshPT17}: $k\downarrow$
-\cite{DBLP:conf/aaai/HoffmannMR17}, \textsc{McSplit},
-$\textsc{McSplit}\downarrow$ \cite{DBLP:conf/ijcai/McCreeshPT17}, and the clique
-encoding \cite{DBLP:conf/cp/McCreeshNPS16}. In order to explain how they work,
-we need to define two other problems:
+We consider four algorithms that were shown to be competitive in a recent paper by
+McCreesh, Prosser and Trimble \cite{DBLP:conf/ijcai/McCreeshPT17}: $k{\downarrow}$
+\cite{DBLP:conf/aaai/HoffmannMR17}, \textsc{McSplit}
+\cite{DBLP:conf/ijcai/McCreeshPT17}, $\textsc{McSplit}{\downarrow}$
+\cite{DBLP:conf/ijcai/McCreeshPT17}, and the clique encoding
+\cite{DBLP:conf/cp/McCreeshNPS16}. In order to explain how they work, we need to
+define two other problems:
 
 \begin{definition}
   Given a graph $G$, the \emph{maximum clique problem} is an optimisation problem
@@ -190,7 +186,8 @@ we need to define two other problems:
   \cite{DBLP:journals/ai/Solnon10, Valiente97analgorithm,
     DBLP:journals/constraints/ZampelliDS10}, respectively. We will use these
   definitions in the context of both the subgraph isomorphism problem and the
-  maximum common subgraph problem.
+  maximum common subgraph problem, where the word 'pattern' will typically refer
+  to the smaller of the two graphs.
 \end{definition}
 
 \begin{figure}
@@ -203,7 +200,7 @@ we need to define two other problems:
       \node (u4) at (2, 3) {$u_4$};
       \node (u5) at (2, 1) {$u_5$};
     \end{scope}
-    \path (u1) [color=blue,thick] edge node {} (u2);
+    \path (u1) [color=blue,ultra thick] edge node {} (u2);
     \path (u1) edge node {} (u4);
     \path (u1) edge node {} (u5);
     \path (u2) edge node {} (u4);
@@ -216,7 +213,7 @@ we need to define two other problems:
       \node (v4) [fill=gray] at (2, 3) {$v_4$};
       \node (v5) [fill=gray] at (2, 1) {$v_5$};
     \end{scope}
-    \begin{scope}[color=blue,thick]
+    \begin{scope}[color=blue,ultra thick]
       \path (v1) edge node {} (v2);
       \path (v1) edge node {} (v4);
       \path (v2) edge node {} (v4);
@@ -229,25 +226,26 @@ we need to define two other problems:
   \label{fig:graphs}
 \end{figure}
 
-We will illustrate how each algorithm works by considering the graphs in Figure
-\ref{fig:graphs}. Since $G_p$ has only one blue edge, while all edges of $G_t$
-are blue, any common subgraph can have up to one edge. It is then obvious that
-the maximum common subgraph is isomorphic to the subgraph induced by $\{ u_1,
-u_2, u_3 \}$ in $G_p$ and it is isomorphic to multiple induced subgraphs of
-$G_t$. TODO: use this to explain \textsc{McSplit} and clique, but probably
-not $k\downarrow$.
+We will illustrate how each algorithm works by considering the graphs in
+Figure~\ref{fig:graphs}. Since $G_p$ has only one blue edge, while all edges of
+$G_t$ are blue, any common subgraph can have up to one edge. It is then obvious
+that the maximum common subgraph is isomorphic to the subgraph induced by $\{
+u_1, u_2, u_3 \}$ in $G_p$ and it is isomorphic to multiple induced subgraphs of
+$G_t$. TODO: use this to explain \textsc{McSplit} and clique, but probably not
+$k{\downarrow}$.
 
-$k\downarrow$ algorithm \cite{DBLP:conf/aaai/HoffmannMR17} starts by trying to
-solve the subgraph isomorphism problem, i.e., finding the pattern graph in the
-target graph. If that fails, it allows a single vertex of the pattern graph to
-not match any of the target graph vertices and tries again, allowing smaller and
-smaller pattern graphs until it finds a solution. The number of vertices of the
-pattern graph that are allowed this additional freedom is represented by $k$.
-More specifically, the algorithm creates a domain for each pattern graph vertex,
-which initially includes all vertices of the target graph and $k$ wildcards. The
-domains are filtered with various propagation techniques. Then the search begins
-with a smallest domain (not counting wildcards), a value is chosen, and domains
-are filtered again to eliminate the chosen value.
+The $k{\downarrow}$ algorithm \cite{DBLP:conf/aaai/HoffmannMR17} starts by
+trying to solve the subgraph isomorphism problem, i.e., finding the pattern
+graph in the target graph. If that fails, it allows a single vertex of the
+pattern graph to not match any of the target graph vertices and tries again,
+allowing smaller and smaller pattern graphs until it finds a solution. The
+number of vertices of the pattern graph that are allowed this additional freedom
+is represented by $k$. More specifically, the algorithm creates a domain for
+each pattern graph vertex, which initially includes all vertices of the target
+graph and $k$ wildcards. The domains are filtered with various propagation
+techniques. Then the search begins with a smallest domain (not counting
+wildcards), a value is chosen, and domains are filtered again to eliminate the
+chosen value.
 
 The clique encoding \cite{DBLP:conf/cp/McCreeshNPS16} solves the
 maximum common subgraph problem by creating a new (\emph{association}) graph and
@@ -268,13 +266,13 @@ same labels. The labels are also used in the upper bound heuristic function:
 if a particular label is assigned to $m$ vertices in $G_1$ and $n$ vertices in
 $G_2$, then up to $\min \{ m, n \}$ pairs can be matched for that label.
 
-$\textsc{McSplit} \downarrow$ is a variant of \textsc{McSplit} mentioned but not
+$\textsc{McSplit} {\downarrow}$ is a variant of \textsc{McSplit} mentioned but not
 explained in the original paper \cite{DBLP:conf/ijcai/McCreeshPT17}. It is meant
-to be similar to $k\downarrow$ in that it starts by trying to find a subgraph
+to be similar to $k{\downarrow}$ in that it starts by trying to find a subgraph
 isomorphism and keeps decreasing the size of common subgraphs that it is
 interested in until a solution is found. Based on the source
 code\footnote{\url{https://github.com/jamestrimble/ijcai2017-partitioning-common-subgraph/blob/master/code/james-cpp/mcsp.c}},
-there are a few key differences between $\textsc{McSplit} \downarrow$ and
+there are a few key differences between $\textsc{McSplit} {\downarrow}$ and
 \textsc{McSplit}:
 \begin{itemize}
 \item Instead of always looking for larger and larger common subgraphs, we have
@@ -290,12 +288,12 @@ We use two graph databases that contain a large variety of graphs differing in
 size, various characteristics, and the way they were generated. The
 \textsc{McSplit} paper \cite{DBLP:conf/ijcai/McCreeshPT17} used the same
 data to compare these (and a few constraint programming) algorithms and
-found \textsc{McSplit} to win with unlabelled graphs described in Section
-\ref{sec:labelled} of this paper, the clique encoding to win with labelled
-graphs, and $\textsc{McSplit}\downarrow$ to win with unlabelled graphs from
-Section \ref{sec:unlabelled}. However, in some cases the difference in
-performance between \textsc{McSplit} and the clique encoding or between
-$\textsc{McSplit}\downarrow$ and $k\downarrow$ was very small.
+found \textsc{McSplit} to win with unlabelled graphs described in
+Section~\ref{sec:labelled} of this paper, the clique encoding to win with
+labelled graphs, and $\textsc{McSplit}{\downarrow}$ to win with unlabelled
+graphs from Section~\ref{sec:unlabelled}. However, in some cases the difference
+in performance between \textsc{McSplit} and the clique encoding or between
+$\textsc{McSplit}{\downarrow}$ and $k{\downarrow}$ was very small.
 
 \section{Labelled Graphs} \label{sec:labelled}
 All labelled graphs are taken from the ARG Database \cite{foggia2001-2,
@@ -308,7 +306,7 @@ graphs. Their unlabelled versions are used as well.
 
 \subsection{Characteristics of Graph Labelling} \label{sec:characteristics}
 
-In Definitions \ref{def:vertex_label} and \ref{def:edge_label} we used $N$ and
+In Definitions~\ref{def:vertex_label} and \ref{def:edge_label} we used $N$ and
 $M$ to denote the number of different labels for vertices and edges,
 respectively. The ARG Database supports interpreting the same graphs to have
 different numbers of different labels via the following
@@ -325,7 +323,7 @@ parameter\footnote{\url{http://mivia.unisa.it/datasets/graph-database/arg-databa
   \centering
   \includegraphics[scale=0.5]{images/labelling_histogram.png}
   \caption{Histogram of the difference between the expected number of vertices
-    assigned each label and the actual number (for all labelled graphs)}
+    assigned each label and the actual number (for all labelled graphs).}
   \label{figure:labelling_histogram}
 \end{figure}
 
@@ -335,7 +333,7 @@ labels are distributed among the $N$ values. We calculate the number of vertices
 that were assigned each label for each graph (represented by $C$) and compare
 those values with the numbers we would expect from a uniform distribution
 (represented by $E(C)$). We plot a histogram of the difference $E(C) - C$ in
-Figure \ref{figure:labelling_histogram} and observe that the difference is
+Figure~\ref{figure:labelling_histogram} and observe that the difference is
 normally distributed around 0.
 
 \section{Unlabelled Graphs} \label{sec:unlabelled}
@@ -380,7 +378,7 @@ minor differences from the version on Christine Solnon's website.
 \end{remark}
 
 \begin{remark}
-  Since $k\downarrow$ comes from the subgraph isomorphism problem background, it
+  Since $k{\downarrow}$ comes from the subgraph isomorphism problem background, it
   treats the two (pattern and target) graphs differently. Therefore, when graphs
   are not divided into patterns and targets, we run the algorithms with both
   orderings ($(G_1, G_2)$ and $(G_2, G_1)$).
@@ -393,12 +391,12 @@ and evaluate ML models in order to compare algorithms and was used to create
 algorithm portfolios for the travelling salesperson problem
 \cite{DBLP:conf/lion/KotthoffKHT15} and the subgraph isomorphism problem
 \cite{DBLP:conf/lion/KotthoffMS16}. First, we run each algorithm on all pairs of
-pattern-target graphs and record the running times (described in Section
-\ref{sec:runtimes}). Then, we adapt a graph feature extractor program used in
-\cite{DBLP:conf/lion/KotthoffMS16} to handle the binary format of the ARG
-Database \cite{foggia2001-2, DBLP:journals/prl/SantoFSV03}, run it on all
-graphs, and record the features in a way described in Section
-\ref{sec:features}.
+pattern-target graphs and record the running times (described in
+Section~\ref{sec:runtimes}). Then, we adapt a graph feature extractor program
+used in \cite{DBLP:conf/lion/KotthoffMS16} to handle the binary format of the
+ARG Database \cite{foggia2001-2, DBLP:journals/prl/SantoFSV03}, run it on all
+graphs, and record the features in a way described in
+Section~\ref{sec:features}.
 
 \section{Running Time of Algorithms} \label{sec:runtimes}
 
@@ -420,12 +418,12 @@ Some limitations had to be enforced to avoid running out of memory. First, the
 clique algorithm requires $O(n^2m^2)$ memory for a pair of graphs with $n$ and
 $m$ vertices \cite{DBLP:conf/aaai/HoffmannMR17, DBLP:conf/cp/McCreeshNPS16}, so
 its virtual memory usage was limited to 7 GB with \texttt{ulimit -v} and the
-instances from Section \ref{sec:unlabelled} (which contain much larger graphs)
+instances from Section~\ref{sec:unlabelled} (which contain much larger graphs)
 were restricted to $m \times n < \num{16000}$. Second, having almost $10^5$
 problem instances and analysing 7 different kinds of labelling (according to
-Definition \ref{def:percent_labelling}) results in too much data for the ML
+Definition~\ref{def:percent_labelling}) results in too much data for the ML
 algorithm. Therefore, we sample \num{30000} out of \num{81400} instances from
-Section \ref{sec:labelled}. The sample is drawn once and used for training ML
+Section~\ref{sec:labelled}. The sample is drawn once and used for training ML
 models for both types of labelling. As with 50\% labelling most instances are
 solved within the time limit, sampling from the whole database still leaves us
 with enough relevant data.
@@ -445,13 +443,13 @@ of the problem instances was solved in that amount of time or less.
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
     \includegraphics[width=\textwidth]{images/ecdf_mcs.png}
-    \caption{Data from Section \ref{sec:labelled}, the ARG Database}
+    \caption{Data from Section~\ref{sec:labelled}, the ARG Database}
     \label{fig:ecdf_unlabelled_mcs}
   \end{subfigure}
   \begin{subfigure}[t]{0.49\textwidth}
     \centering
     \includegraphics[width=\textwidth]{images/ecdf_sip.png}
-    \caption{Data from Section \ref{sec:unlabelled}}
+    \caption{Data from Section~\ref{sec:unlabelled}}
     \label{fig:ecdf_unlabelled_sip}
   \end{subfigure}
   \begin{subfigure}[t]{\textwidth}
@@ -460,27 +458,28 @@ of the problem instances was solved in that amount of time or less.
     \caption{All unlabelled data}
     \label{fig:ecdf_unlabelled_both}
   \end{subfigure}
-  \caption{Comparison of the runtimes of algorithms on unlabelled data}
+  \caption{Comparison of the runtimes of algorithms on unlabelled data.}
   \label{fig:ecdf_unlabelled}
 \end{figure}
 
-We plot the ECDF plots for unlabelled graphs in both databases in Figure
-\ref{fig:ecdf_unlabelled}. We can check that the orderings of the algorithms in
-parts (a) and (b) of Figure \ref{fig:ecdf_unlabelled} are the same as in Figures
-3a and 4 in the \textsc{McSplit} paper \cite{DBLP:conf/ijcai/McCreeshPT17}.
-Namely, \textsc{McSplit} outperforms $k\downarrow$ in Figure
-\ref{fig:ecdf_unlabelled_mcs}, and the opposite happens in Figure
-\ref{fig:ecdf_unlabelled_sip}. In Figure \ref{fig:ecdf_unlabelled_both} we also
-plot a curve for the \emph{virtual best solver (VBS)}, i.e., a perfect algorithm
-portfolio that always chooses the best-performing algorithm for each problem
-instance. Note that the difference between $\textsc{McSplit}\downarrow$ and VBS
-is very small. Therefore, a portfolio cannot provide significant performance
-benefits for this subproblem.
+We plot the ECDF plots for unlabelled graphs in both databases in
+Figure~\ref{fig:ecdf_unlabelled}. We can check that the orderings of the
+algorithms in parts (a) and (b) of Figure~\ref{fig:ecdf_unlabelled} are the same
+as in Figures 3a and 4 in the \textsc{McSplit} paper
+\cite{DBLP:conf/ijcai/McCreeshPT17}. Namely, \textsc{McSplit} outperforms
+$k{\downarrow}$ in Figure \ref{fig:ecdf_unlabelled_mcs}, and the opposite
+happens in Figure \ref{fig:ecdf_unlabelled_sip}. In
+Figure~\ref{fig:ecdf_unlabelled_both} we also plot a curve for the \emph{virtual
+  best solver (VBS)}, i.e., a perfect algorithm portfolio that always chooses
+the best-performing algorithm for each problem instance. Note that the
+difference between $\textsc{McSplit}{\downarrow}$ and VBS is very small.
+Therefore, a portfolio cannot provide significant performance benefits for this
+subproblem.
 
 \begin{table}
   \centering
   \begin{tabular}{l r r r r}
-    Dataset & clique & $k\downarrow$ & \textsc{McSplit} & $\textsc{McSplit}\downarrow$ \\
+    Dataset & clique & $k{\downarrow}$ & \textsc{McSplit} & $\textsc{McSplit}{\downarrow}$ \\
     \hline
     \texttt{images-CVIU11} & 0 & 32 & 79 & 1081 \\
     \texttt{images-PR15} & 0 & 0 & 0 & 24 \\
@@ -494,22 +493,22 @@ benefits for this subproblem.
     \hline
     Total & 1533 & 240 & 22665 & 30254
   \end{tabular}
-  \caption{The number of times each algorithm was the best, for each dataset}
+  \caption{The number of times each algorithm was the best, for each dataset.}
   \label{table:best}
 \end{table}
 
-Table \ref{table:best} shows that most of the datasets have multiple algorithms
+Table~\ref{table:best} shows that most of the datasets have multiple algorithms
 that managed to outperform the others for some problem instances. Thus, looking
 at the differences between different datasets will not be enough to predict the
-best algorithm. More specifically, Table \ref{table:best} shows the numbers of
+best algorithm. More specifically, Table~\ref{table:best} shows the numbers of
 times that each algorithm's runtime was lower than or equal to the runtimes of
 other algorithms. Therefore, if 2 or more lowest runtimes are equal (as can
 often happen with single-digit runtimes), both algorithms are marked as winning
 in the table.
 
 Given this information, we would expect the ML algorithm to suggest using
-\textsc{McSplit} and $\textsc{McSplit}\downarrow$ most of the time, occasionally
-consider the clique encoding, and mostly forget about $k\downarrow$.
+\textsc{McSplit} and $\textsc{McSplit}{\downarrow}$ most of the time, occasionally
+consider the clique encoding, and mostly forget about $k{\downarrow}$.
 
 \subsection{Labelled Graphs} \label{sec:labelled_runtimes}
 
@@ -523,21 +522,21 @@ consider the clique encoding, and mostly forget about $k\downarrow$.
     \centering
     \includegraphics[width=\textwidth]{images/ecdf_both_labels.png}
   \end{subfigure}
-  \caption{Cumulative plots with the vertical axis starting at 0.8}
+  \caption{Cumulative plots with the vertical axis starting at 0.8.}
   \label{fig:ecdfs}
 \end{figure}
 
 We deal with the two types of labelling separately, however, since the results
 are fairly similar, we describe them in the same section to highlight the
-differences. We plot the ECDFs in Figure \ref{fig:ecdfs}. The situation with
-vertex-labelled graphs is quite straightforward: $\textsc{McSplit}\downarrow$ is
+differences. We plot the ECDFs in Figure~\ref{fig:ecdfs}. The situation with
+vertex-labelled graphs is quite straightforward: $\textsc{McSplit}{\downarrow}$ is
 slight better than \textsc{McSplit}, which is better than the clique encoding.
 Moreover, the VBS curve is significantly higher, providing plenty of room for an
 ML model to outperform individual algorithms (unlike with unlabelled data). This
 latter fact is true for fully labelled graphs as well, whereas
 the other 3 curves provide a more interesting story. The clique algorithm is
 briefly winning for shorter timeout values, then is between
-$\textsc{McSplit}\downarrow$ and \textsc{McSplit} until it drops to the
+$\textsc{McSplit}{\downarrow}$ and \textsc{McSplit} until it drops to the
 3\textsuperscript{rd} place right before the final timeout at \num{1000000} ms.
 This is likely because the clique encoding is better with higher labelling
 percentages (we will see this shortly) and such graphs are generally easier to
@@ -558,17 +557,17 @@ of vertices is likely to have different labels).
     \includegraphics[width=\textwidth]{images/both_labels_linechart2.png}
     \includegraphics[width=\textwidth]{images/both_labels_linechart3.png}
   \end{subfigure}
-  \caption{For both types of labelling and for the 3 algorithms we plot how the
-    3 characteristics change with respect to the labelling percentage:
+  \caption{For both types of labelling and for the three algorithms we plot how
+    three characteristics change with respect to the labelling percentage:
     proportion of instances solved within the time limit, total runtime, and
-    number of times each algorithm outperformed the others}
+    number of times each algorithm outperformed the others.}
   \label{fig:linecharts}
 \end{figure}
 
 Just like with unlabelled graphs we could split the data into different subsets
 based on how (and by whom) the graphs were generated, now we can analyse how the
-situation changes with different labelling percentages. In Figure
-\ref{fig:linecharts} we analyse two performance measures (proportion of
+situation changes with different labelling percentages. In
+Figure~\ref{fig:linecharts} we analyse two performance measures (proportion of
 instances solved and total runtime) as well as the number of times each
 algorithm ``wins'', for each labelling percentage. The two performance
 statistics tell exactly the same story, and it is the same for both types of
@@ -576,12 +575,12 @@ labelling. The only difference is that the clique algorithm's major drop in
 performance starts at 20\% for vertex-labelled graphs and at 15\% for fully
 labelled graphs. With higher labelling percentages, the clique encoding is
 better than \textsc{McSplit}, which is marginally better than
-$\textsc{McSplit}\downarrow$. Whereas with lower levels of labelling, two
+$\textsc{McSplit}{\downarrow}$. Whereas with lower levels of labelling, two
 differences emerge: \textsc{McSplit} experiences a drop in performance below
-$\textsc{McSplit}\downarrow$, and the performance of the clique algorithm starts
-to drop exponentially. The latter is exactly what makes the clique encoding
-finish last in Figure \ref{fig:ecdfs}, even though it is in the lead for most
-labelling percentages.
+$\textsc{McSplit}{\downarrow}$, and the performance of the clique algorithm
+starts to drop exponentially. The latter is exactly what makes the clique
+encoding finish last in Figure~\ref{fig:ecdfs}, even though it is in the lead
+for most labelling percentages.
 
 \begin{remark}
 Note that we are only considering instances solved by at least one algorithm.
@@ -595,19 +594,19 @@ problem becomes significantly easier. In this case we are more interested in the
 differences between individual algorithms.
 \end{remark}
 
-As for the last two plots of Figure \ref{fig:linecharts}, \textsc{McSplit} is
-winning more often than $\textsc{McSplit}\downarrow$. This is not surprising for
+As for the last two plots of Figure~\ref{fig:linecharts}, \textsc{McSplit} is
+winning more often than $\textsc{McSplit}{\downarrow}$. This is not surprising for
 higher labelling percentages (based on the other two types of plots), but this
 remains true for lower percentages as well. Perhaps this is because by
-definition $\textsc{McSplit}\downarrow$ is better at handling problem instances
+definition $\textsc{McSplit}{\downarrow}$ is better at handling problem instances
 with a big answer. With a smaller labelling percentage, \textsc{McSplit} is more
 likely to time out on those instances, contributing to
-$\textsc{McSplit}\downarrow$ solving more instances than \textsc{McSplit}.
-Perhaps $\textsc{McSplit}\downarrow$ is also much faster on those instances,
+$\textsc{McSplit}{\downarrow}$ solving more instances than \textsc{McSplit}.
+Perhaps $\textsc{McSplit}{\downarrow}$ is also much faster on those instances,
 ensuring its lower total runtime, while consistently falling slightly behind
 \textsc{McSplit} on easier instances, resulting in a lower win count. The one
 significant difference between the two types of labelling is that the clique
-encoding wins slightly less than $\textsc{McSplit}\downarrow$ with vertex
+encoding wins slightly less than $\textsc{McSplit}{\downarrow}$ with vertex
 labels, but slightly more than \textsc{McSplit} with both vertex and edge
 labels, for 25\%--33\% labelling. Finally, the main observation from this plot
 is that the overall highest point is only at \num{16401} (\num{18031}) for
@@ -653,7 +652,7 @@ density greater than 1.
 We exclude feature extraction running time as a viable feature by itself (used
 in \cite{DBLP:conf/lion/KotthoffMS16}) since it would not provide any insight
 into what properties of the graph affect which algorithm is likely to achieve
-the best performance. Since $k\downarrow$ and $\textsc{McSplit}\downarrow$ both
+the best performance. Since $k{\downarrow}$ and $\textsc{McSplit}{\downarrow}$ both
 start by looking for (complete) subgraph isomorphisms, they are likely to
 outperform other algorithms when both graphs are very similar and the maximum
 common subgraph has (almost) as many vertices as the smaller of the two graphs.
@@ -663,10 +662,10 @@ where $G_p$ and $G_t$ are the pattern and target graphs, respectively.
 
 We analyse three different types of labelling and treat them as separate
 problems: no labels, vertex labels, vertex and edge labels. For the last two
-types, we add a feature corresponding to $p$ defined in Definition
-\ref{def:percent_labelling} and collect data for the following values of $p$:
-5\%, 10\%, 15\%, 20\%, 25\%, 33\%, 50\%. The values correspond to having about
-20, 10, 5, 4, 3, and 2 vertices/edges with the same label on average,
+types, we add a feature corresponding to $p$ defined in
+Definition~\ref{def:percent_labelling} and collect data for the following values
+of $p$: 5\%, 10\%, 15\%, 20\%, 25\%, 33\%, 50\%. The values correspond to having
+about 20, 10, 5, 4, 3, and 2 vertices/edges with the same label on average,
 respectively.
 
 \begin{remark}
@@ -683,8 +682,8 @@ respectively.
 \begin{figure}
   \centering
   \includegraphics[scale=0.7]{images/sip_loops.png}
-  \caption{Density plot of the number of loops in graphs from Section
-    \ref{sec:unlabelled}}
+  \caption{Density plot of the number of loops in graphs from
+    Section~\ref{sec:unlabelled}.}
   \label{fig:loops}
 \end{figure}
 
@@ -722,8 +721,8 @@ respectively.
     \centering
     \includegraphics[width=\textwidth]{images/mcs_maxdist.png}
   \end{subfigure}
-  \caption{Plots of how various features are distributed for graphs from Section
-  \ref{sec:labelled}}
+  \caption{Plots of how various features are distributed for graphs from
+    Section~\ref{sec:labelled}.}
   \label{fig:mcs_features1}
 \end{figure}
 
@@ -762,7 +761,7 @@ respectively.
     \includegraphics[width=\textwidth]{images/sip_maxdist.png}
   \end{subfigure}
   \caption{Plots of how various features are distributed for graphs from Section
-  \ref{sec:unlabelled}}
+ ~\ref{sec:unlabelled}.}
   \label{fig:sip_features1}
 \end{figure}
 
@@ -793,8 +792,8 @@ respectively.
     \includegraphics[width=\textwidth]{images/sip_prop4.png}
   \end{subfigure}
   \caption{Comparison of typical distances between pairs of vertices between the
-  two graph databases with graphs from Section \ref{sec:labelled} on the left
-  and graphs from Section \ref{sec:unlabelled} on the right}
+  two graph databases, with graphs from Section~\ref{sec:labelled} on the left,
+  and graphs from Section~\ref{sec:unlabelled} on the right.}
   \label{fig:proportions}
 \end{figure}
 
@@ -810,8 +809,8 @@ respectively.
   \end{subfigure}
   \caption{The density plots of log-transformed ratio of the number of vertices
     between pattern and target graphs for both databases with graphs from
-    Section \ref{sec:labelled} on the left and graphs from Section
-    \ref{sec:unlabelled} on the right}
+    Section~\ref{sec:labelled} on the left and graphs from
+    Section~\ref{sec:unlabelled} on the right.}
   \label{fig:ratio_vertices}
 \end{figure}
 
@@ -842,7 +841,7 @@ respectively.
     \includegraphics[width=\textwidth]{images/mcs_ratio_maxdist.png}
   \end{subfigure}
   \caption{The other density plots of the log-transformed ratio features for
-    graphs from Section \ref{sec:labelled}}
+    graphs from Section~\ref{sec:labelled}.}
   \label{fig:mcs_ratio}
 \end{figure}
 
@@ -873,65 +872,66 @@ respectively.
     \includegraphics[width=\textwidth]{images/sip_ratio_maxdist.png}
   \end{subfigure}
   \caption{The other density plots of the log-transformed ratio features for
-    graphs from Section \ref{sec:unlabelled}}
+    graphs from Section~\ref{sec:unlabelled}.}
   \label{fig:sip_ratio}
 \end{figure}
 
 In this section we plot and discuss how the selected features are distributed in
-both databases. As the graphs from Section \ref{sec:unlabelled} contain some
+both databases. As the graphs from Section~\ref{sec:unlabelled} contain some
 very hard instances, we only consider graphs that are part of a pair of graphs
 solved by at least one algorithm. In order to visualise highly skewed data, we
 sometimes use density plots. Furthermore, we take $\log$ transformations of
 ratio features.
 
 Firstly, one feature is not plotted as by definition it has only two possible
-values. 99.81\% of graphs from Section \ref{sec:labelled} are connected,
-compared to 93.19\% of graphs from Section \ref{sec:unlabelled}. As both numbers
+values. 99.81\% of graphs from Section~\ref{sec:labelled} are connected,
+compared to 93.19\% of graphs from Section~\ref{sec:unlabelled}. As both numbers
 are quite high, they may not be ideal for establishing if connectedness is a
 significant factor in determining which algorithm performs the best, but might
 be representative of real data in application domains such as chemistry
-\cite{WCMS:WCMS5}. Similarly, the number of loops for graphs from Section
-\ref{sec:labelled} is not plotted as it varies between two values: 0.98\% of the
-graphs have a single loops, while the remaining majority of graphs have no
-loops. On the other hand, as shown in Figure \ref{fig:loops}, some (although not
-many) graphs from Section \ref{sec:unlabelled} have significantly more loops.
+\cite{WCMS:WCMS5}. Similarly, the number of loops for graphs from
+Section~\ref{sec:labelled} is not plotted as it varies between two values:
+0.98\% of the graphs have a single loops, while the remaining majority of graphs
+have no loops. On the other hand, as shown in Figure~\ref{fig:loops}, some
+(although not many) graphs from Section~\ref{sec:unlabelled} have significantly
+more loops.
 
-Most of the features of graphs from Section \ref{sec:labelled} are displayed in
-Figure \ref{fig:mcs_features1}. Other than the number of vertices, which is
+Most of the features of graphs from Section~\ref{sec:labelled} are displayed in
+Figure~\ref{fig:mcs_features1}. Other than the number of vertices, which is
 manually controlled by the creators of the database, all other distributions are
 centred around lower values, with some outliers on the high end. More
 importantly, we have some graphs that are quite dense and some graphs with
 higher mean distance values.
 
-The same plots for graphs from Section \ref{sec:unlabelled} in Figure
-\ref{fig:sip_features1} show a similar story, albeit for clearer reasons. Since
-we filter out graphs that none of the algorithms were able to handle, our sample
-consists of all the easy instances and some harder instances that were
+The same plots for graphs from Section~\ref{sec:unlabelled} in
+Figure~\ref{fig:sip_features1} show a similar story, albeit for clearer reasons.
+Since we filter out graphs that none of the algorithms were able to handle, our
+sample consists of all the easy instances and some harder instances that were
 solved by one or two algorithms. Harder instances typically have more vertices,
 which means they are also capable of higher values for many other features,
-hence all of the density plots are right skewed.
+hence all of the density plots are right-skewed.
 
-Figure \ref{fig:proportions} shows density plots of proportions of pairs of
+Figure~\ref{fig:proportions} shows density plots of proportions of pairs of
 vertices with distance at least $k$ for $k = 2, 3, 4$. For both databases, as
 $k$ increases, the distributions shift to the left as expected. However, there
-is one important difference: even with $k = 4$ the plot for graphs from Section
-\ref{sec:unlabelled} has its highest peak around 0.9, which means that adding
-features for $k \ge 5$ could be valuable.
+is one important difference: even with $k = 4$ the plot for graphs from
+Section~\ref{sec:unlabelled} has its highest peak around 0.9, which means that
+adding features for $k \ge 5$ could be valuable. 
 
-Finally, the density plots of $\log$-transformed ratio features are in Figures
-\ref{fig:ratio_vertices}, \ref{fig:mcs_ratio}, and \ref{fig:sip_ratio}. Almost
-all of these plots for graphs from Section \ref{sec:unlabelled} (with the
+Finally, the density plots of $\log$-transformed ratio features are in
+Figures~\ref{fig:ratio_vertices}, \ref{fig:mcs_ratio}, and \ref{fig:sip_ratio}.
+Almost all of these plots for graphs from Section~\ref{sec:unlabelled} (with the
 exception of the ratio of mean degree) are clearly bimodal with one of the two
 modes centred around 0. Hence we can infer the existence of two subpopulations:
 one where pattern and target graphs have very similar properties (the majority
 for most features) and one where pattern and target graphs are very different.
-As for the graphs from Section \ref{sec:labelled}, the plot of the ratio of the
-number of vertices in Figure \ref{fig:ratio_vertices} is perfectly symmetrical
+As for the graphs from Section~\ref{sec:labelled}, the plot of the ratio of the
+number of vertices in Figure~\ref{fig:ratio_vertices} is perfectly symmetrical
 and centred around 0, since the number of vertices is a controlled variable for
 this database. All of the remaining plots for ratio features have most of the
 data very close to 0. Thus, the differences between pattern and target graphs
-are very small. Furthermore, all distributions are symmetrical---the
-pattern graph is just as likely to be larger/denser/etc. as the opposite.
+are very small. Furthermore, all distributions are symmetrical---the pattern
+graph is just as likely to be larger/denser/etc. as the opposite.
 
 \chapter{Machine Learning Models \& Their Evaluation}
 
@@ -961,8 +961,8 @@ algorithm should be chosen for each pair of graphs. For each pair of graphs,
   parameter is used to ensure a fair comparison when comparing the portfolio
   against other algorithms: the runtime of the portfolio is defined as the
   runtime of its chosen algorithm together with feature extraction time.
-  While costs for graphs from Section \ref{sec:unlabelled} reached up to 65 s,
-  the maximum cost for graphs from Section \ref{sec:labelled} is only 6 ms.
+  While costs for graphs from Section~\ref{sec:unlabelled} reached up to 65 s,
+  the maximum cost for graphs from Section~\ref{sec:labelled} is only 6 ms.
 \end{itemize}
 
 After constructing the required data frames as described above, the data needs to
@@ -1055,7 +1055,7 @@ prediction is called a \emph{vote}. A classifying random forest predicts by
 collecting the votes from all its trees and predicting the class with the
 highest number of votes.
 
-As we saw in Section \ref{sec:features}, some of the feature data is highly
+As we saw in Section~\ref{sec:features}, some of the feature data is highly
 skewed. Thus we should formally address the question of using transformations
 (such as $\log$ used for some of the plots or $x \mapsto 1/x$, giving
 the labelling percentage a different interpretation) before feeding the
@@ -1108,7 +1108,7 @@ majority vote is then declared to be the answer. The \emph{OOB error} is
 the relative frequency of incorrect predictions \cite{James:2014:ISL:2517747}.
 As each prediction was made using trees that had not seen that particular
 observation before, OOB error is a valid estimate of test error. The black line
-in Figure \ref{fig:unlabelled_forest_errors} shows how the error converges to
+in Figure~\ref{fig:unlabelled_forest_errors} shows how the error converges to
 about 17\% as we number of trees reaches 500.
 
 The other lines in the figure, one for each algorithm, are defined as $1 -
@@ -1118,11 +1118,11 @@ The other lines in the figure, one for each algorithm, are defined as $1 -
       $A$}}{\text{the number of instances where $A$ is the correct
       prediction}}. \]
 
-The error rates for $\textsc{McSplit}\downarrow$, \textsc{McSplit}, the clique
-encoding, and $k\downarrow$ converge to 11\%, 29\%, 30\%, and 80\%,
-respectively. Unlike the errors of other classes, the error of $k\downarrow$ has
+The error rates for $\textsc{McSplit}{\downarrow}$, \textsc{McSplit}, the clique
+encoding, and $k{\downarrow}$ converge to 11\%, 29\%, 30\%, and 80\%,
+respectively. Unlike the errors of other classes, the error of $k{\downarrow}$ has
 an upward trend and converges to a very high value. Perhaps the model eventually
-learns not to predict $k\downarrow$ and the data points with $k\downarrow$
+learns not to predict $k{\downarrow}$ and the data points with $k{\downarrow}$
 winning are treated as randomness in the data more so than a statistically
 significant trend.
 
@@ -1156,13 +1156,14 @@ at its lowest when all proportions $\hat{p}_{mk}$ are close to either 0 or
 region belong to a single class. Hence the Gini index is often used to evaluate
 the quality of a split.
 
+% TODO: these should not be subfigures
 \begin{figure}
   \centering
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{images/unlabelled_variable_importance.png}
     \caption{Dot chart of variable importance calculated based on the Gini index
-      and sorted from most important to least important}
+      and sorted from most important to least important.}
     \label{fig:unlabelled_variable_importance}
   \end{subfigure}
   \hfill
@@ -1174,22 +1175,22 @@ the quality of a split.
   \end{subfigure}
 \end{figure}
 
-The variable importance measure of feature $f$ in Figure
-\ref{fig:unlabelled_variable_importance} is calculated as the amount by which
-the Gini index decreases after passing nodes that use feature $f$, averaged over
-all trees in the random forest \cite{James:2014:ISL:2517747}. Looking at the
-figure more closely, the standard deviations of degrees of both target and
-pattern graphs are by far the most important predictors. Unsurprisingly, the
-worst predictors are the features with very low variance: number of loops and
-connectedness of both graphs. Perhaps more surprisingly, the ratio features are
-not as successful as one might have hoped: the ratio of the numbers of vertices
-is at the bottom 5\textsuperscript{th} place and the best ratio feature, the
-mean distance ratio, is only 10\textsuperscript{th}. Last thing to note is that
-features of the pattern graph are always behind the same features of the target
-graph and usually not far behind. Perhaps this is due to some datasets having
-less pattern graphs, or pattern graphs having fewer vertices. The variable usage
-plot in Figure \ref{fig:unlabelled_var_used} tells a similar story: the orders
-are not identical, but there are no big outliers.
+The variable importance measure of feature $f$ in
+Figure~\ref{fig:unlabelled_variable_importance} is calculated as the amount by
+which the Gini index decreases after passing nodes that use feature $f$,
+averaged over all trees in the random forest \cite{James:2014:ISL:2517747}.
+Looking at the figure more closely, the standard deviations of degrees of both
+target and pattern graphs are by far the most important predictors.
+Unsurprisingly, the worst predictors are the features with very low variance:
+number of loops and connectedness of both graphs. Perhaps more surprisingly, the
+ratio features are not as successful as one might have hoped: the ratio of the
+numbers of vertices is at the bottom 5\textsuperscript{th} place and the best
+ratio feature, the mean distance ratio, is only 10\textsuperscript{th}. Last
+thing to note is that features of the pattern graph are always behind the same
+features of the target graph and usually not far behind. Perhaps this is due to
+some datasets having less pattern graphs, or pattern graphs having fewer
+vertices. The variable usage plot in Figure~\ref{fig:unlabelled_var_used} tells
+a similar story: the orders are not identical, but there are no big outliers.
 
 \subsection{Margins}
 
@@ -1215,7 +1216,7 @@ are not identical, but there are no big outliers.
     \caption{Unsorted}
     \label{fig:unlabelled_margins2}
   \end{subfigure}
-  \caption{Margins of the data points}
+  \caption{Margins of the data points.}
   \label{fig:unlabelled_margins}
 \end{figure}
 
@@ -1237,33 +1238,33 @@ are not identical, but there are no big outliers.
     \centering
     \includegraphics[width=\textwidth]{images/mcsplitdown_hist.png}
   \end{subfigure}
-  \caption{Histograms of margins for each winning algorithm}
+  \caption{Histograms of margins for each winning algorithm.}
   \label{fig:unlabelled_margin_hist}
 \end{figure}
 
 A value above 0 means that the forest as a whole predicted correctly. A margin
-of 1 would mean that all trees voted correctly. In Figure
-\ref{fig:unlabelled_margins} we plot the margins in the following way: for each
-problem instance, the colour signifies the winning algorithm and the height
-shows its margin. Figure \ref{fig:unlabelled_margins1} shows the points sorted
-by the margin, while in Figure \ref{fig:unlabelled_margins2} they are left in
-the original order of the data (which mostly corresponds to the order of files
-in the databases, but with some variation since experiments are started in order
-but end at different times). We can recognise the same error rates as in Figure
-\ref{fig:unlabelled_forest_errors} as well as areas where \textsc{McSplit} and
-$\textsc{McSplit}\downarrow$ dominate. We also plot the histograms of how the
-margins are distributed for each algorithm in Figure
-\ref{fig:unlabelled_margin_hist}. We note that:
+of 1 would mean that all trees voted correctly. In
+Figure~\ref{fig:unlabelled_margins} we plot the margins in the following way:
+for each problem instance, the colour signifies the winning algorithm and the
+height shows its margin. Figure~\ref{fig:unlabelled_margins1} shows the points
+sorted by the margin, while in Figure~\ref{fig:unlabelled_margins2} they are
+left in the original order of the data (which mostly corresponds to the order of
+files in the databases, but with some variation since experiments are started in
+order but end at different times). We can recognise the same error rates as in
+Figure~\ref{fig:unlabelled_forest_errors} as well as areas where
+\textsc{McSplit} and $\textsc{McSplit}{\downarrow}$ dominate. We also plot the
+histograms of how the margins are distributed for each algorithm in
+Figure~\ref{fig:unlabelled_margin_hist}. We note that:
 
 \begin{itemize}
 \item Instances best handled with the clique encoding are usually recognised, but
   with significant uncertainty.
-\item We are usually wrong about $k\downarrow$ (probably because it is a
+\item We are usually wrong about $k{\downarrow}$ (probably because it is a
   winning algorithm in only 0.44\% of all cases).
 \item When faced with an instance that is best handled with
-  $\textsc{McSplit}\downarrow$, the vast majority of trees vote correctly.
+  $\textsc{McSplit}{\downarrow}$, the vast majority of trees vote correctly.
 \item \textsc{McSplit} detection rates are decent, but far behind those of
-  $\textsc{McSplit}\downarrow$.
+  $\textsc{McSplit}{\downarrow}$.
 \end{itemize}
 
 \subsection{Partial Dependence} \label{sec:unlabelled_partial}
@@ -1279,14 +1280,14 @@ margins are distributed for each algorithm in Figure
     \includegraphics[width=\textwidth]{images/clique_partial.png}
   \end{subfigure}
   \caption{Partial dependence plots of the standard deviation of degrees in the
-    target graph}
+    target graph.}
   \label{fig:unlabelled_partials}
 \end{figure}
 
 Since the standard deviations of degrees in both target and pattern graphs are
 the most important features, we plot partial dependence plots of the standard
-deviation of degrees in the target graph for $\textsc{McSplit}\downarrow$ and
-the clique encoding in Figure \ref{fig:unlabelled_partials}. The plotted
+deviation of degrees in the target graph for $\textsc{McSplit}{\downarrow}$ and
+the clique encoding in Figure~\ref{fig:unlabelled_partials}. The plotted
 function \cite{forest} is defined as
 \[ f(x) = \log{p_k(x)} - \frac{1}{K} \sum_{i=1}^K \log{p_i(x)}, \]
 where:
@@ -1298,23 +1299,23 @@ where:
   with a standard deviation of degrees in the target graph equal to $x$,
 \item $K$ is the number of classes,
 \item and $k$ is the main class under consideration
-  ($\textsc{McSplit}\downarrow$ and the clique encoding).
+  ($\textsc{McSplit}{\downarrow}$ and the clique encoding).
 \end{itemize}
 
 Essentially, $f(x)$ compares the proportion of votes for class $k$ with the
 average value over all classes. We can deduce that a low standard deviation of
-degrees is a strong sign that \textsc{McSplit} and $\textsc{McSplit}\downarrow$
+degrees is a strong sign that \textsc{McSplit} and $\textsc{McSplit}{\downarrow}$
 should perform well. On the other hand, the clique encoding is expected to
 perform better on graphs with high variance in degrees. However, $\max f(x)$ for
 the clique encoding is just barely above 0 and much lower than $\min f(x)$ for
-$\textsc{McSplit}\downarrow$, meaning that the standard deviation of degrees
+$\textsc{McSplit}{\downarrow}$, meaning that the standard deviation of degrees
 does not provide enough information to choose the clique encoding over
-\textsc{McSplit} or $\textsc{McSplit}\downarrow$.
+\textsc{McSplit} or $\textsc{McSplit}{\downarrow}$.
 
 \begin{remark}
   We omit the plots for the other two algorithms as the plot for \textsc{McSplit}
-  looks the same as the one for $\textsc{McSplit}\downarrow$ and prediction success
-  rate for $k\downarrow$ is so low that a plot for $k\downarrow$ would be
+  looks the same as the one for $\textsc{McSplit}{\downarrow}$ and prediction success
+  rate for $k{\downarrow}$ is so low that a plot for $k{\downarrow}$ would be
   meaningless.
 \end{remark}
 
@@ -1329,20 +1330,20 @@ does not provide enough information to choose the clique encoding over
   \centering
   \includegraphics[scale=0.5]{images/ecdf_unlabelled_llama.png}
   \caption{\textsc{Llama} model compared to the VBS and
-    $\textsc{McSplit}\downarrow$}
+    $\textsc{McSplit}{\downarrow}$.}
   \label{fig:ecdf_unlabelled_llama}
 \end{figure}
 
 In order to compare our ML model with other algorithms, we treat the
-VBS as the upper bound and the single best solver $\textsc{McSplit}\downarrow$
+VBS as the upper bound and the single best solver $\textsc{McSplit}{\downarrow}$
 as the lower bound. Out of 45468 instances solved by at least one algorithm, our
 model managed to solve 45290, compared to 45223 solved by
-$\textsc{McSplit}\downarrow$. In other words, it was able to close 27.3\% of the
+$\textsc{McSplit}{\downarrow}$. In other words, it was able to close 27.3\% of the
 gap between our lower and upper bounds in terms of instances solved within the
-time limit. Figure \ref{fig:ecdf_unlabelled_llama} shows how the ML model
-compares to the VBS and the single best solver $\textsc{McSplit}\downarrow$
+time limit. Figure~\ref{fig:ecdf_unlabelled_llama} shows how the ML model
+compares to the VBS and the single best solver $\textsc{McSplit}{\downarrow}$
 (note that the vertical axis starts at 0.9 rather than 0). Unsurprisingly, the
-model outperforms $\textsc{McSplit}\downarrow$, but does not reach the best
+model outperforms $\textsc{McSplit}{\downarrow}$, but does not reach the best
 possible performance represented by the VBS.
 
 \section{Labelled Graphs} \label{sec:ml_labelled}
@@ -1365,26 +1366,26 @@ possible performance represented by the VBS.
 
 \begin{table}
   \centering
-  \begin{tabular}{l | c c}
+  \begin{tabular}{l c c}
     Error type & Final value for vertex labels (\%) & Final value for both labels (\%) \\
     \hline
     OOB & 13 & 14 \\
     clique & 8 & 7 \\
     \textsc{McSplit} & 22 & 29 \\
-    $\textsc{McSplit}\downarrow$ & 11 & 11
+    $\textsc{McSplit}{\downarrow}$ & 11 & 11
   \end{tabular}
   \caption{The values that all 4 errors (approximately) converge to, for both
-    types of labelling}
+    types of labelling.}
   \label{table:errors}
 \end{table}
 
-Once again we plot the error rates (defined in Section
-\ref{sec:unlabelled_error_rates}) in Figure \ref{fig:forest_errors}. The final
-error values are summarized in Table \ref{table:errors}. This time all errors
-converge downwards and are below 50\%. Comparing vertex-labelled and fully
-labelled subproblems, the only noticeable difference is that \textsc{McSplit} has
-a lower error rate for vertex-labelled graphs, which is also the
-worst-recognised algorithm for both types of labelling.
+Once again we plot the error rates (defined in
+Section~\ref{sec:unlabelled_error_rates}) in Figure~\ref{fig:forest_errors}. The
+final error values are summarized in Table~\ref{table:errors}. This time all
+errors converge downwards and are below 50\%. Comparing vertex-labelled and
+fully labelled subproblems, the only noticeable difference is that
+\textsc{McSplit} has a lower error rate for vertex-labelled graphs, which is
+also the worst-recognised algorithm for both types of labelling.
 
 \begin{figure}
   \centering
@@ -1397,7 +1398,7 @@ worst-recognised algorithm for both types of labelling.
     \includegraphics[width=\textwidth]{images/both_labels_variable_importance.png}
   \end{subfigure}
   \caption{Variable importance for both types of labelling, sorted from most to
-    least important}
+    least important.}
   \label{fig:variable_importance}
 \end{figure}
 
@@ -1415,23 +1416,23 @@ worst-recognised algorithm for both types of labelling.
   \label{fig:var_used}
 \end{figure}
 
-According to the variable importance measures plotted in Figure
-\ref{fig:variable_importance}, the standard deviations of degrees for
+According to the variable importance measures plotted in
+Figure~\ref{fig:variable_importance}, the standard deviations of degrees for
 both pattern and target graphs still act as top predictors, however, they are
 overshadowed by the labelling feature, which is to be expected considering how
 impactful it is to the performance of the clique algorithm and the difficulty of
 the problem in general. For graphs with both vertex and edge labels, the
 vertex/edge counts make up the next most important predictors, while for
-vertex-labelled graphs, the number of vertices in the target graph seems to
-be less important (perhaps simply due to chance). Comparing this with the
-variable usage statistic in Figure \ref{fig:var_used} (which is almost identical
-for the two subproblems), the top 3 spots remain the same, the numbers of
-edges drop to the middle of the list, and the numbers of vertices drop to the
+vertex-labelled graphs, the number of vertices in the target graph seems to be
+less important (perhaps simply due to chance). Comparing this with the variable
+usage statistic in Figure~\ref{fig:var_used} (which is almost identical for the
+two subproblems), the top 3 spots remain the same, the numbers of edges drop to
+the middle of the list, and the numbers of vertices drop to the
 6\textsuperscript{th}--7\textsuperscript{th} places from the bottom. Apparently,
-even though all 4 of these predictors end up doing a great job at splitting the
-data to reduce the Gini index (a variation of which is used by the random forest
-algorithm in choosing which predictor to split on \cite{167153}), they are
-rarely used.
+even though all four of these predictors end up doing a great job at splitting
+the data to reduce the Gini index (a variation of which is used by the random
+forest algorithm in choosing which predictor to split on \cite{167153}), they
+are rarely used. 
 
 \begin{figure}
   \centering
@@ -1446,7 +1447,7 @@ rarely used.
     \includegraphics[width=\textwidth]{images/both_labels_margin2.png}
   \end{subfigure}
   \caption{Sorted and unsorted margins of all data points, for both types of
-    labelling}
+    labelling.}
   \label{fig:margins}
 \end{figure}
 
@@ -1464,14 +1465,14 @@ rarely used.
     \includegraphics[width=\textwidth]{images/both_labels_mcsplit_hist.png}
     \includegraphics[width=\textwidth]{images/both_labels_mcsplitdown_hist.png}
   \end{subfigure}
-  \caption{Histograms of margins, for each algorithm and type of labelling}
+  \caption{Histograms of margins, for each algorithm and type of labelling.}
   \label{fig:margin_hist}
 \end{figure}
 
-We show the margin plots and histograms in Figures \ref{fig:margins} and
+We show the margin plots and histograms in Figures~\ref{fig:margins} and
 \ref{fig:margin_hist}. Again, the data for both types of labelling is close to
-identical. Note that there are plenty of data points in all 3 colours and the ML
-models are usually very convinced when predicting $\textsc{McSplit}\downarrow$
+identical. Note that there are plenty of data points in all three colours and the ML
+models are usually very convinced when predicting $\textsc{McSplit}{\downarrow}$
 and the clique encoding and are less sure when dealing with problem instances
 best handled with \textsc{McSplit}.
 
@@ -1489,7 +1490,7 @@ best handled with \textsc{McSplit}.
     \includegraphics[width=\textwidth]{images/both_labels_mcsplit_labelling.png}
     \includegraphics[width=\textwidth]{images/both_labels_mcsplitdown_labelling.png}
   \end{subfigure}
-  \caption{Partial dependence plots of the labelling percentage}
+  \caption{Partial dependence plots of the labelling percentage.}
   \label{fig:labelling_partials}
 \end{figure}
 
@@ -1508,35 +1509,36 @@ best handled with \textsc{McSplit}.
     \includegraphics[width=\textwidth]{images/both_labels_mcsplitdown_stddeg.png}
   \end{subfigure}
   \caption{Partial dependence plots of the standard deviation of degrees in the
-    target graph}
+    target graph.}
   \label{fig:stddeg_partials}
 \end{figure}
 
-This time we show the partial dependence plots for the top top 2 most
+This time we show the partial dependence plots for the top 2 most
 important predictors (the labelling percentage and the standard deviation of
 degrees in the target graph\footnote{The second most important predictor for the
 fully labelled case is the standard deviation of degrees in the pattern graph,
 but the difference is negligible and very likely to be due to randomness.}) in
-Figures \ref{fig:labelling_partials} and \ref{fig:stddeg_partials},
+Figures~\ref{fig:labelling_partials} and \ref{fig:stddeg_partials},
 respectively. In both cases there is little difference between the plots for
 vertex-labelled and fully labelled graphs. Consider the labelling plots first.
 The results for the clique encoding are the most straightforward to interpret.
 Clearly, the algorithm performs much better with higher labelling percentages
-(more different labels). The interesting bit (just like back in Figure
-\ref{fig:linecharts}) is that the curve stays constant between 20\% and 50\%. In
-other words, anywhere above 20\% labelling, a higher labelling percentage does
-not make the clique encoding more preferable than it already is. Furthermore,
-once again we can recognise how the curve descends more slowly for both labels
-than it does for vertex labels. On the other hand, both \textsc{McSplit} and
-$\textsc{McSplit}\downarrow$ prefer lower labelling percentages.
+(more different labels). The interesting bit (just like back in
+Figure~\ref{fig:linecharts}) is that the curve stays constant between 20\% and
+50\%. In other words, anywhere above 20\% labelling, a higher labelling
+percentage does not make the clique encoding more preferable than it already is.
+Furthermore, once again we can recognise how the curve descends more slowly for
+both labels than it does for vertex labels. On the other hand, both
+\textsc{McSplit} and $\textsc{McSplit}{\downarrow}$ prefer lower labelling
+percentages.
 
 The partial dependence on the standard deviation of degrees of the target graph
-says what we already knew from Section \ref{sec:unlabelled_partial}: the clique
+says what we already knew from Section~\ref{sec:unlabelled_partial}: the clique
 encoding prefers graphs with more variance in degrees. The one small difference
 is that this time the change is not as steep, but this can be easily explained
 by the fact that the highest standard deviation of degrees is around 7 in this
-section compared to around 70 in Section \ref{sec:unlabelled_partial}. While
-$\textsc{McSplit}\downarrow$ prefers graphs with smaller standard deviations of
+section compared to around 70 in Section~\ref{sec:unlabelled_partial}. While
+$\textsc{McSplit}{\downarrow}$ prefers graphs with smaller standard deviations of
 degrees, the situation with \textsc{McSplit} is suddenly less clear, which is
 reflective of the fact that the ML models have less confidence about
 \textsc{McSplit} (compared to the other 2 algorithms). While small standard
@@ -1553,37 +1555,38 @@ of 1 and 2.
     \centering
     \includegraphics[width=\textwidth]{images/ecdf_both_labels_llama.png}
   \end{subfigure}
-  \caption{\textsc{Llama} models compared to the other algorithms and the VBS}
+  \caption{\textsc{Llama} models compared to the other algorithms and the VBS.}
   \label{fig:ecdf_llama}
 \end{figure}
 
 Finally, for the runtime comparison, we plot the ECDFs for all individual
-algorithms, the VBS, and the \textsc{Llama} models in Figure
-\ref{fig:ecdf_llama}. While there are important differences among individual
-algorithms' curves (discussed in Section \ref{sec:labelled_runtimes}), the way
-\textsc{Llama} behaves with respect to the VBS and $\textsc{McSplit}\downarrow$
-curves is about the same: \textsc{Llama}'s curve is quite close to optimal, and
-the gap between \textsc{Llama} and $\textsc{McSplit}\downarrow$ is significantly
-wider than the gap between $\textsc{McSplit}\downarrow$ and \textsc{McSplit}. To
-add more numbers to this picture, \textsc{Llama} closed 86\% and 88\% of the
-difference between its lower and upper bounds for vertex-labelled and fully
-labelled graphs, respectively.
+algorithms, the VBS, and the \textsc{Llama} models in
+Figure~\ref{fig:ecdf_llama}. While there are important differences among
+individual algorithms' curves (discussed in
+Section~\ref{sec:labelled_runtimes}), the way \textsc{Llama} behaves with
+respect to the VBS and $\textsc{McSplit}{\downarrow}$ curves is about the same:
+\textsc{Llama}'s curve is quite close to optimal, and the gap between
+\textsc{Llama} and $\textsc{McSplit}{\downarrow}$ is significantly wider than
+the gap between $\textsc{McSplit}{\downarrow}$ and \textsc{McSplit}. To add more
+numbers to this picture, \textsc{Llama} closed 86\% and 88\% of the difference
+between its lower and upper bounds for vertex-labelled and fully labelled
+graphs, respectively.
 
 \chapter{Further Experiments}
 
-\section{Modifications to \texorpdfstring{$k\downarrow$}{kdown}}
+\section{Modifications to \texorpdfstring{$k{\downarrow}$}{kdown}}
 
-The $k\downarrow$ algorithm was modified to accept graphs with vertex
+The $k{\downarrow}$ algorithm was modified to accept graphs with vertex
 labels by adding an additional constraint for matching labels on line 8 of the
 \texttt{klessSubgraphIsomorphism} function \cite{DBLP:conf/aaai/HoffmannMR17}
 and extending the \texttt{Graph} class with two new fields: a \texttt{vector},
 assigning a label to each vertex, and a \texttt{vector} of \texttt{vector}s,
 which, for each label, list all vertices that have that label. After generating
 most of the data, it was noticed that the vertex-labelled version of
-$k\downarrow$ was winning precisely 0 times and thus was not considered in
-Sections \ref{sec:labelled_runtimes} and \ref{sec:ml_labelled}.
+$k{\downarrow}$ was winning precisely 0 times and thus was not considered in
+Sections~\ref{sec:labelled_runtimes} and \ref{sec:ml_labelled}.
 
-In order to make $k\downarrow$ more competitive, the neighbourhood degree
+In order to make $k{\downarrow}$ more competitive, the neighbourhood degree
 sequence filtering was improved to make use of the additional information that
 labels provide. It is also part of line 8 of the same function in the original
 paper \cite{DBLP:conf/aaai/HoffmannMR17}, however, it is not enabled by
@@ -1607,7 +1610,7 @@ and is not used in the experiments of the \textsc{McSplit} paper
 \end{definition}
 
 As a simplification of the definition above, we state the following lemma, based
-on Corollary 1 from the $k\downarrow$ paper \cite{DBLP:conf/aaai/HoffmannMR17}.
+on Corollary 1 from the $k{\downarrow}$ paper \cite{DBLP:conf/aaai/HoffmannMR17}.
 
 \begin{lemma} \label{lemma1}
   Let $S = (s_1, \dots, s_n)$ and $T = (t_1, \dots, t_m)$ be two sequences and
@@ -1639,21 +1642,21 @@ useful to our proposed algorithm:
     \pNds, a list of NDSs for each label \tNds}
   \KwResult{a Boolean value, indicating whether $p$ and $t$ can be matched}
   $\neighbours \gets \sum_{i=|\tNds|}^{|\pNds| - 1} |\pNds[i]|$\;
-  \If{$\neighbours > k$}{\Return{false};}
+  \lIf{$\neighbours > k$}{\Return{false}}
   \For{$i \gets 0$ \KwTo $\min\{ |\pNds|, |\tNds| \} - 1$}{
     \If{$|\pNds[i]| - |\tNds[i]| > 0$}{
       $\neighbours \gets \neighbours + |\pNds[i]| - |\tNds[i]|$\;
-      \If{$\neighbours > k$}{\Return{false};}
+      \lIf{$\neighbours > k$}{\Return{false}}
     }
-    \If{$\pNds[i] \cancel{\kprec{k}} \tNds[i]$}{\Return{false};}
+    \lIf{$\pNds[i] \cancel{\kprec{k}} \tNds[i]$}{\Return{false}}
   }
   \Return{true}\;
-  \caption{NDS filtering with vertex label support}
+  \caption{NDS filtering with vertex label support.}
   \label{alg:nds}
 \end{algorithm}
 
 % TODO: name the pattern and target graphs
-We extend these ideas in Algorithm \ref{alg:nds} by considering an NDS for each
+We extend these ideas in Algorithm~\ref{alg:nds} by considering an NDS for each
 label. The algorithm checks whether a vertex $p$ in the pattern graph can be
 matched with a vertex $t$ in the target graph.
 \textsf{NeighboursUniqueToPattern} tracks the number of neighbours of $p$ that
@@ -1661,21 +1664,21 @@ have to be excluded, i.e., whenever the pattern graph has more neighbours with a
 particular label than the target graph, we can add the difference to
 \textsf{NeighboursUniqueToPattern}, and if it ever becomes larger than $k$, we
 know that it is impossible to map $p$ to $t$. The other early exit condition is
-the contrapositive of Proposition \ref{prop:kdown}. If neither of these
+the contrapositive of Proposition~\ref{prop:kdown}. If neither of these
 conditions is satisfied throughout the \textbf{for} loop that starts on line 5,
 then $p$ and $t$ are compatible for this value of $k$.
 
 \begin{figure}
   \centering
   \includegraphics[scale=0.5]{images/ecdf_kdown.png}
-  \caption{Cumulative plot of all algorithms with 10\% vertex labelling}
+  \caption{Cumulative plot of all algorithms with 10\% vertex labelling.}
   \label{fig:ecdf_kdown}
 \end{figure}
 
 As this improvement is an afterthought after the main experiments, the resulting
 algorithm was run on a smaller subset of all data: \num{30000} instances with
-10\% labelling. The ECDF plot in Figure \ref{fig:ecdf_kdown} shows the new
-$k\downarrow$ to be just slightly behind the clique encoding and it outperforms
+10\% labelling. The ECDF plot in Figure~\ref{fig:ecdf_kdown} shows the new
+$k{\downarrow}$ to be just slightly behind the clique encoding and it outperforms
 other algorithms in 193 instances, making it considerable for an inclusion in
 a portfolio, although it might achieve similar results as with unlabelled
 graphs, where it wins too infrequently to be a valuable inclusion.
@@ -1721,25 +1724,25 @@ graphs, where it wins too infrequently to be a valuable inclusion.
 
 The next question we want to answer is ``how does the clique algorithm's running
 time depend on properties of the association graph?'' To answer this question we
-record some of the features from Section \ref{sec:features} about the
+record some of the features from Section~\ref{sec:features} about the
 association graph. More specifically, we record the features that are easy to
 compute (since association graphs can get quite big) and can be informative:
 number of vertices, number of edges, mean degree, max degree, standard deviation
 of degrees, and density. We record this information for association graphs
-created for all unlabelled instances from Section \ref{sec:labelled} (since the
-graphs from Section \ref{sec:unlabelled} often stretch the memory limits of the
+created for all unlabelled instances from Section~\ref{sec:labelled} (since the
+graphs from Section~\ref{sec:unlabelled} often stretch the memory limits of the
 algorithm) as well as the \num{30000} instances previously selected for
 experiments with labelled graphs, for all 7 labelling percentages. As the
 timed-out experiments would make interpreting any results much harder, we remove
 them from the data and are left with about \num{300000} (instead of about
 \num{500000}) observations. The distribution of each column of the remaining
-dataset is plotted in Figure \ref{fig:densities}.
+dataset is plotted in Figure~\ref{fig:densities}.
 
 \begin{figure}
   \centering
   \includegraphics[scale=0.5]{images/correlations.png}
   \caption{Spearman's rank correlation coefficients between the measured
-    variables}
+    variables.}
   \label{fig:correlations}
 \end{figure}
 
@@ -1764,7 +1767,7 @@ vectors, assigns a natural number to each element such that $x_i > x_j \implies
 r(x_i) > r(x_j)$, for any two elements of $\bm{x}$.
 \end{definition}
 
-The resulting correlations are in Figure \ref{fig:correlations}. Note that all
+The resulting correlations are in Figure~\ref{fig:correlations}. Note that all
 variables are positively correlated: some correlations are very strong, some
 average, and one very weak (between density and the standard deviation of
 degrees). More specifically, all measured characteristics of the association
@@ -1806,7 +1809,7 @@ the clique encoding is better than other algorithms based on properties of the
 association graph?'' For each of the 6 measured properties, we divide its range
 of values to 100 bins of equal size (some of them turn out to be empty) and plot
 the proportion of instances in that range where the clique encoding outperformed
-other algorithms in Figure \ref{fig:bins}. We can make 3 observations:
+other algorithms in Figure~\ref{fig:bins}. We can make 3 observations:
 \begin{itemize}
 \item For all measured properties except density, the clique algorithm is not
   just overall faster, but also faster than other algorithms (i.e., more likely
@@ -1821,6 +1824,60 @@ other algorithms in Figure \ref{fig:bins}. We can make 3 observations:
   re-encoding the maximum common subgraph instance into an instance of maximum
   clique would provide clear benefits.
 \end{itemize}
+
+\section{\textsc{Fusion}: \textsc{McSplit} and the Clique Encoding United}
+% TODO: more justification for why we're doing this
+
+Firstly, we add an additional argument to the \texttt{Search} function of the
+\textsc{McSplit} algorithm \cite{DBLP:conf/ijcai/McCreeshPT17} called
+\textsf{depth} with a default (initial) value of 0. It is increased by one in
+the recursive call on line 19 of Algorithm 1 in the \textsc{McSplit} paper and
+left unchanged in a different recursive call on line 23.
+
+Secondly, we also add a global parameter \textsf{DEPTH}, which denotes at what value of
+\textsf{depth} \textsc{McSplit} re-encodes the remaining problem to a maximum
+clique instance. A special value of $\textsf{DEPTH} = -1$ makes \textsc{Fusion}
+essentially equal to \textsc{McSplit} in all its behaviour. Similarly,
+$\textsf{DEPTH} = 0$ is similar to running the clique algorithm, but, unlike in
+the implementation of the clique algorithm, association graph's creation time is
+included as part of total running time.
+
+Lastly, similarly to the $\nabla$ operator in the paper on the clique
+algorithm \cite{DBLP:conf/cp/McCreeshNPS16}, which creates the association graph
+from two graphs, we create a version of $\nabla$ that works on the list of label
+classes called \textit{future} in the \textsc{McSplit} paper
+\cite{DBLP:conf/ijcai/McCreeshPT17}. The set of vertices of the association
+graph is then defined as
+\[ \bigcup_{\langle G, H \rangle \in \textit{future}} G \times H, \]
+and the edges are defined in exactly the same way as in the original paper.
+
+Given the two new variables \textsf{depth} and \textsf{DEPTH}, we only need to
+add the following lines of code between lines 5 and 6 of Algorithm 1 in the
+\textsc{McSplit} paper to transform \textsc{McSplit} into \textsc{Fusion}:
+
+\begin{algorithm}
+  \SetKwData{depthVar}{depth}
+  \SetKwData{DEPTH}{DEPTH}
+  \If{$\DEPTH \ne -1$ \bf{and} $\depthVar \ge \DEPTH$}{
+    $|\textit{incumbent}_{\text{clique}}| \gets
+    |\textit{incumbent}_{\textsc{McSplit}}| - |M|$\;
+    $\texttt{search}(\nabla(\textit{future}), \emptyset, \emptyset, V_1)$\;
+    \lIf{$|M| + |\textit{incumbent}_{\text{clique}}| >
+      |\textit{incumbent}_{\textsc{McSplit}}|$}{$\textit{incumbent}_{\textsc{McSplit}}
+      \gets \textit{incumbent}_{\textsc{McSplit}} \cup
+      \textit{incumbent}_{\text{clique}}$}
+  }
+\end{algorithm}
+
+Here, $\textit{incumbent}_{\textsc{McSplit}}$ and
+$\textit{incumbent}_{\text{clique}}$ denote the different variables with the
+same name in the two algorithms, $M$ and \textit{future} come from the
+\textsc{McSplit} algorithm, and $V_1$ is the set of vertices of one of the
+original graphs, used in the initialisation of the clique algorithm.
+
+\chapter{Conclusion}
+
+TODO
 
 %\begin{appendices}
 %\end{appendices}
