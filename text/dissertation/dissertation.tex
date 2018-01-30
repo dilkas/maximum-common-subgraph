@@ -5,7 +5,7 @@
 \usepackage[UKenglish]{isodate}
 \PassOptionsToPackage{hyphens}{url}\usepackage[hidelinks]{hyperref}
 \usepackage{amsfonts, amsmath, amsthm, graphicx, subcaption, mathtools,
-  tikz, cancel, bm}
+  tikz, cancel, bm, etoolbox}
 \usepackage[group-separator={,}]{siunitx}
 \usepackage[linesnumbered]{algorithm2e}
 \usetikzlibrary{positioning}
@@ -14,12 +14,19 @@
 \newtheorem{proposition}{Proposition}[chapter]
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[chapter]
-\newtheorem{example}{Example}[chapter]
+\newtheorem{example}{Example}[chapter] % TODO: what style?
 \theoremstyle{remark}
 \newtheorem{remark}{Remark}[chapter]
 
+\AfterEndEnvironment{lemma}{\noindent\ignorespaces}
+\AfterEndEnvironment{proposition}{\noindent\ignorespaces}
+\AfterEndEnvironment{definition}{\noindent\ignorespaces}
+\AfterEndEnvironment{example}{\noindent\ignorespaces}
+\AfterEndEnvironment{remark}{\noindent\ignorespaces}
+
 \DeclareMathOperator{\dom}{dom}
 \newcommand{\kprec}[1]{\prescript{}{#1}{\preceq}\ }
+\newcommand{\etal}{\textit{et al}.}
 
 \title{Algorithm Selection for Maximum Common Subgraph}
 \author{Paulius Dilkas}
@@ -37,6 +44,26 @@
 
 \chapter{Introduction}
 \pagenumbering{arabic}
+
+The maximum common subgraph problem is a way to determine the similarity between
+two graphs. More specifically, it finds what the two graphs have in common
+(these ideas will be made more concrete in Section~\ref{sec:definitions}). Since
+graphs can represent many real-world phenomena, it is widely used in molecular
+science \cite{WCMS:WCMS5, DBLP:journals/dam/GayFMSS14, grindley,
+  DBLP:journals/jcamd/RaymondW02a}, malware detection
+\cite{DBLP:journals/compsec/ParkRS13}, source code analysis \cite{617051}
+% TODO: finish and reword differently
+
+\section{Definitions} \label{sec:definitions}
+
+% TODO: introduce algorithm selection
+\begin{definition}
+  Given a set $\mathcal{I}$ of problem instances, a space of algorithms
+  $\mathcal{A}$, and a performance measure $m \colon \mathcal{I} \times
+  \mathcal{A} \to \mathbb{R}$, the \emph{per-instance algorithm selection
+    problem} is to find a mapping $s \colon \mathcal{I} \to \mathcal{A}$ that
+  optimises $\mathbb{E}[m(i, s(i))]$ \cite{DBLP:journals/ai/BischlKKLMFHHLT16}.
+\end{definition}
 
 The purpose of this project is to create and explore machine learning-based
 algorithm \emph{portfolios}, i.e., machine learning models whose main goal is to
@@ -61,7 +88,6 @@ Chapter~\ref{chapter:generating_data}.
   it is called a \emph{loop}. When several edges map to the same pair of
   vertices, they are referred to as \emph{multiple edges}. 
 \end{definition}
-
 For the purposes of this project, we look at two kinds of labelled graphs: those
 with vertex labels, and those with both vertex and edge labels. We define them
 as follows (the definitions are loosely inspired by \cite{abu-aisheh_2016}):
@@ -78,7 +104,6 @@ as follows (the definitions are loosely inspired by \cite{abu-aisheh_2016}):
   \colon E \to \{ 0, \dots, M - 1 \}$ is an edge labelling function, for some $M
   \in \mathbb{N}$.
 \end{definition}
-
 Specifically, note that:
 
 \begin{itemize}
@@ -146,8 +171,7 @@ relevant to this dissertation.
   $\forall v_1, v_2 \in C$ with $v_1 \ne v_2$, there is an edge in $E$ mapping
   to $\{ v_1, v_2 \}$ \cite{DBLP:journals/jgo/PardalosX94a}.
 \end{definition}
-
-\noindent Finally, we define the main problem of this project:
+Finally, we define the main problem of this project:
 
 % TODO: split into CIS and MCIS
 % TODO: state that it is NP-C/-Hard
@@ -274,6 +298,7 @@ interested in until a solution is found. Based on the source
 code\footnote{\url{https://github.com/jamestrimble/ijcai2017-partitioning-common-subgraph/blob/master/code/james-cpp/mcsp.c}},
 there are a few key differences between $\textsc{McSplit} {\downarrow}$ and
 \textsc{McSplit}:
+
 \begin{itemize}
 \item Instead of always looking for larger and larger common subgraphs, we have
   a goal size and exit early if a common subgraph of that size is found.
@@ -296,6 +321,7 @@ in performance between \textsc{McSplit} and the clique encoding or between
 $\textsc{McSplit}{\downarrow}$ and $k{\downarrow}$ was very small.
 
 \section{Labelled Graphs} \label{sec:labelled}
+
 All labelled graphs are taken from the ARG Database \cite{foggia2001-2,
   DBLP:journals/prl/SantoFSV03}, which is a large collection of graphs for
 benchmarking various graph-matching algorithms. The database contains randomly
@@ -337,6 +363,7 @@ Figure~\ref{figure:labelling_histogram} and observe that the difference is
 normally distributed around 0.
 
 \section{Unlabelled Graphs} \label{sec:unlabelled}
+
 We also include a collection of benchmark instances for the subgraph isomorphism
 problem\footnote{\url{http://liris.cnrs.fr/csolnon/SIP.html}} (with the
 biochemical reactions dataset excluded since we are not dealing with directed
@@ -385,6 +412,7 @@ minor differences from the version on Christine Solnon's website.
 \end{remark}
 
 \chapter{Generating Data} \label{chapter:generating_data}
+
 A machine learning (ML) model requires data to learn from. We are using an R
 package called \textsc{Llama} \cite{kotthoff_llama_2013, llama}, which helps to train
 and evaluate ML models in order to compare algorithms and was used to create
@@ -617,6 +645,7 @@ similar. This makes the problem especially potent for a algorithm selection
 approach.
 
 \section{Graph Features} \label{sec:features}
+
 The initial set of features is based on the algorithm selection paper for the
 subgraph isomorphism problem \cite{DBLP:conf/lion/KotthoffMS16} and consists of
 the following:
@@ -643,7 +672,6 @@ graphs (i.e., graphs with no multiple edges or loops
 \cite{DBLP:books/ws/NishizekiR04}) is
 \[ \frac{m}{\binom{n}{2}} = \frac{2m}{n(n-1)}. \]
 \end{definition}
-
 Even though some of our graphs do contain multiple edges and loops, we stick to
 this formula as it was used in \cite{DBLP:conf/lion/KotthoffMS16} and it does
 not break the ML algorithm in any way to have the theoretical possibility of
@@ -1145,7 +1173,6 @@ observation can be in while at some node $n$ as a \emph{region}.
   that are from class $k$ (i.e., have algorithm $k$ as the best algorithm)
   \cite{James:2014:ISL:2517747}.
 \end{definition}
-
 As we move down a tree, we want the region to be restricted to a single class.
 Then the observations from the training data satisfying the conditions imposed
 by the parent nodes would be classified with perfect accuracy. The Gini index is
@@ -1608,7 +1635,6 @@ and is not used in the experiments of the \textsc{McSplit} paper
   \[ \forall s_i \in S \setminus S_k, \text{ there exists a distinct } j \in \{
     1, \dots, m \} \text{ such that } s_i - k \le t_j. \]
 \end{definition}
-
 As a simplification of the definition above, we state the following lemma, based
 on Corollary 1 from the $k{\downarrow}$ paper \cite{DBLP:conf/aaai/HoffmannMR17}.
 
@@ -1766,7 +1792,6 @@ where $\overline{r}(\bm{x}) = \sum_i r(x_i)/n$, $\overline{r}(\bm{y})
 vectors, assigns a natural number to each element such that $x_i > x_j \implies
 r(x_i) > r(x_j)$, for any two elements of $\bm{x}$.
 \end{definition}
-
 The resulting correlations are in Figure~\ref{fig:correlations}. Note that all
 variables are positively correlated: some correlations are very strong, some
 average, and one very weak (between density and the standard deviation of

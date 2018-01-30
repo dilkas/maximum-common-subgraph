@@ -3,16 +3,16 @@ library(llama)
 parallelStartSocket(64)
 parallelLibrary("llama")
 
-labelling <- "vertex" # "vertex" or "both"
-type <- "vertex_labels"
-p_values <- c(10)
+labelling <- "both" # "vertex" or "both"
+type <- "both_labels"
+p_values <- c(5, 10, 15, 20, 25, 33, 50)
 
-algorithms <- c("clique", "mcsplit", "mcsplitdown")
+algorithms <- c("clique", "mcsplit", "mcsplitdown", "fusion1")
 if (labelling == "vertex") {
   algorithms <- c(algorithms, "kdown")
 }
 
-filtered_instances <- readLines("results/filtered_instances")
+filtered_instances <- readLines("results/filtered_instances2")
 
 costs <- read.csv("results/costs.csv", header = FALSE)
 colnames(costs) <- c("ID", "group1")
@@ -33,7 +33,8 @@ colnames(original_features) <- c("ID",
                                  paste("target", feature_names, sep = "."))
 rm("feature_names")
 original_features <- subset(original_features,
-                            original_features$ID %in% filtered_instances)
+                            gsub(" .*$", "", original_features$ID)
+                            %in% filtered_instances)
 for (feature in c("vertices", "edges", "meandeg", "maxdeg", "density",
                   "meandistance", "maxdistance")) {
   original_features[paste(feature, "ratio", sep = ".")] <- (
@@ -46,12 +47,13 @@ features <- original_features[rep(seq_len(nrow(original_features)),
 rm("original_features")
 features$labelling <- p_values
 features$ID <- sprintf("%02d %s", features$labelling, features$ID)
+features <- features[order(features$ID), ]
 
 #Construct the performance (running time) data frame
 names <- c("ID", "nodes", "time", "size")
 classes <- c("character", "NULL", "integer", "integer")
-performance <- data.frame(ID = sort(features$ID))
-answers <- data.frame(ID = sort(features$ID))
+performance <- data.frame(ID = features$ID)
+answers <- data.frame(ID = features$ID)
 for (algorithm in algorithms) {
   print(paste("Loading", algorithm))
   algorithm_runtimes <- data.frame()
@@ -59,7 +61,7 @@ for (algorithm in algorithms) {
     data_file <- read.csv(paste0("results/", algorithm, ".", labelling,
                                  ".labels.", p, ".csv"), header = FALSE,
                           colClasses = classes, col.names = names)
-    data_file <- subset(data_file, data_file$ID %in% filtered_instances)
+    data_file <- subset(data_file, sub(" .*$", "", data_file$ID) %in% filtered_instances)
     data_file$ID <- sprintf("%02d %s", p, data_file$ID)
     algorithm_runtimes <- rbind(algorithm_runtimes,
                                 data_file[order(data_file$ID),])
@@ -93,6 +95,7 @@ answers <- answers[answers$all_finished,]
 all(answers$mcsplit == answers$mcsplitdown)
 all(answers$mcsplit == answers$kdown)
 all(answers$clique == answers$mcsplit)
+all(answers$clique == answers$fusion1)
 
 data <- input(features, performance, success,
               list(groups = list(group1 = colnames(features)[-1]),
@@ -103,3 +106,15 @@ model <- classify(makeLearner("classif.randomForest"),
                   cvFolds(data, stratify = TRUE))
 saveRDS(model, sprintf("models/%s_labels.rds", labelling))
 parallelStop()
+
+# ECDF plot for fusion
+
+library(lattice)
+library(latticeExtra)
+
+png(paste0("dissertation/images/ecdf_", type, "_llama.png"), width = 480, height = 320)
+plt <- ecdfplot(~ mcsplit + clique + fusion1, data = performance[startsWith(as.character(performance$ID), "10"), ],
+               auto.key = list(space = "right", text = c("McSplit", "clique", "Fusion1")),
+               xlab = "Runtime (ms)", ylim = c(0.6, 1), log = "x")
+update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8, name = "Dark2")))
+dev.off()
