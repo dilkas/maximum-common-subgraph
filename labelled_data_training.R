@@ -7,7 +7,7 @@ labelling <- "both" # "vertex" or "both"
 type <- "both_labels"
 p_values <- c(5, 10, 15, 20, 25, 33, 50)
 
-algorithms <- c("clique", "mcsplit", "mcsplitdown", "fusion1")
+algorithms <- c("clique", "mcsplit", "mcsplitdown", "fusion1", "fusion2")
 if (labelling == "vertex") {
   algorithms <- c(algorithms, "kdown")
 }
@@ -96,6 +96,7 @@ all(answers$mcsplit == answers$mcsplitdown)
 all(answers$mcsplit == answers$kdown)
 all(answers$clique == answers$mcsplit)
 all(answers$clique == answers$fusion1)
+all(answers$clique == answers$fusion2)
 
 data <- input(features, performance, success,
               list(groups = list(group1 = colnames(features)[-1]),
@@ -112,9 +113,16 @@ parallelStop()
 library(lattice)
 library(latticeExtra)
 
-png(paste0("dissertation/images/ecdf_", type, "_llama.png"), width = 480, height = 320)
-plt <- ecdfplot(~ mcsplit + clique + fusion1, data = performance[startsWith(as.character(performance$ID), "10"), ],
-               auto.key = list(space = "right", text = c("McSplit", "clique", "Fusion1")),
-               xlab = "Runtime (ms)", ylim = c(0.6, 1), log = "x")
-update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8, name = "Dark2")))
+png(paste0("dissertation/images/ecdf_", type, "_llama.png"), width = 480,
+    height = 320)
+plt <- ecdfplot(~ mcsplit + mcsplitdown + clique + fusion1 + fusion2,
+                data = performance,
+#                data = performance[startsWith(as.character(performance$ID),
+#                                              "50"), ],
+               auto.key = list(space = "right",
+                               text = c("McSplit", "McSplit\u2193", "clique",
+                                        "Fusion1", "Fusion2")),
+               xlab = "Runtime (ms)", ylim = c(0.8, 1), log = "x")
+update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8,
+                                                          name = "Dark2")))
 dev.off()

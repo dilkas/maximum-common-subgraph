@@ -5,7 +5,7 @@
 \usepackage[UKenglish]{isodate}
 \PassOptionsToPackage{hyphens}{url}\usepackage[hidelinks]{hyperref}
 \usepackage{amsfonts, amsmath, amsthm, graphicx, subcaption, mathtools,
-  tikz, cancel, bm, etoolbox}
+  tikz, cancel, bm, etoolbox, booktabs}
 \usepackage[group-separator={,}]{siunitx}
 \usepackage[linesnumbered]{algorithm2e}
 \usetikzlibrary{positioning}
@@ -14,7 +14,7 @@
 \newtheorem{proposition}{Proposition}[chapter]
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[chapter]
-\newtheorem{example}{Example}[chapter] % TODO: what style?
+\newtheorem{example}{Example}[chapter]
 \theoremstyle{remark}
 \newtheorem{remark}{Remark}[chapter]
 
@@ -45,34 +45,64 @@
 \chapter{Introduction}
 \pagenumbering{arabic}
 
-The maximum common subgraph problem is a way to determine the similarity between
-two graphs. More specifically, it finds what the two graphs have in common
-(these ideas will be made more concrete in Section~\ref{sec:definitions}). Since
-graphs can represent many real-world phenomena, it is widely used in molecular
-science \cite{WCMS:WCMS5, DBLP:journals/dam/GayFMSS14, grindley,
-  DBLP:journals/jcamd/RaymondW02a}, malware detection
-\cite{DBLP:journals/compsec/ParkRS13}, source code analysis \cite{617051}
-% TODO: finish and reword differently
+Maximum common subgraph (MCS) is a way to determine the similarity between two
+graphs. More specifically, MCS algorithms find what the two graphs have in
+common (these ideas will be made more concrete in
+Section~\ref{sec:definitions}). Since graphs can represent many real-world
+phenomena, MCS algorithms have been used in molecular science \cite{WCMS:WCMS5,
+  DBLP:journals/dam/GayFMSS14, grindley, DBLP:journals/jcamd/RaymondW02a},
+malware detection \cite{DBLP:journals/compsec/ParkRS13}, and substructure
+discovery \cite{DBLP:journals/jair/CookH94, 617051}.
+
+Different MCS algorithms tend to be best for different types of graphs,
+depending on how many vertices they have, and whether they contain labels
+\cite{DBLP:conf/ijcai/McCreeshPT17}. In some cases the differences are quite
+small, and typically the overall best algorithm gets outperformed by other
+algorithms as often as half the time (see Chapter \ref{chapter:generating_data}
+for more details). Since there are no (known) clear boundaries that separate
+instances best handled by each algorith, perhaps training a machine learning
+(ML) model to quickly choose an algorithm based on features of the input graphs
+would result in a algorithm faster than any individual algorithm. This is an
+approach known as algorithm selection \cite{DBLP:journals/ac/Rice76} and is the
+main focus of this project.
+
+In the rest of this chapter we provide rigorous definitions for concepts such as
+algorithm selection, define the kind of graphs we are interested in, continue
+with some necessary graph theory definitions, building up to the definition of
+an MCS. We then descibe and illustrate the algorithms used in this project. In
+order to compare MCS algorithms and reliably choose an algorithm for each
+problem instance, we need to run all algorithms on some pairs of graphs, and
+use an ML algorithm to find how their running times (or, more precisely, which
+algorithm is expected to win) depend on various features of the graphs. Thus,
+Chapter \ref{chapter:problems} describes all graphs used to compare algorithms
+and train ML models, looking into their origins, how they were constructed, and
+undocumented but relevant features. Chapter \ref{chapter:generating_data} then
+describes how the algorithms were run to generate running time data, explores
+how the algorithms compare on different parts of the data, outlines the features
+used for ML, and describes their distributions in the data. We then move on to
+building the ML models in Chapter \ref{chapter:ml}, where we start with the
+relevant definitions in ML and statistics, describing the relevant software and
+the ML algorithm used. Afterwards, we describe various ways to evaluate the
+resulting models and do so for three different models. Finally, Chapter
+\ref{chapter:further} provides ideas on how to expand one of the algorithms to
+previously unsupported instances, and introduces a new algorithm that merges two
+algorithms into one.
 
 \section{Definitions} \label{sec:definitions}
 
-% TODO: introduce algorithm selection
 \begin{definition}
   Given a set $\mathcal{I}$ of problem instances, a space of algorithms
   $\mathcal{A}$, and a performance measure $m \colon \mathcal{I} \times
   \mathcal{A} \to \mathbb{R}$, the \emph{per-instance algorithm selection
     problem} is to find a mapping $s \colon \mathcal{I} \to \mathcal{A}$ that
   optimises $\mathbb{E}[m(i, s(i))]$ \cite{DBLP:journals/ai/BischlKKLMFHHLT16}.
+  $\mathcal{A}$ (and sometimes this problem in general) is often referred to as
+  an \emph{algorithm portfolio} \cite{DBLP:conf/ijcai/Leyton-BrownNAMS03,
+    DBLP:journals/corr/abs-1111-2249}.
 \end{definition}
-
-The purpose of this project is to create and explore machine learning-based
-algorithm \emph{portfolios}, i.e., machine learning models whose main goal is to
-provide a mapping, assigning the best-performing algorithm to each problem
-instance \cite{DBLP:journals/ai/BischlKKLMFHHLT16, DBLP:journals/ac/Rice76}.
-
-We begin with a definition of a graph suitable for the empirical data described
-in Chapter~\ref{chapter:problems} and used in
-Chapter~\ref{chapter:generating_data}.
+%We begin with a definition of a graph suitable for the empirical data described
+%in Chapter~\ref{chapter:problems} and used in
+%Chapter~\ref{chapter:generating_data}.
 
 \begin{definition}
   Let $S$ be a set and $k$ a non-negative integer. Then $[S]^k$ denotes
@@ -89,8 +119,10 @@ Chapter~\ref{chapter:generating_data}.
   vertices, they are referred to as \emph{multiple edges}. 
 \end{definition}
 For the purposes of this project, we look at two kinds of labelled graphs: those
-with vertex labels, and those with both vertex and edge labels. We define them
-as follows (the definitions are loosely inspired by \cite{abu-aisheh_2016}):
+with vertex labels, and those with both vertex and edge labels. Labels can be
+used to represent important properties of graphs such as types of atoms and
+bonds in chemistry. We define them as follows (the definitions are loosely
+inspired by \cite{abu-aisheh_2016}):
 
 \begin{definition} \label{def:vertex_label}
   A \emph{(vertex-)labelled graph} is a 3-tuple $G = (V, E, \mu)$, where $V$,
@@ -173,46 +205,19 @@ relevant to this dissertation.
 \end{definition}
 Finally, we define the main problem of this project:
 
-% TODO: split into CIS and MCIS
-% TODO: state that it is NP-C/-Hard
 \begin{definition}
-  A \emph{maximum common (induced) subgraph} between graphs $G_1$ and $G_2$ is a
-  graph $G_3 = (V_3, E_3)$ such that $G_3$ is isomorphic to induced subgraphs of
-  both $G_1$ and $G_2$ with $|V_3|$ maximised
+  A \emph{maximum common (induced) subgraph} (MCS) between graphs $G_1$ and
+  $G_2$ is a graph $G_3 = (V_3, E_3)$ such that $G_3$ is isomorphic to induced
+  subgraphs of both $G_1$ and $G_2$ with $|V_3|$ maximised
   \cite{DBLP:journals/jcamd/RaymondW02a}. The \emph{maximum common (induced)
-    subgraph problem} is the problem of finding a maximum common subgraph
-  between two given graphs $G_1 = (V_1, E_1)$ and $G_2 = (V_2, E_2)$, usually
-  expressed as a bijection between two subsets of vertices $U_1 \subseteq V_1$
-  and $U_2 \subseteq V_2$.
+    subgraph problem} is the problem of finding an MCS between two given graphs
+  $G_1 = (V_1, E_1)$ and $G_2 = (V_2, E_2)$, usually expressed as a bijection
+  between two subsets of vertices $U_1 \subseteq V_1$ and $U_2 \subseteq V_2$.
 \end{definition}
-
-\chapter{Algorithms}
-
-We consider four algorithms that were shown to be competitive in a recent paper by
-McCreesh, Prosser and Trimble \cite{DBLP:conf/ijcai/McCreeshPT17}: $k{\downarrow}$
-\cite{DBLP:conf/aaai/HoffmannMR17}, \textsc{McSplit}
-\cite{DBLP:conf/ijcai/McCreeshPT17}, $\textsc{McSplit}{\downarrow}$
-\cite{DBLP:conf/ijcai/McCreeshPT17}, and the clique encoding
-\cite{DBLP:conf/cp/McCreeshNPS16}. In order to explain how they work, we need to
-define two other problems:
-
-\begin{definition}
-  Given a graph $G$, the \emph{maximum clique problem} is an optimisation problem
-  asking for a clique in $G$ with maximum cardinality
-  \cite{DBLP:journals/jgo/PardalosX94a}.
-\end{definition}
-
-\begin{definition}
-  Given two (finite) graphs $G_1$ and $G_2$, the \emph{subgraph isomorphism
-    problem} is the decision problem of determining whether $G_1$ is isomorphic
-  to a subgraph of $G_2$ \cite{DBLP:conf/stoc/Cook71}. $G_1$ and $G_2$ are
-  usually referred to as the \emph{pattern} and \emph{target} graphs
-  \cite{DBLP:journals/ai/Solnon10, Valiente97analgorithm,
-    DBLP:journals/constraints/ZampelliDS10}, respectively. We will use these
-  definitions in the context of both the subgraph isomorphism problem and the
-  maximum common subgraph problem, where the word 'pattern' will typically refer
-  to the smaller of the two graphs.
-\end{definition}
+The decision version of this problem (finding a common induced subgraph of a
+fixed size) is NP-complete \cite{DBLP:journals/bmcbi/HuangLJ06}, and thus the
+MCS optimisation problem is NP-hard \cite{DBLP:conf/ijcai/McCreeshPT17,
+  DBLP:books/ph/PapadimitriouS82}.
 
 \begin{figure}
   \centering
@@ -245,18 +250,46 @@ define two other problems:
     \end{scope}
   \end{tikzpicture}
   \caption{Two graphs with binary ($\protect{\{ 0, 1 \}}$) labels on both vertices
-    and edges with pattern graph ($G_p$) on the left and target graph ($G_t$) on the
-    right. Grey vertices and thick blue edges represent label 1.}
+    and edges with pattern graph $G_p$ on the left and target graph $G_t$ on the
+    right. Grey vertices and thick blue edges represent label 1, while white
+    vertices and black edges have label 0.}
   \label{fig:graphs}
 \end{figure}
 
-We will illustrate how each algorithm works by considering the graphs in
-Figure~\ref{fig:graphs}. Since $G_p$ has only one blue edge, while all edges of
-$G_t$ are blue, any common subgraph can have up to one edge. It is then obvious
-that the maximum common subgraph is isomorphic to the subgraph induced by $\{
-u_1, u_2, u_3 \}$ in $G_p$ and it is isomorphic to multiple induced subgraphs of
-$G_t$. TODO: use this to explain \textsc{McSplit} and clique, but probably not
-$k{\downarrow}$.
+\begin{example}
+  Consider the graphs in Figure~\ref{fig:graphs}. Since $G_p$ has only one blue
+  edge, while all edges of $G_t$ are blue, any common subgraph can have up to
+  one edge. It is then obvious that any MCS must be isomorphic to the subgraph
+  induced by $\{ u_1, u_2, u_3 \}$ in $G_p$ and to multiple induced subgraphs of $G_t$.
+\end{example}
+
+\section{Algorithms}
+
+We consider four algorithms that were shown to be competitive in a recent paper by
+McCreesh, Prosser and Trimble \cite{DBLP:conf/ijcai/McCreeshPT17}: $k{\downarrow}$
+\cite{DBLP:conf/aaai/HoffmannMR17}, \textsc{McSplit}
+\cite{DBLP:conf/ijcai/McCreeshPT17}, $\textsc{McSplit}{\downarrow}$
+\cite{DBLP:conf/ijcai/McCreeshPT17}, and the clique encoding
+\cite{DBLP:conf/cp/McCreeshNPS16}. In order to explain how they work, we need to
+define two other problems:
+
+\begin{definition}
+  Given a graph $G$, the \emph{maximum clique problem} is an optimisation problem
+  asking for a clique in $G$ with maximum cardinality
+  \cite{DBLP:journals/jgo/PardalosX94a}.
+\end{definition}
+
+\begin{definition}
+  Given two (finite) graphs $G_1$ and $G_2$, the \emph{subgraph isomorphism
+    problem} is the decision problem of determining whether $G_1$ is isomorphic
+  to a subgraph of $G_2$ \cite{DBLP:conf/stoc/Cook71}. $G_1$ and $G_2$ are
+  usually referred to as the \emph{pattern} and \emph{target} graphs
+  \cite{DBLP:journals/ai/Solnon10, Valiente97analgorithm,
+    DBLP:journals/constraints/ZampelliDS10}, respectively. We will use these
+  definitions in the context of both the subgraph isomorphism problem and the
+  MCS problem, where the word 'pattern' will typically refer to the smaller of
+  the two graphs.
+\end{definition}
 
 The $k{\downarrow}$ algorithm \cite{DBLP:conf/aaai/HoffmannMR17} starts by
 trying to solve the subgraph isomorphism problem, i.e., finding the pattern
@@ -271,14 +304,14 @@ techniques. Then the search begins with a smallest domain (not counting
 wildcards), a value is chosen, and domains are filtered again to eliminate the
 chosen value.
 
-The clique encoding \cite{DBLP:conf/cp/McCreeshNPS16} solves the
-maximum common subgraph problem by creating a new (\emph{association}) graph and
-transforming the problem into an instance of the maximum clique problem
-\cite{Levi1973}, which is then solved by a sequential version of the maximum
-clique solver by McCreesh and Prosser \cite{DBLP:journals/topc/McCreeshP15},
-which is a branch and bound algorithm that uses bitsets and greedy colouring.
-Colouring is used to provide a quick upper bound: if a subgraph can be coloured
-with $k$ colours, then it cannot have a clique of size more than $k$.
+The clique encoding \cite{DBLP:conf/cp/McCreeshNPS16} solves the MCS problem by
+creating a new (\emph{association}) graph and transforming the problem into an
+instance of the maximum clique problem \cite{Levi1973}, which is then solved by
+a sequential version of the maximum clique solver by McCreesh and Prosser
+\cite{DBLP:journals/topc/McCreeshP15}, which is a branch and bound algorithm
+that uses bitsets and greedy colouring. Colouring is used to provide a quick
+upper bound: if a subgraph can be coloured with $k$ colours, then it cannot have
+a clique of size more than $k$.
 
 \textsc{McSplit} \cite{DBLP:conf/ijcai/McCreeshPT17} is a branch and bound
 algorithm that builds its own bit string labels for vertices in both pattern and
@@ -307,18 +340,20 @@ there are a few key differences between $\textsc{McSplit} {\downarrow}$ and
   more of the search tree branches.
 \end{itemize}
 
+The \textsc{McSplit} paper \cite{DBLP:conf/ijcai/McCreeshPT17} compared these
+(and a few constraint programming) algorithms and found \textsc{McSplit} to win
+with unlabelled graphs from Section~\ref{sec:labelled} of this dissertation, the
+clique encoding to win with labelled graphs, and $\textsc{McSplit}{\downarrow}$
+to win with unlabelled graphs from Section~\ref{sec:unlabelled} (closely
+followed by $k{\downarrow}$).
+
 \chapter{Problem Instances} \label{chapter:problems}
 
-We use two graph databases that contain a large variety of graphs differing in
-size, various characteristics, and the way they were generated. The
-\textsc{McSplit} paper \cite{DBLP:conf/ijcai/McCreeshPT17} used the same
-data to compare these (and a few constraint programming) algorithms and
-found \textsc{McSplit} to win with unlabelled graphs described in
-Section~\ref{sec:labelled} of this paper, the clique encoding to win with
-labelled graphs, and $\textsc{McSplit}{\downarrow}$ to win with unlabelled
-graphs from Section~\ref{sec:unlabelled}. However, in some cases the difference
-in performance between \textsc{McSplit} and the clique encoding or between
-$\textsc{McSplit}{\downarrow}$ and $k{\downarrow}$ was very small.
+In order to build ML models that predict the winning algorithm for each pair of
+graphs as well as to see how the algorithms compare for different kinds of
+graphs, we need to have or generate some graphs. For that we use two graph
+databases that contain a large variety of graphs differing in size, various
+characteristics, and the way they were generated.
 
 \section{Labelled Graphs} \label{sec:labelled}
 
@@ -358,7 +393,7 @@ The default value for $p$ is 33\%. The publications associated with the database
 labels are distributed among the $N$ values. We calculate the number of vertices
 that were assigned each label for each graph (represented by $C$) and compare
 those values with the numbers we would expect from a uniform distribution
-(represented by $E(C)$). We plot a histogram of the difference $E(C) - C$ in
+(represented by $\mathrm{E}(C)$). We plot a histogram of the difference $\mathrm{E}(C) - C$ in
 Figure~\ref{figure:labelling_histogram} and observe that the difference is
 normally distributed around 0.
 
@@ -367,18 +402,18 @@ normally distributed around 0.
 We also include a collection of benchmark instances for the subgraph isomorphism
 problem\footnote{\url{http://liris.cnrs.fr/csolnon/SIP.html}} (with the
 biochemical reactions dataset excluded since we are not dealing with directed
-graphs). It contains only unlabelled graphs and consists of the following sets:
+graphs). It contains only unlabelled graphs, and consists of the following sets:
 
 \begin{description}
-\item[images-CVIU11] Graphs generated from segmented images. 43 pattern graphs
-  and 146 target graphs, giving a total of \num{6278} instances.
+\item[images-CVIU11] Graphs generated from segmented images. There are 43
+  pattern graphs and 146 target graphs, giving a total of \num{6278} instances.
 \item[meshes-CVIU11] Graphs generated from meshes modelling 3D
   objects. 6 pattern graphs and 503 target graphs, giving a total of \num{3018}
   instances. Both \texttt{images-CVIU11} and \texttt{meshes-CVIU11} datasets are
-  described in \cite{DBLP:journals/cviu/DamiandSHJS11}.
+  described in a paper by Damiand \etal{} \cite{DBLP:journals/cviu/DamiandSHJS11}.
 \item[images-PR15] Graphs generated from segmented images
-  \cite{DBLP:journals/pr/SolnonDHJ15}. 24 pattern graphs and a single target
-  graph, giving 24 instances.
+  \cite{DBLP:journals/pr/SolnonDHJ15}. There are 24 pattern graphs and a single
+  target graph, giving 24 instances.
 \item[LV] Graphs with various properties (connected, biconnected, triconnected,
   bipartite, planar, etc.). 49 graphs are paired up in all possible ways, giving
   $49^2=\num{2401}$ instances.
@@ -387,14 +422,17 @@ graphs). It contains only unlabelled graphs and consists of the following sets:
 \item[si] Bounded valence graphs, 4D meshes, and randomly generated graphs
   (\num{1170} instances). This is the unlabelled part of the ARG database.
   \texttt{LV}, \texttt{scalefree}, and \texttt{si} datasets are described in
-  \cite{DBLP:journals/ai/Solnon10, DBLP:journals/constraints/ZampelliDS10}.
+  two papers by Solnon \cite{DBLP:journals/ai/Solnon10} and by Zampelli,
+  Deville, and Solnon \cite{DBLP:journals/constraints/ZampelliDS10}.
 \item[phase] Random graphs generated to be close to the
   satisfiable-unsatisfiable phase transition (200 instances)
   \cite{DBLP:conf/ijcai/McCreeshPT16}.
 \item[largerGraphs] Larger instances of the \texttt{LV} dataset. There are 70
   graphs, giving $70^2=\num{4900}$ instances. The separation was made and used
-  in \cite{DBLP:conf/aaai/HoffmannMR17, DBLP:conf/lion/KotthoffMS16,
-    DBLP:conf/ijcai/McCreeshPT17}.
+  in the $k{\downarrow}$ paper \cite{DBLP:conf/aaai/HoffmannMR17}, a paper on
+  algorithm selection for the subgraph isomorphism problem by Kotthoff,
+  McCreesh, and Solnon \cite{DBLP:conf/lion/KotthoffMS16}, and the
+  \textsc{McSplit} paper \cite{DBLP:conf/ijcai/McCreeshPT17}.
 \end{description}
 
 \begin{remark}
@@ -421,25 +459,27 @@ algorithm portfolios for the travelling salesperson problem
 \cite{DBLP:conf/lion/KotthoffMS16}. First, we run each algorithm on all pairs of
 pattern-target graphs and record the running times (described in
 Section~\ref{sec:runtimes}). Then, we adapt a graph feature extractor program
-used in \cite{DBLP:conf/lion/KotthoffMS16} to handle the binary format of the
-ARG Database \cite{foggia2001-2, DBLP:journals/prl/SantoFSV03}, run it on all
-graphs, and record the features in a way described in
-Section~\ref{sec:features}.
+used in an algorithm selection paper for the subgraph isomorphism problem by
+Kotthoff, McCreesh, and Solnon \cite{DBLP:conf/lion/KotthoffMS16} to handle the
+binary format of the ARG Database \cite{foggia2001-2,
+  DBLP:journals/prl/SantoFSV03}, run it on all graphs, and record the features
+in a way described in Section~\ref{sec:features}.
 
 \section{Running Time of Algorithms} \label{sec:runtimes}
 
-The algorithms were compiled with gcc 6.3.0 and run on Intel Xeon E5-2697A v4
-(2.60 GHz) processors with a \num{1000} s time limit. A Makefile was created to
-run multiple experiments in parallel with, e.g., \texttt{make -j 64}, which
-generates pairs of graph filenames for all datasets, runs the selected
-algorithms with various command line arguments, redirects their output to files
-that are later parsed using \texttt{sed} and regular expressions into the CSV
-format. For each algorithm, we keep the full names of pattern and target graphs,
-the number of vertices in the returned maximum common subgraph, running time as
-reported by the algorithms themselves, and the number of explored nodes in the
-search tree. Entries with running time greater than or equal to the timeout
-value are considered to have timed out. The aforementioned node counts are
-collected but not currently used. Afterwards, the answers of different
+The algorithms were compiled with gcc 6.3.0 and run on nodes with Ubuntu 17.04
+(Zesty Zapus) operating system, Intel Xeon E5-2697A v4 (2.60 GHz) processors,
+and 512 GB RAM. Each algorithm was set to time out after \num{1000} s. A
+Makefile was created to run multiple experiments in parallel (with, e.g.,
+\texttt{make -j 64}), which generates pairs of graph filenames for all datasets,
+runs the selected algorithms with various command line arguments, redirects
+their output to files that are later parsed using \texttt{sed} and regular
+expressions into the CSV format. For each algorithm, we keep the full names of
+pattern and target graphs, the number of vertices in the returned MCS, running
+time as reported by the algorithms themselves, and the number of explored nodes
+in the search tree. Entries with running time greater than or equal to the
+timeout value are considered to have timed out. The aforementioned node counts
+are collected but not currently used. Afterwards, the answers of different
 algorithms are checked for equality (for algorithms that did not time out).
 
 Some limitations had to be enforced to avoid running out of memory. First, the
@@ -451,18 +491,23 @@ were restricted to $m \times n < \num{16000}$. Second, having almost $10^5$
 problem instances and analysing 7 different kinds of labelling (according to
 Definition~\ref{def:percent_labelling}) results in too much data for the ML
 algorithm. Therefore, we sample \num{30000} out of \num{81400} instances from
-Section~\ref{sec:labelled}. The sample is drawn once and used for training ML
-models for both types of labelling. As with 50\% labelling most instances are
-solved within the time limit, sampling from the whole database still leaves us
-with enough relevant data.
+Section~\ref{sec:labelled}. The sample is drawn once and used to train ML
+models for both vertex-labelled and fully labelled graphs. As with 50\%
+labelling most instances are solved within the time limit, sampling from the
+whole database still leaves us with enough instances where at least one
+algorithm finished within the time limit.
 
 In the rest of this section we explore and compare how the algorithms performed
 on the three different subproblems under consideration, namely with unlabelled,
 vertex-labelled and fully labelled graphs. We introduce
 \emph{empirical cumulative distribution function (ECDF)}
 plots \cite{10.2307/2334448} (also known as cumulative plots): for each unit of
-time on the horizontal axis, the value on the vertical axis represents what part
-of the problem instances was solved in that amount of time or less.
+time on the horizontal axis, the value on the vertical axis represents the
+proportion of problem instances solved in that amount of time or less on an
+instance-by-instance basis. For example, if an algorithm finished one instance
+in 1~s and two instances in 2~s, then its ECDF curve will connect points $(0,
+0)$, $(1, \frac{1}{3})$, and $(2, 1)$ (assuming that time is measured in
+seconds).
 
 \subsection{Unlabelled Graphs}
 
@@ -493,35 +538,38 @@ of the problem instances was solved in that amount of time or less.
 We plot the ECDF plots for unlabelled graphs in both databases in
 Figure~\ref{fig:ecdf_unlabelled}. We can check that the orderings of the
 algorithms in parts (a) and (b) of Figure~\ref{fig:ecdf_unlabelled} are the same
-as in Figures 3a and 4 in the \textsc{McSplit} paper
+as in Figures 3a and 4 of the \textsc{McSplit} paper
 \cite{DBLP:conf/ijcai/McCreeshPT17}. Namely, \textsc{McSplit} outperforms
 $k{\downarrow}$ in Figure \ref{fig:ecdf_unlabelled_mcs}, and the opposite
 happens in Figure \ref{fig:ecdf_unlabelled_sip}. In
 Figure~\ref{fig:ecdf_unlabelled_both} we also plot a curve for the \emph{virtual
   best solver (VBS)}, i.e., a perfect algorithm portfolio that always chooses
 the best-performing algorithm for each problem instance. Note that the
-difference between $\textsc{McSplit}{\downarrow}$ and VBS is very small.
-Therefore, a portfolio cannot provide significant performance benefits for this
-subproblem.
+difference between $\textsc{McSplit}{\downarrow}$ and the VBS is very small.
+Therefore, a portfolio cannot provide significant performance benefits for
+unlabelled graphs.
 
 \begin{table}
   \centering
-  \begin{tabular}{l r r r r}
+  \begin{tabular}{l l l l l}
+    \toprule
     Dataset & clique & $k{\downarrow}$ & \textsc{McSplit} & $\textsc{McSplit}{\downarrow}$ \\
-    \hline
-    \texttt{images-CVIU11} & 0 & 32 & 79 & 1081 \\
-    \texttt{images-PR15} & 0 & 0 & 0 & 24 \\
-    \texttt{largerGraphs} & 0 & 14 & 30 & 167 \\
-    \texttt{LV} & 90 & 30 & 489 & 439 \\
-    \texttt{meshes-CVIU11} & 0 & 13 & 0 & 23 \\
-    \texttt{phase} & 0 & 0 & 0 & 0 \\
-    \texttt{scalefree} & 0 & 0 & 0 & 80 \\
-    \texttt{si} & 0 & 10 & 102 & 1135 \\
-    ARG Database & 1443 & 141 & 21965 & 27305 \\
-    \hline
-    Total & 1533 & 240 & 22665 & 30254
+    \midrule
+    \texttt{images-CVIU11} & \tablenum{0} & \tablenum{32} & \tablenum{79} & \tablenum{1081} \\
+    \texttt{images-PR15} & \tablenum{0} & \tablenum{0} & \tablenum{0} & \tablenum{24} \\
+    \texttt{largerGraphs} & \tablenum{0} & \tablenum{14} & \tablenum{30} & \tablenum{167} \\
+    \texttt{LV} & \tablenum{90} & \tablenum{30} & \tablenum{489} & \tablenum{439} \\
+    \texttt{meshes-CVIU11} & \tablenum{0} & \tablenum{13} & \tablenum{0} & \tablenum{23} \\
+    \texttt{phase} & \tablenum{0} & \tablenum{0} & \tablenum{0} & \tablenum{0} \\
+    \texttt{scalefree} & \tablenum{0} & \tablenum{0} & \tablenum{0} & \tablenum{80} \\
+    \texttt{si} & \tablenum{0} & \tablenum{10} & \tablenum{102} & \tablenum{1135} \\
+    ARG Database & \tablenum{1443} & \tablenum{141} & \tablenum{21965} & \tablenum{27305} \\
+    \midrule
+    Total & \tablenum{1533} & \tablenum{240} & \tablenum{22665} & \tablenum{30254} \\
+    \bottomrule
   \end{tabular}
-  \caption{The number of times each algorithm was the best, for each dataset.}
+  \caption{The number of times each algorithm outperformed other algorithms, for
+    each dataset.}
   \label{table:best}
 \end{table}
 
@@ -647,7 +695,7 @@ approach.
 \section{Graph Features} \label{sec:features}
 
 The initial set of features is based on the algorithm selection paper for the
-subgraph isomorphism problem \cite{DBLP:conf/lion/KotthoffMS16} and consists of
+subgraph isomorphism problem \cite{DBLP:conf/lion/KotthoffMS16}, and consists of
 the following:
 
 \begin{enumerate}
@@ -673,14 +721,16 @@ graphs (i.e., graphs with no multiple edges or loops
 \[ \frac{m}{\binom{n}{2}} = \frac{2m}{n(n-1)}. \]
 \end{definition}
 Even though some of our graphs do contain multiple edges and loops, we stick to
-this formula as it was used in \cite{DBLP:conf/lion/KotthoffMS16} and it does
+this formula, as it was used in the algorithm selection paper for the subgraph
+isomorphism problem \cite{DBLP:conf/lion/KotthoffMS16}, and it does
 not break the ML algorithm in any way to have the theoretical possibility of
 density greater than 1.
 
 We exclude feature extraction running time as a viable feature by itself (used
-in \cite{DBLP:conf/lion/KotthoffMS16}) since it would not provide any insight
-into what properties of the graph affect which algorithm is likely to achieve
-the best performance. Since $k{\downarrow}$ and $\textsc{McSplit}{\downarrow}$ both
+in the algorithm selection paper for the subgraph isomorphism problem
+\cite{DBLP:conf/lion/KotthoffMS16}), since it would not provide any insight into
+what properties of the graph affect which algorithm is likely to achieve the
+best performance. Since $k{\downarrow}$ and $\textsc{McSplit}{\downarrow}$ both
 start by looking for (complete) subgraph isomorphisms, they are likely to
 outperform other algorithms when both graphs are very similar and the maximum
 common subgraph has (almost) as many vertices as the smaller of the two graphs.
@@ -701,215 +751,18 @@ respectively.
   value of $p$ for both vertices and edges. This ``convention'' seems to have
   originated in a paper by the creators of the ARG Database
   \cite{DBLP:journals/jgaa/ConteFV07} and was replicated in subsequent papers on
-  maximum common subgraph algorithms \cite{DBLP:conf/cp/McCreeshNPS16,
-    DBLP:conf/cp/NdiayeS11}.
+  MCS algorithms \cite{DBLP:conf/cp/McCreeshNPS16, DBLP:conf/cp/NdiayeS11}.
 \end{remark}
 
 \subsection{Distributions of Features}
 
-\begin{figure}
-  \centering
-  \includegraphics[scale=0.7]{images/sip_loops.png}
-  \caption{Density plot of the number of loops in graphs from
-    Section~\ref{sec:unlabelled}.}
-  \label{fig:loops}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/mcs_vertices.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/mcs_edges.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/mcs_meandeg.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/mcs_maxdeg.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/mcs_stddeg.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/mcs_density.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/mcs_meandist.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/mcs_maxdist.png}
-  \end{subfigure}
-  \caption{Plots of how various features are distributed for graphs from
-    Section~\ref{sec:labelled}.}
-  \label{fig:mcs_features1}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/sip_vertices.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/sip_edges.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/sip_meandeg.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/sip_maxdeg.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/sip_stddeg.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/sip_density.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/sip_meandist.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/sip_maxdist.png}
-  \end{subfigure}
-  \caption{Plots of how various features are distributed for graphs from Section
- ~\ref{sec:unlabelled}.}
-  \label{fig:sip_features1}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/mcs_prop2.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/sip_prop2.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/mcs_prop3.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/sip_prop3.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/mcs_prop4.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/sip_prop4.png}
-  \end{subfigure}
-  \caption{Comparison of typical distances between pairs of vertices between the
-  two graph databases, with graphs from Section~\ref{sec:labelled} on the left,
-  and graphs from Section~\ref{sec:unlabelled} on the right.}
-  \label{fig:proportions}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/mcs_ratio_vertices.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/sip_ratio_vertices.png}
-  \end{subfigure}
-  \caption{The density plots of log-transformed ratio of the number of vertices
-    between pattern and target graphs for both databases with graphs from
-    Section~\ref{sec:labelled} on the left and graphs from
-    Section~\ref{sec:unlabelled} on the right.}
-  \label{fig:ratio_vertices}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/mcs_ratio_edges.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/mcs_ratio_meandeg.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/mcs_ratio_maxdeg.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/mcs_ratio_density.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/mcs_ratio_meandist.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/mcs_ratio_maxdist.png}
-  \end{subfigure}
-  \caption{The other density plots of the log-transformed ratio features for
-    graphs from Section~\ref{sec:labelled}.}
-  \label{fig:mcs_ratio}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/sip_ratio_edges.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/sip_ratio_meandeg.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/sip_ratio_maxdeg.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/sip_ratio_density.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/sip_ratio_meandist.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/sip_ratio_maxdist.png}
-  \end{subfigure}
-  \caption{The other density plots of the log-transformed ratio features for
-    graphs from Section~\ref{sec:unlabelled}.}
-  \label{fig:sip_ratio}
-\end{figure}
-
-In this section we plot and discuss how the selected features are distributed in
-both databases. As the graphs from Section~\ref{sec:unlabelled} contain some
-very hard instances, we only consider graphs that are part of a pair of graphs
-solved by at least one algorithm. In order to visualise highly skewed data, we
-sometimes use density plots. Furthermore, we take $\log$ transformations of
-ratio features.
+In this section we discuss how the selected features are distributed in both
+databases. In order to save space, all plots are in Appendix
+\ref{appendix:plots}. As the graphs from Section~\ref{sec:unlabelled} contain
+some very hard instances, we only consider graphs that are part of a pair of
+graphs solved by at least one algorithm. In order to visualise highly skewed
+data, we sometimes use density plots. Furthermore, we take $\log$
+transformations of ratio features.
 
 Firstly, one feature is not plotted as by definition it has only two possible
 values. 99.81\% of graphs from Section~\ref{sec:labelled} are connected,
@@ -961,12 +814,54 @@ data very close to 0. Thus, the differences between pattern and target graphs
 are very small. Furthermore, all distributions are symmetrical---the pattern
 graph is just as likely to be larger/denser/etc. as the opposite.
 
-\chapter{Machine Learning Models \& Their Evaluation}
+\subsection{Correlations}
+
+Another important question is how the features are correlated with each other.
+Even though research suggests that Pearson's correlation coefficient can be
+quite robust to violations of the data normality assumption \cite{article}
+(which is clearly violated with our data), we choose Spearman's correlation
+coefficient as the more appropriate alternative:
+
+\begin{definition}
+  \emph{Spearman's rank correlation coefficient} \cite{mood1974introduction}
+  between vectors $\bm{x}, \bm{y} \in \mathbb{R}^n$ is defined as
+\[ S = \frac{\sum_i [r(x_i) - \overline{r}(\bm{x})][r(y_i) -
+    \overline{r}(\bm{y})]}{\sqrt{\sum_i [r(x_i) -
+      \overline{r}(\bm{x})]^2\sum_i [r(y_i) -
+      \overline{r}(\bm{y})]^2}} \],
+where $\overline{r}(\bm{x}) = \sum_i r(x_i)/n$, $\overline{r}(\bm{y})
+= \sum_i r(y_i)/n$, and $r$ is a rank function, which, for each of the two
+vectors, assigns a natural number to each element such that $x_i > x_j \implies
+r(x_i) > r(x_j)$, for any two elements of $\bm{x}$.
+\end{definition}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{images/feature_correlations.png}
+  \caption{Spearman's rank correlation coefficients between all pairs of
+    features, for both databases of graphs. Each correlation coefficient is
+    represented by colour, with dark red for strong negative correlations,
+    dark blue for strong positive correlations, and white for a correlation
+    coefficient that is close to zero.}
+  \label{fig:feature_correlations}
+\end{figure}
+
+The resulting correlation coefficients are pictured in Figure
+\ref{fig:feature_correlations}. Ratio features, connectedness, and numbers of
+loops have almost no significant correlations, unlike the rest of the features
+that have significant positive and negative correlations. There is also a
+noticeable symmetry between features of the pattern and target graphs, i.e., if
+feature $f$ of the pattern graph correlates with features $g$ and $h$ of the
+pattern graph, then it also correlates with features $f, g, h$ of the target
+graph.
+
+\chapter{Machine Learning Models \& Their Evaluation} \label{chapter:ml}
 
 After running the algorithms  with different types and percentages of labelling
-and recording their running times, an ML algorithm can be trained to predict which
+and recording their running times, an ML model can be trained to predict which
 algorithm should be chosen for each pair of graphs. For each pair of graphs,
-\textsc{Llama} \cite{llama} can take:
+\textsc{Llama} \cite{llama} (the package that facilitates constructing algorithm
+portfolios) can take:
 
 \begin{itemize}
 \item A list of features. With separate features for pattern and target graphs
@@ -974,10 +869,10 @@ algorithm should be chosen for each pair of graphs. For each pair of graphs,
   total.
 \item A list of performance measures for all algorithms, i.e., the values that
   we are trying to optimise. In this case (as in most cases), this corresponds
-  to running time. The values are capped at the timeout value (\num{1000000} ms).
+  to running time. The values are capped at the timeout value (\num{1000000}~ms).
   Furthermore, instances that were not run on the clique algorithm are also set
-  to the timeout value. Finally, we filter out instances where all of the
-  algorithms timed out.
+  to the timeout value. Finally, we filter out instances where all algorithms
+  timed out.
 \item A list of Boolean values, denoting whether each algorithm successfully
   finished or not. Timeouts, the clique algorithm running out of memory, and
   instances that were not run with the clique algorithm because of their size
@@ -990,7 +885,8 @@ algorithm should be chosen for each pair of graphs. For each pair of graphs,
   against other algorithms: the runtime of the portfolio is defined as the
   runtime of its chosen algorithm together with feature extraction time.
   While costs for graphs from Section~\ref{sec:unlabelled} reached up to 65 s,
-  the maximum cost for graphs from Section~\ref{sec:labelled} is only 6 ms.
+  the maximum cost for graphs from Section~\ref{sec:labelled} is only 6 ms, with
+  distance-based features being more expensive to compute.
 \end{itemize}
 
 After constructing the required data frames as described above, the data needs to
@@ -1115,6 +1011,13 @@ consumption.
 
 \section{Unlabelled Graphs}
 
+In this section we introduce various metrics and plots that can be used to
+examine a random forest, and use them to evaluate our model for unlabelled
+graphs. We examine how well the model predicts the winning of each algorithm,
+how important each feature is in making a prediction, how convinced the model is
+of each prediction, which algorithms prefer what values of various features, and
+how well the model performs compared to individual algorithms and the VBS.
+
 \subsection{Error Rates} \label{sec:unlabelled_error_rates}
 
 \begin{figure}
@@ -1183,7 +1086,6 @@ at its lowest when all proportions $\hat{p}_{mk}$ are close to either 0 or
 region belong to a single class. Hence the Gini index is often used to evaluate
 the quality of a split.
 
-% TODO: these should not be subfigures
 \begin{figure}
   \centering
   \begin{subfigure}[t]{0.45\textwidth}
@@ -1212,10 +1114,10 @@ Unsurprisingly, the worst predictors are the features with very low variance:
 number of loops and connectedness of both graphs. Perhaps more surprisingly, the
 ratio features are not as successful as one might have hoped: the ratio of the
 numbers of vertices is at the bottom 5\textsuperscript{th} place and the best
-ratio feature, the mean distance ratio, is only 10\textsuperscript{th}. Last
+ratio feature, the mean distance ratio, is only 10\textsuperscript{th}. The last
 thing to note is that features of the pattern graph are always behind the same
 features of the target graph and usually not far behind. Perhaps this is due to
-some datasets having less pattern graphs, or pattern graphs having fewer
+some datasets having fewer pattern graphs, or pattern graphs having fewer
 vertices. The variable usage plot in Figure~\ref{fig:unlabelled_var_used} tells
 a similar story: the orders are not identical, but there are no big outliers.
 
@@ -1361,13 +1263,13 @@ does not provide enough information to choose the clique encoding over
   \label{fig:ecdf_unlabelled_llama}
 \end{figure}
 
-In order to compare our ML model with other algorithms, we treat the
-VBS as the upper bound and the single best solver $\textsc{McSplit}{\downarrow}$
-as the lower bound. Out of 45468 instances solved by at least one algorithm, our
-model managed to solve 45290, compared to 45223 solved by
-$\textsc{McSplit}{\downarrow}$. In other words, it was able to close 27.3\% of the
-gap between our lower and upper bounds in terms of instances solved within the
-time limit. Figure~\ref{fig:ecdf_unlabelled_llama} shows how the ML model
+In order to compare our ML model with other algorithms, we treat the VBS as the
+upper bound and the single best solver $\textsc{McSplit}{\downarrow}$ as the
+lower bound. Out of \num{45468} instances solved by at least one algorithm, our
+model managed to solve \num{45290}, compared to \num{45223} solved by
+$\textsc{McSplit}{\downarrow}$. In other words, it was able to close 27.3\% of
+the gap between our lower and upper bounds in terms of instances solved within
+the time limit. Figure~\ref{fig:ecdf_unlabelled_llama} shows how the ML model
 compares to the VBS and the single best solver $\textsc{McSplit}{\downarrow}$
 (note that the vertical axis starts at 0.9 rather than 0). Unsurprisingly, the
 model outperforms $\textsc{McSplit}{\downarrow}$, but does not reach the best
@@ -1394,12 +1296,14 @@ possible performance represented by the VBS.
 \begin{table}
   \centering
   \begin{tabular}{l c c}
+    \toprule
     Error type & Final value for vertex labels (\%) & Final value for both labels (\%) \\
-    \hline
-    OOB & 13 & 14 \\
-    clique & 8 & 7 \\
-    \textsc{McSplit} & 22 & 29 \\
-    $\textsc{McSplit}{\downarrow}$ & 11 & 11
+    \midrule
+    OOB & \tablenum{13} & \tablenum{14} \\
+    clique & \tablenum{8} & \tablenum{7} \\
+    \textsc{McSplit} & \tablenum{22} & \tablenum{29} \\
+    $\textsc{McSplit}{\downarrow}$ & \tablenum{11} & \tablenum{11} \\
+    \bottomrule
   \end{tabular}
   \caption{The values that all 4 errors (approximately) converge to, for both
     types of labelling.}
@@ -1582,7 +1486,7 @@ of 1 and 2.
     \centering
     \includegraphics[width=\textwidth]{images/ecdf_both_labels_llama.png}
   \end{subfigure}
-  \caption{\textsc{Llama} models compared to the other algorithms and the VBS.}
+  \caption{\textsc{Llama} models compared to other algorithms and the VBS.}
   \label{fig:ecdf_llama}
 \end{figure}
 
@@ -1599,7 +1503,13 @@ numbers to this picture, \textsc{Llama} closed 86\% and 88\% of the difference
 between its lower and upper bounds for vertex-labelled and fully labelled
 graphs, respectively.
 
-\chapter{Further Experiments}
+\chapter{Further Experiments} \label{chapter:further}
+
+In this chapter we build on the knowledge gained by developing ML models and
+analysing algorithms' performance to extend current algorithms and propose new
+ones. We suggest a way to extend $k{\downarrow}$ to support vertex-labelled
+graphs in a non-trivial manner and introduce the idea of combining
+\textsc{McSplit} and the clique encoding into a single algorithm.
 
 \section{Modifications to \texorpdfstring{$k{\downarrow}$}{kdown}}
 
@@ -1619,8 +1529,8 @@ labels provide. It is also part of line 8 of the same function in the original
 paper \cite{DBLP:conf/aaai/HoffmannMR17}, however, it is not enabled by
 default\footnote{\url{https://github.com/ciaranm/aaai17-between-subgraph-isomorphism-and-maximum-common-subgraph-paper}}
 and is not used in the experiments of the \textsc{McSplit} paper
-\cite{DBLP:conf/ijcai/McCreeshPT17}. We take the definition directly from
-\cite{DBLP:conf/aaai/HoffmannMR17}:
+\cite{DBLP:conf/ijcai/McCreeshPT17}. We take the definition directly from the
+$k{\downarrow}$ paper \cite{DBLP:conf/aaai/HoffmannMR17}:
 
 \begin{definition}
   ``The \emph{neighbourhood degree sequence} (NDS) of a vertex $p$, $S(p)$, is the
@@ -1646,12 +1556,12 @@ on Corollary 1 from the $k{\downarrow}$ paper \cite{DBLP:conf/aaai/HoffmannMR17}
 \end{lemma}
 
 \begin{proof}
-  A simple extension of Corollary 1 from \cite{DBLP:conf/aaai/HoffmannMR17} by a
-  reordering argument.
+  A simple extension of Corollary 1 from the $k{\downarrow}$ paper
+  \cite{DBLP:conf/aaai/HoffmannMR17} by a reordering argument.
 \end{proof}
 
-We also have Proposition 3 from \cite{DBLP:conf/aaai/HoffmannMR17}, which is
-useful to our proposed algorithm:
+We also have Proposition 3 from the same paper
+\cite{DBLP:conf/aaai/HoffmannMR17}, which is useful to our proposed algorithm:
 
 \begin{proposition} \label{prop:kdown}
   Given some $k$, if a pattern graph vertex $p$ is mapped to a target graph
@@ -1681,7 +1591,6 @@ useful to our proposed algorithm:
   \label{alg:nds}
 \end{algorithm}
 
-% TODO: name the pattern and target graphs
 We extend these ideas in Algorithm~\ref{alg:nds} by considering an NDS for each
 label. The algorithm checks whether a vertex $p$ in the pattern graph can be
 matched with a vertex $t$ in the target graph.
@@ -1705,11 +1614,11 @@ As this improvement is an afterthought after the main experiments, the resulting
 algorithm was run on a smaller subset of all data: \num{30000} instances with
 10\% labelling. The ECDF plot in Figure~\ref{fig:ecdf_kdown} shows the new
 $k{\downarrow}$ to be just slightly behind the clique encoding and it outperforms
-other algorithms in 193 instances, making it considerable for an inclusion in
-a portfolio, although it might achieve similar results as with unlabelled
-graphs, where it wins too infrequently to be a valuable inclusion.
+other algorithms in 193 instances, making it worth consideration for an
+inclusion in a portfolio, although it might achieve similar results as with
+unlabelled graphs, where it wins too infrequently to be a valuable inclusion.
 
-\section{The Clique Algorithm and its Association Graph}
+\section{The Clique Algorithm and its Association Graph} \label{sec:clique}
 % TODO: intro the whole ordeal once it's done
 
 \begin{figure}
@@ -1774,29 +1683,12 @@ dataset is plotted in Figure~\ref{fig:densities}.
 
 To keep things simple and not violate assumptions about independent variables,
 we will only consider correlations between the variables instead of trying to
-fit some kind of a regression model. Even though research suggests that
-Pearson's correlation coefficient can be quite robust to violations of the data
-normality assumption \cite{article} (which is clearly violated with our data),
-we choose Spearman's correlation coefficient as the more appropriate
-alternative.
-
-\begin{definition}
-  \emph{Spearman's rank correlation coefficient} \cite{mood1974introduction}
-  between vectors $\bm{x}, \bm{y} \in \mathbb{R}^n$ is defined as
-\[ S = \frac{\sum_i [r(x_i) - \overline{r}(\bm{x})][r(y_i) -
-    \overline{r}(\bm{y})]}{\sqrt{\sum_i [r(x_i) -
-      \overline{r}(\bm{x})]^2\sum_i [r(y_i) -
-      \overline{r}(\bm{y})]^2}} \],
-where $\overline{r}(\bm{x}) = \sum_i r(x_i)/n$, $\overline{r}(\bm{y})
-= \sum_i r(y_i)/n$, and $r$ is a rank function, which, for each of the two
-vectors, assigns a natural number to each element such that $x_i > x_j \implies
-r(x_i) > r(x_j)$, for any two elements of $\bm{x}$.
-\end{definition}
-The resulting correlations are in Figure~\ref{fig:correlations}. Note that all
-variables are positively correlated: some correlations are very strong, some
-average, and one very weak (between density and the standard deviation of
-degrees). More specifically, all measured characteristics of the association
-graph are positively correlated with the algorithm's running time.
+fit some kind of a regression model. The resulting Spearman's rank correlation
+coefficients are in Figure~\ref{fig:correlations}. Note that all variables are
+positively correlated: some correlations are very strong, some average, and one
+very weak (between density and the standard deviation of degrees). Also note
+that all measured characteristics of the association graph are positively
+correlated with the algorithm's running time. 
 
 \begin{figure}
   \centering
@@ -1846,18 +1738,27 @@ other algorithms in Figure~\ref{fig:bins}. We can make 3 observations:
   clique algorithm's winning rate stays below 0.5, meaning that simply looking
   at each measured property of the association graph is not enough to identify
   values of those properties that would provide a clear indication that
-  re-encoding the maximum common subgraph instance into an instance of maximum
-  clique would provide clear benefits.
+  re-encoding the MCS instance into an instance of maximum clique would provide
+  clear benefits.
 \end{itemize}
 
-\section{\textsc{Fusion}: \textsc{McSplit} and the Clique Encoding United}
-% TODO: more justification for why we're doing this
+\subsection{\textsc{Fusion}: \textsc{McSplit} and the Clique Encoding United}
+
+Even though we were not able to justify re-encoding a problem instance that is
+partially solve by \textsc{McSplit} into the clique encoding using the simple
+techniques of Section \ref{sec:clique}, this section presents the simplest way of
+merging the two algorithms, where the clique algorithm overtakes
+\textsc{McSplit} after making a fixed number of choices. The hope is that making
+several decision with \textsc{McSplit} would simplify the association graph
+enough to warrant the extra cost in creating the association graph and switching
+algorithms.
 
 Firstly, we add an additional argument to the \texttt{Search} function of the
 \textsc{McSplit} algorithm \cite{DBLP:conf/ijcai/McCreeshPT17} called
 \textsf{depth} with a default (initial) value of 0. It is increased by one in
-the recursive call on line 19 of Algorithm 1 in the \textsc{McSplit} paper and
-left unchanged in a different recursive call on line 23.
+the recursive call on line 19 of Algorithm 1 in the \textsc{McSplit} paper
+\cite{DBLP:conf/ijcai/McCreeshPT17} and left unchanged in a different recursive
+call on line 23.
 
 Secondly, we also add a global parameter \textsf{DEPTH}, which denotes at what value of
 \textsf{depth} \textsc{McSplit} re-encodes the remaining problem to a maximum
@@ -1878,7 +1779,8 @@ and the edges are defined in exactly the same way as in the original paper.
 
 Given the two new variables \textsf{depth} and \textsf{DEPTH}, we only need to
 add the following lines of code between lines 5 and 6 of Algorithm 1 in the
-\textsc{McSplit} paper to transform \textsc{McSplit} into \textsc{Fusion}:
+\textsc{McSplit} paper \cite{DBLP:conf/ijcai/McCreeshPT17} to transform
+\textsc{McSplit} into \textsc{Fusion}:
 
 \begin{algorithm}
   \SetKwData{depthVar}{depth}
@@ -1897,15 +1799,237 @@ add the following lines of code between lines 5 and 6 of Algorithm 1 in the
 Here, $\textit{incumbent}_{\textsc{McSplit}}$ and
 $\textit{incumbent}_{\text{clique}}$ denote the different variables with the
 same name in the two algorithms, $M$ and \textit{future} come from the
-\textsc{McSplit} algorithm, and $V_1$ is the set of vertices of one of the
-original graphs, used in the initialisation of the clique algorithm.
+\textsc{McSplit} algorithm, $V_1$ is the set of vertices of one of the
+original graphs, used in the initialisation of the clique algorithm, and
+\texttt{search} is the main search function of the clique algorithm
+\cite{DBLP:conf/cp/McCreeshNPS16}. Note that due to how the incumbents are
+implemented in practice, we set the cardinality of
+$\textit{incumbent}_{\text{clique}}$ without having to set the incumbent itself.
+% TODO: describe results
 
-\chapter{Conclusion}
+\subsection{TODO: rename me}
 
-TODO
+\begin{definition}
+  A \emph{partially solved MCS instance} is defined as... (includes unsolved
+  instances)
+\end{definition}
 
-%\begin{appendices}
-%\end{appendices}
+\begin{definition}
+  Two partially solved MCS instances are \emph{clique-equivalent} if... (the
+  association graph is the same)
+\end{definition}
+
+\begin{lemma}
+  How to turn a partially solved instance into a clique-equivalent unsolved
+  instance.
+\end{lemma}
+
+\chapter{Conclusion and Future Work}
+
+% better understanding, better algorithm (good performance), two perfect situations for algorithm
+% selection, filtering variables can help, importance of lower values of
+% labelling
+
+\begin{appendices}
+  \chapter{Plots of Distributions of Features} \label{appendix:plots}
+  \begin{figure}
+    \centering
+    \includegraphics[scale=0.7]{images/sip_loops.png}
+    \caption{Density plot of the number of loops in graphs from
+      Section~\ref{sec:unlabelled}.}
+    \label{fig:loops}
+  \end{figure}
+
+  \begin{figure}
+    \centering
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/mcs_vertices.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/mcs_edges.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/mcs_meandeg.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/mcs_maxdeg.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/mcs_stddeg.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/mcs_density.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/mcs_meandist.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/mcs_maxdist.png}
+    \end{subfigure}
+    \caption{Plots of how various features are distributed for graphs from
+      Section~\ref{sec:labelled}.}
+    \label{fig:mcs_features1}
+  \end{figure}
+
+  \begin{figure}
+    \centering
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/sip_vertices.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/sip_edges.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/sip_meandeg.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/sip_maxdeg.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/sip_stddeg.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/sip_density.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/sip_meandist.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/sip_maxdist.png}
+    \end{subfigure}
+    \caption{Plots of how various features are distributed for graphs from Section
+      ~\ref{sec:unlabelled}.}
+    \label{fig:sip_features1}
+  \end{figure}
+
+  \begin{figure}
+    \centering
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/mcs_prop2.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/sip_prop2.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/mcs_prop3.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/sip_prop3.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/mcs_prop4.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/sip_prop4.png}
+    \end{subfigure}
+    \caption{Comparison of typical distances between pairs of vertices between the
+      two graph databases, with graphs from Section~\ref{sec:labelled} on the left,
+      and graphs from Section~\ref{sec:unlabelled} on the right.}
+    \label{fig:proportions}
+  \end{figure}
+
+  \begin{figure}
+    \centering
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/mcs_ratio_vertices.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/sip_ratio_vertices.png}
+    \end{subfigure}
+    \caption{The density plots of log-transformed ratio of the number of vertices
+      between pattern and target graphs for both databases with graphs from
+      Section~\ref{sec:labelled} on the left and graphs from
+      Section~\ref{sec:unlabelled} on the right.}
+    \label{fig:ratio_vertices}
+  \end{figure}
+
+  \begin{figure}
+    \centering
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/mcs_ratio_edges.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/mcs_ratio_meandeg.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/mcs_ratio_maxdeg.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/mcs_ratio_density.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/mcs_ratio_meandist.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/mcs_ratio_maxdist.png}
+    \end{subfigure}
+    \caption{The other density plots of the log-transformed ratio features for
+      graphs from Section~\ref{sec:labelled}.}
+    \label{fig:mcs_ratio}
+  \end{figure}
+
+  \begin{figure}
+    \centering
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/sip_ratio_edges.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/sip_ratio_meandeg.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/sip_ratio_maxdeg.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/sip_ratio_density.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/sip_ratio_meandist.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{images/sip_ratio_maxdist.png}
+    \end{subfigure}
+    \caption{The other density plots of the log-transformed ratio features for
+      graphs from Section~\ref{sec:unlabelled}.}
+    \label{fig:sip_ratio}
+  \end{figure}
+
+\end{appendices}
 
 \bibliographystyle{plain}
 \bibliography{references}
