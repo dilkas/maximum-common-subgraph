@@ -60,7 +60,8 @@ namespace
 
                   edges.push_back({association.find({v1, v2})->second, association.find({w1, w2})->second});
                 }
-    std::cout << edges.size() << std::endl;
+    std::cout << "Vertices: " << association.size() << std::endl;
+    std::cout << "Edges: " << edges.size() << std::endl;
 
     /*
     // Record features/statistics

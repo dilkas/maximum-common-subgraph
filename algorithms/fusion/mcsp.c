@@ -416,6 +416,9 @@ void run_clique(const Graph & g0, const Graph & g1, vector<VtxPair> & incumbent,
           g1.adjmat.at(a2.first.second).at(a1.first.second))
         edges.push_back({a1.second, a2.second});
 
+  std::cout << "Vertices: " << association.size() << std::endl;
+  std::cout << "Edges: " << edges.size() << std::endl;
+
   // fields related to labels are not used and don't have to be initialised
   VFGraph first_graph;
   first_graph.size = g0.n;

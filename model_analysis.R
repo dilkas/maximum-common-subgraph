@@ -179,43 +179,43 @@ sum(times$clique <= times$vbs)
 #dev.off()
 
 # Line graphs
-#algorithms <- c("clique", "mcsplit", "mcsplitdown")
-# colours <- rainbow(length(algorithms))
-# solved <- expand.grid(algorithm = algorithms, labelling = p_values)
-# solved$proportion <- apply(solved, 1, function(row)
-#   sum(data[["data"]]$labelling == as.numeric(row[2])))
-# solved$proportion <- apply(solved, 1, function(row)
-#   sum(data[["data"]]$labelling == as.numeric(row[2]) &
-#         data[["data"]][paste0(row[1], "_success")] == TRUE) /
-#     as.numeric(row[3]))
-# png(paste0("dissertation/images/", type, "_linechart.png"), width = 480,
-#     height = 320)
-# plot(range(solved$labelling), range(solved$proportion), xlab = "Labelling (%)",
-#      ylab = "Proportion solved", type = "n", main = type_label)
-# for (i in 1:length(algorithms)) {
-#   individual_results <- subset(solved, solved$algorithm == algorithms[i])
-#   lines(individual_results$labelling, individual_results$proportion,
-#         col = colours[i])
-# }
-# legend("bottomright", c("clique", "McSplit", "McSplit\u2193"), fill = colours)
-# dev.off()
+algorithms <- c("clique", "mcsplit", "mcsplitdown", "fusion1", "fusion2")
+colours <- rainbow(length(algorithms))
+solved <- expand.grid(algorithm = algorithms, labelling = p_values)
+solved$proportion <- apply(solved, 1, function(row)
+  sum(data[["data"]]$labelling == as.numeric(row[2])))
+solved$proportion <- apply(solved, 1, function(row)
+  sum(data[["data"]]$labelling == as.numeric(row[2]) &
+        data[["data"]][paste0(row[1], "_success")] == TRUE) /
+    as.numeric(row[3]))
+png(paste0("dissertation/images/", type, "_linechart.png"), width = 480,
+    height = 320)
+plot(range(solved$labelling), range(solved$proportion), xlab = "Labelling (%)",
+     ylab = "Proportion solved", type = "n", main = type_label)
+for (i in 1:length(algorithms)) {
+  individual_results <- subset(solved, solved$algorithm == algorithms[i])
+  lines(individual_results$labelling, individual_results$proportion,
+        col = colours[i])
+}
+legend("bottomright", c("clique", "McSplit", "McSplit\u2193"), fill = colours)
+dev.off()
 # rm("solved")
 # 
-# cumulative <- expand.grid(algorithm = algorithms, labelling = p_values)
-# cumulative$time <- apply(cumulative, 1, function(row)
-#   sum(data$data[data$data$labelling == as.numeric(row[2]), row[1]]))
-# png(paste0("dissertation/images/", type, "_linechart2.png"), width = 480,
-#     height = 320)
-# plot(range(cumulative$labelling), range(cumulative$time),
-#      xlab = "Labelling (%)", ylab = "Total runtime (ms)", type = "n", main = type_label)
-# for (i in 1:length(algorithms)) {
-#   individual_results <- subset(cumulative,
-#                                cumulative$algorithm == algorithms[i])
-#   lines(individual_results$labelling, individual_results$time,
-#         col = colours[i])
-# }
-# legend("topright", c("clique", "McSplit", "McSplit\u2193"), fill = colours)
-# dev.off()
+cumulative <- expand.grid(algorithm = algorithms, labelling = p_values)
+cumulative$time <- apply(cumulative, 1, function(row)
+  sum(data$data[data$data$labelling == as.numeric(row[2]), row[1]]))
+png(paste0("dissertation/images/", type, "_linechart2.png"), width = 480,
+    height = 320)
+plot(range(cumulative$labelling), range(cumulative$time),
+     xlab = "Labelling (%)", ylab = "Total runtime (ms)", type = "n", main = type_label)
+for (i in 1:length(algorithms)) {
+  individual_results <- subset(cumulative,
+                               cumulative$algorithm == algorithms[i])
+  lines(individual_results$labelling, individual_results$time,
+        col = colours[i])
+}
+legend("topright", c("clique", "McSplit", "McSplit\u2193"), fill = colours)
+ dev.off()
 # rm("cumulative")
 # 
 #mins <- data$data[, c("labelling", algorithms)]

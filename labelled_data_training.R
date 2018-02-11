@@ -101,6 +101,7 @@ all(answers$clique == answers$fusion2)
 data <- input(features, performance, success,
               list(groups = list(group1 = colnames(features)[-1]),
                    values = costs))
+#data <- input(features, performance, success)
 rm("features", "performance", "success", "costs")
 saveRDS(data, sprintf("models/%s_labels_data.rds", labelling))
 model <- classify(makeLearner("classif.randomForest"),
@@ -112,17 +113,36 @@ parallelStop()
 
 library(lattice)
 library(latticeExtra)
+library(RColorBrewer)
 
-png(paste0("dissertation/images/ecdf_", type, "_llama.png"), width = 480,
-    height = 320)
-plt <- ecdfplot(~ mcsplit + mcsplitdown + clique + fusion1 + fusion2,
+png("text/dissertation/images/fusion_ecdf.png", width = 480, height = 320)
+plt <- ecdfplot(~ clique + mcsplit + mcsplitdown + fusion1 + fusion2,
                 data = performance,
 #                data = performance[startsWith(as.character(performance$ID),
 #                                              "50"), ],
                auto.key = list(space = "right",
-                               text = c("McSplit", "McSplit\u2193", "clique",
-                                        "Fusion1", "Fusion2")),
-               xlab = "Runtime (ms)", ylim = c(0.8, 1), log = "x")
+                               text = c("clique", "McSplit", "McSplit\u2193",
+                                        "Fusion 1", "Fusion 2")),
+               xlab = "Runtime (ms)", ylim = c(0.8, 1), xlim = c(0, 999999))
 update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8,
                                                           name = "Dark2")))
+dev.off()
+
+cumulative <- expand.grid(algorithm = algorithms, labelling = p_values)
+cumulative$time <- apply(cumulative, 1, function(row)
+  sum(performance[startsWith(as.character(performance$ID),
+                             sprintf("%02d", as.numeric(row[2]))), row[1]]))
+png(paste0("text/dissertation/images/fusion_linechart.png"), width = 480,
+    height = 320)
+plot(range(cumulative$labelling), range(cumulative$time),
+     xlab = "Labelling (%)", ylab = "Total runtime (ms)", type = "n",
+     main = "Both labels")
+for (i in 1:length(algorithms)) {
+  individual_results <- subset(cumulative,
+                               cumulative$algorithm == algorithms[i])
+  lines(individual_results$labelling, individual_results$time,
+        col = colours[i])
+}
+legend("topright", c("clique", "McSplit", "McSplit\u2193", "Fusion 1",
+                     "Fusion 2"), fill = colours)
 dev.off()

@@ -362,7 +362,7 @@ All labelled graphs are taken from the ARG Database \cite{foggia2001-2,
 benchmarking various graph-matching algorithms. The database contains randomly
 generated graphs; 2D, 3D, and 4D meshes; and bounded valence graphs.
 Furthermore, each graph-generating algorithm is executed with several (3--5)
-different parameter values. The database includes 81400 pairs of labelled
+different parameter values. The database includes \num{81400} pairs of labelled
 graphs. Their unlabelled versions are used as well.
 
 \subsection{Characteristics of Graph Labelling} \label{sec:characteristics}
@@ -602,7 +602,7 @@ consider the clique encoding, and mostly forget about $k{\downarrow}$.
   \label{fig:ecdfs}
 \end{figure}
 
-We deal with the two types of labelling separately, however, since the results
+We deal with the two types of labelling separately; however, since the results
 are fairly similar, we describe them in the same section to highlight the
 differences. We plot the ECDFs in Figure~\ref{fig:ecdfs}. The situation with
 vertex-labelled graphs is quite straightforward: $\textsc{McSplit}{\downarrow}$ is
@@ -610,7 +610,7 @@ slight better than \textsc{McSplit}, which is better than the clique encoding.
 Moreover, the VBS curve is significantly higher, providing plenty of room for an
 ML model to outperform individual algorithms (unlike with unlabelled data). This
 latter fact is true for fully labelled graphs as well, whereas
-the other 3 curves provide a more interesting story. The clique algorithm is
+the other three curves provide a more interesting story. The clique algorithm is
 briefly winning for shorter timeout values, then is between
 $\textsc{McSplit}{\downarrow}$ and \textsc{McSplit} until it drops to the
 3\textsuperscript{rd} place right before the final timeout at \num{1000000} ms.
@@ -635,24 +635,30 @@ of vertices is likely to have different labels).
   \end{subfigure}
   \caption{For both types of labelling and for the three algorithms we plot how
     three characteristics change with respect to the labelling percentage:
-    proportion of instances solved within the time limit, total runtime, and
+    proportion of instances solved within the time limit, total runtime, and the
     number of times each algorithm outperformed the others.}
   \label{fig:linecharts}
 \end{figure}
 
 Just like with unlabelled graphs we could split the data into different subsets
 based on how (and by whom) the graphs were generated, now we can analyse how the
-situation changes with different labelling percentages. In
-Figure~\ref{fig:linecharts} we analyse two performance measures (proportion of
-instances solved and total runtime) as well as the number of times each
-algorithm ``wins'', for each labelling percentage. The two performance
-statistics tell exactly the same story, and it is the same for both types of
-labelling. The only difference is that the clique algorithm's major drop in
-performance starts at 20\% for vertex-labelled graphs and at 15\% for fully
-labelled graphs. With higher labelling percentages, the clique encoding is
+situation changes with different labelling percentages. While some publications
+explored several different values of the labelling percentage (33\%, 50\%, 75\%)
+\cite{DBLP:conf/sspr/BunkeFGSV02, DBLP:journals/jgaa/ConteFV07,
+  DBLP:conf/gbrpr/ConteGS03}, and some explored only one (33\%)
+\cite{DBLP:conf/cp/McCreeshNPS16, DBLP:conf/ijcai/McCreeshPT17}, we explore a
+much wider range from 5\% to 50\%, showing exactly when algorithms considered
+best for labelled graphs stop being good, when faced with a smaller number of
+labels. In Figure~\ref{fig:linecharts} we analyse two performance measures
+(proportion of instances solved and total runtime) as well as the number of
+times each algorithm ``wins'', for each labelling percentage. The two
+performance statistics tell exactly the same story, and it is the same for both
+types of labelling. The only difference is that the clique algorithm's major
+drop in performance starts at 20\% for vertex-labelled graphs and at 15\% for
+fully labelled graphs. With higher labelling percentages, the clique encoding is
 better than \textsc{McSplit}, which is marginally better than
-$\textsc{McSplit}{\downarrow}$. Whereas with lower levels of labelling, two
-differences emerge: \textsc{McSplit} experiences a drop in performance below
+$\textsc{McSplit}{\downarrow}$. With lower levels of labelling, two differences
+emerge: \textsc{McSplit} experiences a drop in performance below
 $\textsc{McSplit}{\downarrow}$, and the performance of the clique algorithm
 starts to drop exponentially. The latter is exactly what makes the clique
 encoding finish last in Figure~\ref{fig:ecdfs}, even though it is in the lead
@@ -670,13 +676,13 @@ problem becomes significantly easier. In this case we are more interested in the
 differences between individual algorithms.
 \end{remark}
 
-As for the last two plots of Figure~\ref{fig:linecharts}, \textsc{McSplit} is
-winning more often than $\textsc{McSplit}{\downarrow}$. This is not surprising for
+As for the last two plots of Figure~\ref{fig:linecharts}, \textsc{McSplit} wins
+more often than $\textsc{McSplit}{\downarrow}$. This is not surprising for
 higher labelling percentages (based on the other two types of plots), but this
 remains true for lower percentages as well. Perhaps this is because by
-definition $\textsc{McSplit}{\downarrow}$ is better at handling problem instances
-with a big answer. With a smaller labelling percentage, \textsc{McSplit} is more
-likely to time out on those instances, contributing to
+definition $\textsc{McSplit}{\downarrow}$ is better at handling problem
+instances with a big answer. With a smaller labelling percentage,
+\textsc{McSplit} is more likely to time out on those instances, contributing to
 $\textsc{McSplit}{\downarrow}$ solving more instances than \textsc{McSplit}.
 Perhaps $\textsc{McSplit}{\downarrow}$ is also much faster on those instances,
 ensuring its lower total runtime, while consistently falling slightly behind
@@ -687,10 +693,10 @@ labels, but slightly more than \textsc{McSplit} with both vertex and edge
 labels, for 25\%--33\% labelling. Finally, the main observation from this plot
 is that the overall highest point is only at \num{16401} (\num{18031}) for
 vertex-labelled graphs (both vertex and edge labels), just slightly above half
-of the number of instances (\num{30000}) and other than the clique encoding
-falling behind with $\le 15\%$ labelling, the 3 algorithms winning rates stay
-similar. This makes the problem especially potent for a algorithm selection
-approach.
+of the number of instances (\num{30000}), and other than the clique encoding
+falling behind with $\le 15\%$ labelling, win rates of the three algorithms
+stay similar. This makes the problem especially potent for an algorithm
+selection approach.
 
 \section{Graph Features} \label{sec:features}
 
@@ -1503,7 +1509,7 @@ numbers to this picture, \textsc{Llama} closed 86\% and 88\% of the difference
 between its lower and upper bounds for vertex-labelled and fully labelled
 graphs, respectively.
 
-\chapter{Further Experiments} \label{chapter:further}
+\chapter{Further Suggestions, Investigations, and Experiments} \label{chapter:further}
 
 In this chapter we build on the knowledge gained by developing ML models and
 analysing algorithms' performance to extend current algorithms and propose new
@@ -1726,7 +1732,7 @@ the clique encoding is better than other algorithms based on properties of the
 association graph?'' For each of the 6 measured properties, we divide its range
 of values to 100 bins of equal size (some of them turn out to be empty) and plot
 the proportion of instances in that range where the clique encoding outperformed
-other algorithms in Figure~\ref{fig:bins}. We can make 3 observations:
+other algorithms in Figure~\ref{fig:bins}. We can make three observations:
 \begin{itemize}
 \item For all measured properties except density, the clique algorithm is not
   just overall faster, but also faster than other algorithms (i.e., more likely
@@ -1742,7 +1748,16 @@ other algorithms in Figure~\ref{fig:bins}. We can make 3 observations:
   clear benefits.
 \end{itemize}
 
-\subsection{\textsc{Fusion}: \textsc{McSplit} and the Clique Encoding United}
+\begin{remark}
+  The reader might notice that some bins start at negative values, even though
+  the feature itself cannot be negative. This is because the left endpoint of
+  the leftmost interval is defined as
+  \[ \min(X) - 0.001 \times (\max(X) - \min(X)), \]
+  where $X$ is the set of observed values of some particular feature \cite{R}
+  (and similarly for the right endpoint of the rightmost interval).
+\end{remark}
+
+\section{\textsc{Fusion}: \textsc{McSplit} and the Clique Encoding United}
 
 Even though we were not able to justify re-encoding a problem instance that is
 partially solve by \textsc{McSplit} into the clique encoding using the simple
@@ -1805,9 +1820,53 @@ original graphs, used in the initialisation of the clique algorithm, and
 \cite{DBLP:conf/cp/McCreeshNPS16}. Note that due to how the incumbents are
 implemented in practice, we set the cardinality of
 $\textit{incumbent}_{\text{clique}}$ without having to set the incumbent itself.
-% TODO: describe results
 
-\subsection{TODO: rename me}
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.5]{images/fusion_ecdf.png}
+  \caption{Cumulative plot of the main three MCS algorithms with two versions of
+    \textsc{Fusion}: \textsc{Fusion 1} and \textsc{Fusion 2}, that build the
+    association graph after one and two branching decisions, respectively.}
+  \label{fig:fusion_ecdf}
+\end{figure}
+
+The algorithm was run on \num{10000} randomly-selected instances with
+the labelling percentage varying between 5\% and 50\% (just like in Section
+\ref{sec:runtimes}) and the resulting ECDF plot in Figure \ref{fig:fusion_ecdf}
+shows that:
+
+\begin{itemize}
+\item \textsc{Fusion 2} is strictly worse than \textsc{Fusion 1}. Therefore we
+  do not run experiments with versions of \textsc{Fusion} that switch algorithms
+  after even more decisions.
+\item \textsc{Fusion 1} is second best for very small runtimes, but gradually
+  falls to the 4\textsuperscript{th} place.
+\item At all points in the plot, \textsc{Fusion 1} is worse than the original
+  clique encoding.
+\end{itemize}
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.5]{images/fusion_linechart.png}
+  \caption{Total runtime of each algorithm, for each labelling percentage.}
+  \label{fig:fusion_lines}
+\end{figure}
+
+Figure \ref{fig:fusion_lines} helps to clarify the picture by showing
+differences in performance of the old and the new algorithms, for each labelling
+percentage. Keeping in mind that in this plot low total runtime values represent
+well-performing algorithms, we can see that the original clique algorithm is
+better than \textsc{Fusion 1}, which is better than \textsc{Fusion 2}, for all
+labelling percentages, except for small differences when all three algorithms'
+performance becomes terrible with 5\% labelling. Another thing to note is that
+the differences between these three algorithms is highest for average
+(10\%--20\%) labelling percentages, and becomes smaller when moving towards
+either extreme. This conclusively shows that switching between \textsc{McSplit}
+and the clique encoding at a certain depth of the search tree does not produce a
+competitive algorithm for solving MCS problem instances.
+
+\section{\textsc{SmartFusion}: Can We Switch Algorithms in a More Intelligent
+  Manner?}
 
 \begin{definition}
   A \emph{partially solved MCS instance} is defined as... (includes unsolved
@@ -1826,9 +1885,27 @@ $\textit{incumbent}_{\text{clique}}$ without having to set the incumbent itself.
 
 \chapter{Conclusion and Future Work}
 
-% better understanding, better algorithm (good performance), two perfect situations for algorithm
-% selection, filtering variables can help, importance of lower values of
-% labelling
+We took several competitive algorithms for the MCS problem, and explored how their
+performance changes with the number of labels on vertices and edges. Then we
+constructed an extensive list of features to represent each pair of graphs,
+trained three different ML models, and showed two of them to have near-optimal
+performance, significantly outperforming previous algorithms. During that
+process, we uncovered new information on how labels are typically implemented,
+the weaknesses of making generalisations about all labelled instances from a
+very limited sample, and the distributions and correlations of features in
+various benchmark datasets. ML models allowed us to gain further insight into
+which features are the most important, which algorithm prefers what values of
+each feature, and how confidently we can predict when each algorithm should be
+chosen. We were then able to build on that knowledge in order to extend one of
+the algorithms to vertex-labelled instances, and propose the idea of switching
+between two algorithms during runtime. We implemented a simple version, capable
+of switching according to a fixed rule, and laid the theoretical groundwork
+towards making the switching decision in a more intelligent, ML-based manner.
+
+% TODO: further work
+% filtering variables can help, or coming up with new ones, transformations,
+% even lower values of labelling, static labelling (not tied to the size of the graph)
+% when is mcsplit better than mcsplit down?
 
 \begin{appendices}
   \chapter{Plots of Distributions of Features} \label{appendix:plots}
