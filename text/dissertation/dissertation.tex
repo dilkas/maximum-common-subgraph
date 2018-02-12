@@ -1663,6 +1663,7 @@ unlabelled graphs, where it wins too infrequently to be a valuable inclusion.
   \label{fig:densities}
 \end{figure}
 
+% TODO: rewrite in a better way
 The next question we want to answer is ``how does the clique algorithm's running
 time depend on properties of the association graph?'' To answer this question we
 record some of the features from Section~\ref{sec:features} about the
@@ -1868,20 +1869,50 @@ competitive algorithm for solving MCS problem instances.
 \section{\textsc{SmartFusion}: Can We Switch Algorithms in a More Intelligent
   Manner?}
 
-\begin{definition}
-  A \emph{partially solved MCS instance} is defined as... (includes unsolved
-  instances)
-\end{definition}
+We consider switching algorithms at the same place in the \textsc{McSplit}
+algorithm as in the previous section, but this time we want to use running-time
+data and simple statistical/ML models to inform our choice for when to switch.
+We introduce a way to map partially-solved instances inside \textsc{McSplit}
+into unsolved instances, so that... Consider solving an MCS problem between
+graphs $\mathcal{G} = (V_{\mathcal{G}}, E_{\mathcal{G}})$ and $\mathcal{H} =
+(V_{\mathcal{H}}, E_{\mathcal{H}})$. We define formal definitions for how each
+algorithm ``sees'' a problem instance (obviously, the definitions are heavily
+based on the two papers describing these algorithms
+\cite{DBLP:conf/cp/McCreeshNPS16, DBLP:conf/ijcai/McCreeshPT17}):
 
 \begin{definition}
-  Two partially solved MCS instances are \emph{clique-equivalent} if... (the
-  association graph is the same)
+  A \emph{partially solved (\textsc{McSplit}) instance} is a 3-tuple
+  $(\textit{future}, M, \textit{incumbent})$, where:
+  \begin{itemize}
+  \item $\textit{future} = \{ \langle G, H \rangle : G \subseteq
+    V_{\mathcal{G}}, H \subseteq V_{\mathcal{H}} \}$ represents the fact that
+    every vertex in $G$ can only be matched to vertices in $H$ and vice versa,
+  \item $M = \{ (v, w) : v \in V_{\mathcal{G}}, w \in V_{\mathcal{H}} \}$
+    contains the pairs of vertices that have already been matched,
+  \item $\textit{incumbent} = \{ (v, w) : v \in V_{\mathcal{G}}, w \in
+    V_{\mathcal{H}} \}$ is the maximum common subgraph known so far.
+  \end{itemize}
 \end{definition}
 
-\begin{lemma}
-  How to turn a partially solved instance into a clique-equivalent unsolved
-  instance.
-\end{lemma}
+%\begin{definition}
+%  An \emph{unsolved \textsc{McSplit} instance} is a partially solved instance
+%  $(\textit{future}, M, \textit{incumbent})$ with
+%  \[ \textit{future} \]
+%  \[ M = \emptyset \]
+%\end{definition}
+
+\begin{definition}
+  A \emph{clique instance} is a tuple $(G, \textit{incumbent})$, where
+  \begin{itemize}
+  \item $G = \mathcal{G} \nabla \mathcal{H} = (V, E)$ is the association graph,
+  \item and $\textit{incumbent} \subseteq V$ is the maximum clique in the
+    association graph known so far.
+  \end{itemize}
+\end{definition}
+
+\begin{proposition}
+  
+\end{proposition}
 
 \chapter{Conclusion and Future Work}
 
