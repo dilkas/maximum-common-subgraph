@@ -25,6 +25,7 @@
 \AfterEndEnvironment{remark}{\noindent\ignorespaces}
 
 \DeclareMathOperator{\dom}{dom}
+\DeclareMathOperator{\nablaop}{\nabla}
 \newcommand{\kprec}[1]{\prescript{}{#1}{\preceq}\ }
 \newcommand{\etal}{\textit{et al}.}
 
@@ -291,10 +292,10 @@ define two other problems:
   the two graphs.
 \end{definition}
 
-The $k{\downarrow}$ algorithm \cite{DBLP:conf/aaai/HoffmannMR17} starts by
-trying to solve the subgraph isomorphism problem, i.e., finding the pattern
-graph in the target graph. If that fails, it allows a single vertex of the
-pattern graph to not match any of the target graph vertices and tries again,
+\noindent The $k{\downarrow}$ algorithm \cite{DBLP:conf/aaai/HoffmannMR17}
+starts by trying to solve the subgraph isomorphism problem, i.e., finding the
+pattern graph in the target graph. If that fails, it allows a single vertex of
+the pattern graph to not match any of the target graph vertices and tries again,
 allowing smaller and smaller pattern graphs until it finds a solution. The
 number of vertices of the pattern graph that are allowed this additional freedom
 is represented by $k$. More specifically, the algorithm creates a domain for
@@ -304,8 +305,35 @@ techniques. Then the search begins with a smallest domain (not counting
 wildcards), a value is chosen, and domains are filtered again to eliminate the
 chosen value.
 
-The clique encoding \cite{DBLP:conf/cp/McCreeshNPS16} solves the MCS problem by
-creating a new (\emph{association}) graph and transforming the problem into an
+\begin{definition}
+  Although typically the \emph{image} of a set $S$ under a function $f$
+  \cite{algebra} is defined as a set
+  \[ f(S) = \{ f(s) : s \in S \}, \]
+  we define the \emph{multiset image} of $S$ under $f$ by the same expression,
+  but with $f(S)$ as a multiset, i.e., if $f(x) = f(y)$ for two different $x, y
+  \in S$, then $f(x)$ is in $f(S)$ at least two times
+  \cite{DBLP:books/lib/Knuth98}.
+\end{definition}
+
+\begin{definition} \label{def:nabla}
+  The \emph{association graph} of an MCS problem instance between graphs $G_1 =
+  (V_1, E_1, \mu_1, \zeta_1)$ and $G_2 = (V_2, E_2, \mu_2, \zeta_2)$, denoted
+  $G_1 \nablaop G_2 = (V_3, E_3)$ \cite{DBLP:conf/cp/McCreeshNPS16}, is a simple
+  graph that can be defined as follows:
+  \begin{itemize}
+  \item we add a vertex $(v_1, v_2)$ to $V_3$ if $\mu_1(v_1) = \mu_2(v_2)$, and
+    the multiset image of loops of $v_1$ under $\zeta_1$ is equal to the
+    multiset image of loops of $v_2$ under $\zeta_2$;
+  \item $E_3$ is defined so that there is an edge between vertices $(u_1, u_2)$
+    and $(v_1, v_2)$ if $u_1 \ne v_1$, $u_2 \ne v_2$, and the multiset image of
+    edges in $E_1$ that are between $u_1$ and $v_1$ under $\zeta_1$ is equal to
+    the multiset image of edges in $E_2$ that are between $u_2$ and $v_2$ under
+    $\zeta_2$.
+  \end{itemize}
+\end{definition}
+
+\noindent The clique encoding \cite{DBLP:conf/cp/McCreeshNPS16} solves the MCS
+problem by creating an association graph and transforming the problem into an
 instance of the maximum clique problem \cite{Levi1973}, which is then solved by
 a sequential version of the maximum clique solver by McCreesh and Prosser
 \cite{DBLP:journals/topc/McCreeshP15}, which is a branch and bound algorithm
@@ -1784,14 +1812,13 @@ $\textsf{DEPTH} = 0$ is similar to running the clique algorithm, but, unlike in
 the implementation of the clique algorithm, association graph's creation time is
 included as part of total running time.
 
-Lastly, similarly to the $\nabla$ operator in the paper on the clique
-algorithm \cite{DBLP:conf/cp/McCreeshNPS16}, which creates the association graph
-from two graphs, we create a version of $\nabla$ that works on the list of label
-classes called \textit{future} in the \textsc{McSplit} paper
-\cite{DBLP:conf/ijcai/McCreeshPT17}. The set of vertices of the association
-graph is then defined as
+Lastly, similarly to the $\nabla$ operator from Definition \ref{def:nabla},
+which creates the association graph from two graphs, we create a version of
+$\nabla$ that works on the list of label classes called \textit{future} in the
+\textsc{McSplit} paper \cite{DBLP:conf/ijcai/McCreeshPT17}. The set of vertices
+of the association graph is then defined as
 \[ \bigcup_{\langle G, H \rangle \in \textit{future}} G \times H, \]
-and the edges are defined in exactly the same way as in the original paper.
+and the edges are defined in exactly the same way as in the original definition.
 
 Given the two new variables \textsf{depth} and \textsf{DEPTH}, we only need to
 add the following lines of code between lines 5 and 6 of Algorithm 1 in the
@@ -1873,46 +1900,115 @@ We consider switching algorithms at the same place in the \textsc{McSplit}
 algorithm as in the previous section, but this time we want to use running-time
 data and simple statistical/ML models to inform our choice for when to switch.
 We introduce a way to map partially-solved instances inside \textsc{McSplit}
-into unsolved instances, so that... Consider solving an MCS problem between
-graphs $\mathcal{G} = (V_{\mathcal{G}}, E_{\mathcal{G}})$ and $\mathcal{H} =
-(V_{\mathcal{H}}, E_{\mathcal{H}})$. We define formal definitions for how each
-algorithm ``sees'' a problem instance (obviously, the definitions are heavily
-based on the two papers describing these algorithms
-\cite{DBLP:conf/cp/McCreeshNPS16, DBLP:conf/ijcai/McCreeshPT17}):
+into unsolved instances, so that...TODO: complete this sentence. For the rest of
+this section, consider an MCS problem instance between graphs $\mathcal{G} =
+(V_{\mathcal{G}}, E_{\mathcal{G}}, \mu_{\mathcal{G}}, \zeta_{\mathcal{G}})$ and
+$\mathcal{H} = (V_{\mathcal{H}}, E_{\mathcal{H}}, \mu_{\mathcal{H}},
+\zeta_{\mathcal{H}})$ with $\mu_{\mathcal{G}} \colon V_{\mathcal{G}} \to \{ 0,
+\dots, N - 1 \}$ and $\mu_{\mathcal{H}} \colon V_{\mathcal{H}} \to \{ 0, \dots,
+N - 1\}$. We define formal definitions for how each algorithm ``sees'' a
+problem instance (obviously, the definitions are heavily based on the two papers
+describing these algorithms \cite{DBLP:conf/cp/McCreeshNPS16,
+  DBLP:conf/ijcai/McCreeshPT17}):
 
-\begin{definition}
-  A \emph{partially solved (\textsc{McSplit}) instance} is a 3-tuple
-  $(\textit{future}, M, \textit{incumbent})$, where:
+\begin{definition} \label{def:mcsplit_instance}
+  A \emph{\textsc{McSplit} instance} is a 5-tuple
+  $(\textit{future}, M, \textit{incumbent}, \mathcal{G}, \mathcal{H}$), where:
   \begin{itemize}
   \item $\textit{future} = \{ \langle G, H \rangle : G \subseteq
     V_{\mathcal{G}}, H \subseteq V_{\mathcal{H}} \}$ represents the fact that
-    every vertex in $G$ can only be matched to vertices in $H$ and vice versa,
+    every vertex in $G$ can only be matched to vertices in $H$ and vice versa.
+    Initially, each element of \textit{future} $\langle G, H \rangle $
+    corresponds to a vertex label $l \in \mu_{\mathcal{G}}(V_{\mathcal{G}}) \cap
+    \mu_{\mathcal{H}}(V_{\mathcal{H}})$, and then $G =
+    \mu_{\mathcal{G}}^{-1}(l)$ and $H = \mu_{\mathcal{H}}^{-1}(l)$.
   \item $M = \{ (v, w) : v \in V_{\mathcal{G}}, w \in V_{\mathcal{H}} \}$
-    contains the pairs of vertices that have already been matched,
+    contains the pairs of vertices that have already been matched.
   \item $\textit{incumbent} = \{ (v, w) : v \in V_{\mathcal{G}}, w \in
     V_{\mathcal{H}} \}$ is the maximum common subgraph known so far.
+  \item $\mathcal{G}$ and $\mathcal{H}$ are the original graphs. The information
+    contained in them is represented in other variables, but considering the
+    original graphs as part of the state of the algorithm's execution will prove
+    to be useful.
   \end{itemize}
+  We will call this an \emph{unsolved \textsc{McSplit} instance} if $M =
+  \emptyset$ and a \emph{partially solved instance} otherwise.
 \end{definition}
 
-%\begin{definition}
-%  An \emph{unsolved \textsc{McSplit} instance} is a partially solved instance
-%  $(\textit{future}, M, \textit{incumbent})$ with
-%  \[ \textit{future} \]
-%  \[ M = \emptyset \]
-%\end{definition}
+\begin{definition}
+  A \emph{clique instance} is a tuple $(G, \textit{incumbent})$, where $G =
+  \mathcal{G} \nablaop \mathcal{H} = (V, E)$ is the association graph, and
+  $\textit{incumbent} \subseteq V$ is the maximum clique in the association
+  graph known so far.
+\end{definition}
+
+\noindent An \emph{unsolved instance} is characterised by a pair of graphs and a
+non-negative integer $(\mathcal{G}, \mathcal{H}, k)$. Here, $k$ is used to set
+up the initial size of the \textit{incumbent}. An unsolved instance
+$(\mathcal{G}, \mathcal{H}, k)$ can be transformed to a clique instance
+$(\mathcal{G} \nablaop \mathcal{H}, \textit{incumbent})$, and to a
+\textsc{McSplit} instance $(\textit{future}, \emptyset, \textit{incumbent},
+\mathcal{G}, \mathcal{H})$, where $\textit{incumbent}$ is any set of cardinality
+$k$, and \textit{future} is initialised as in Definition
+\ref{def:mcsplit_instance}.
 
 \begin{definition}
-  A \emph{clique instance} is a tuple $(G, \textit{incumbent})$, where
+  We call a partially solved instance $(\textit{future}, M, \textit{incumbent},
+  \mathcal{G}, \mathcal{H})$ \emph{equivalent} to an unsolved instance
+  $(\mathcal{G'}, \mathcal{H'}, k)$ if
   \begin{itemize}
-  \item $G = \mathcal{G} \nabla \mathcal{H} = (V, E)$ is the association graph,
-  \item and $\textit{incumbent} \subseteq V$ is the maximum clique in the
-    association graph known so far.
+  \item \textsc{McSplit} takes the same path of execution on both instances
+    (transforming an unsolved instance into an unsolved \textsc{McSplit}
+    instance as described earlier),
+  \item and the clique algorithm takes the same path of execution on a clique
+    instance constructed from $(\mathcal{G'}, \mathcal{H'}, k)$ as on
+    $(\nabla(\textit{future}), X)$, where $X$ is any set of cardinality
+    $|\textit{incumbent}| - |M|$.
   \end{itemize}
 \end{definition}
 
 \begin{proposition}
-  
+  A partially solved instance $(\textit{future}, M, \textit{incumbent},
+  \mathcal{G}, \mathcal{H})$ is equivalent to an unsolved instance
+  $(\mathcal{G}', \mathcal{H}', |\textit{incumbent}|-|M|)$, where $\mathcal{G}'
+  = (V_{\mathcal{G}'}, E_{\mathcal{G}'}, \mu_{\mathcal{G}'},
+  \zeta_{\mathcal{G}'})$, and:
+\begin{itemize}
+\item $V_{\mathcal{G}'} = V_{\mathcal{G}} \setminus \{ v : (v, w) \in M \}$ (we
+  remove vertices that have already been matched).
+\item $E_{\mathcal{G}'}$ is a subset of $E_{\mathcal{G}}$, where we remove each
+  edge that has one of its endpoints in $V_{\mathcal{G}} \setminus
+  V_{\mathcal{G}'}$.
+\item In order to define $\mu_{\mathcal{G}'}$, we order the elements of $M$ in
+  an arbitrary way: $(v_1, w_1), (v_2, w_2), \dots, (v_k, w_k)$. Then, we let $n
+  = \min \{ l \in \mathbb{N} \cup \{ 0 \} : 2^l \ge N \}$, and, for every $v \in
+  V_{\mathcal{G}'}$, define
+\[\mu_{\mathcal{G}'}(v) = \mu_{\mathcal{G}}(v) + \sum_{\substack{1 \le i \le
+      k,\\\{ v, v_i \} \in E_{\mathcal{G}}}} 2^{n+i-1}. \]
+\item $\zeta_{\mathcal{G}'} = \zeta_{\mathcal{G}}|_{E_{\mathcal{G'}}}$.
+\end{itemize}
+And $\mathcal{H}'$ is set up in a similar way.
 \end{proposition}
+
+\begin{remark}
+  The idea behind vertex labelling deserves some more explanation. It is
+  essentially a version of vertex labelling introduced by the \textsc{McSplit}
+  algorithm \cite{DBLP:conf/ijcai/McCreeshPT17}: every time a vertex is matched,
+  we extend the current vertex labels so that its neighbours and non-neighbours
+  get different labels. This version is set up with two advantages in
+  efficiency:
+  \begin{itemize}
+  \item for each vertex in $M$, vertices not adjacent to it are not relabelled
+    (assuming that this is the majority of vertices most of the time);
+  \item every addition of a power of two corresponds to flipping a bit in the
+    label's binary representation, since $n$\textsuperscript{th} bit is zero by
+    definition.
+  \end{itemize}
+\end{remark}
+
+\begin{proof}
+  
+\end{proof}
 
 \chapter{Conclusion and Future Work}
 
@@ -1930,13 +2026,29 @@ each feature, and how confidently we can predict when each algorithm should be
 chosen. We were then able to build on that knowledge in order to extend one of
 the algorithms to vertex-labelled instances, and propose the idea of switching
 between two algorithms during runtime. We implemented a simple version, capable
-of switching according to a fixed rule, and laid the theoretical groundwork
-towards making the switching decision in a more intelligent, ML-based manner.
+of switching algorithms according to a fixed rule, and laid the theoretical
+groundwork towards making the decision for when to switch in a more intelligent,
+ML-based manner.
 
-% TODO: further work
-% filtering variables can help, or coming up with new ones, transformations,
-% even lower values of labelling, static labelling (not tied to the size of the graph)
-% when is mcsplit better than mcsplit down?
+The set of features used for the ML models is far from perfect. A better
+performance should be achieved by removing at least a few of the
+worst-performing features. Many things can be calculated from a graph, some of
+them are likely to perform well as new features. In particular, since the
+standard deviations of degrees performed so well, other measures of dispersion
+such as the coefficient of variation should be considered. As mentioned earlier
+in the dissertation, considering transformations of feature data might not bring
+massive advantages, but could be worthwhile nonetheless.
+
+In this project, all labels occurred with equal probabilities. This may not be
+true in real world data. Hence, along with varying how many labels a graphs has,
+one could also consider some probability distribution over the set of possible
+labels, making some of them more common than others.
+
+As for MCS algorithms, it would be interesting to see an implementation of
+\textsc{SmartFusion} based on new runtime data. One other question that our ML
+models were not particularly successful in answering is ``when is
+$\textsc{McSplit}{\downarrow}$ better than \textsc{McSplit}?''
+% TODO: expand this
 
 \begin{appendices}
   \chapter{Plots of Distributions of Features} \label{appendix:plots}
