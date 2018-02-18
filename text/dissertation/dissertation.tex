@@ -430,7 +430,11 @@ normally distributed around 0.
 We also include a collection of benchmark instances for the subgraph isomorphism
 problem\footnote{\url{http://liris.cnrs.fr/csolnon/SIP.html}} (with the
 biochemical reactions dataset excluded since we are not dealing with directed
-graphs). It contains only unlabelled graphs, and consists of the following sets:
+graphs). It contains only unlabelled graphs, and consists of the following
+sets\footnote{This set of instances was taken from the repository
+  (\url{https://github.com/jamestrimble/ijcai2017-partitioning-common-subgraph})
+  for the \textsc{McSplit} paper \cite{DBLP:conf/ijcai/McCreeshPT17} and has
+  some minor differences from the version on Christine Solnon's website.}:
 
 \begin{description}
 \item[images-CVIU11] Graphs generated from segmented images. There are 43
@@ -462,13 +466,6 @@ graphs). It contains only unlabelled graphs, and consists of the following sets:
   McCreesh, and Solnon \cite{DBLP:conf/lion/KotthoffMS16}, and the
   \textsc{McSplit} paper \cite{DBLP:conf/ijcai/McCreeshPT17}.
 \end{description}
-
-\begin{remark}
-This set of instances was taken from the
-repository\footnote{\url{https://github.com/jamestrimble/ijcai2017-partitioning-common-subgraph}}
-for the \textsc{McSplit} paper \cite{DBLP:conf/ijcai/McCreeshPT17} and has some
-minor differences from the version on Christine Solnon's website.
-\end{remark}
 
 \begin{remark}
   Since $k{\downarrow}$ comes from the subgraph isomorphism problem background, it
@@ -776,17 +773,14 @@ We analyse three different types of labelling and treat them as separate
 problems: no labels, vertex labels, vertex and edge labels. For the last two
 types, we add a feature corresponding to $p$ defined in
 Definition~\ref{def:percent_labelling} and collect data for the following values
-of $p$: 5\%, 10\%, 15\%, 20\%, 25\%, 33\%, 50\%. The values correspond to having
-about 20, 10, 5, 4, 3, and 2 vertices/edges with the same label on average,
-respectively.
-
-\begin{remark}
-  When working with both vertex and edge labels, we only consider using the same
-  value of $p$ for both vertices and edges. This ``convention'' seems to have
-  originated in a paper by the creators of the ARG Database
-  \cite{DBLP:journals/jgaa/ConteFV07} and was replicated in subsequent papers on
-  MCS algorithms \cite{DBLP:conf/cp/McCreeshNPS16, DBLP:conf/cp/NdiayeS11}.
-\end{remark}
+of $p$: 5\%, 10\%, 15\%, 20\%, 25\%, 33\%, 50\%\footnote{When working with both
+  vertex and edge labels, we only consider using the same value of $p$ for both
+  vertices and edges. This ``convention'' seems to have originated in a paper by
+  the creators of the ARG Database \cite{DBLP:journals/jgaa/ConteFV07} and was
+  replicated in subsequent papers on MCS algorithms
+  \cite{DBLP:conf/cp/McCreeshNPS16, DBLP:conf/cp/NdiayeS11}.}. The values
+correspond to having about 20, 10, 5, 4, 3, and 2 vertices/edges with the same
+label on average, respectively.
 
 \subsection{Distributions of Features}
 
@@ -985,19 +979,15 @@ A \emph{(classification) decision tree} is ``a classifier expressed as a
 recursive partition of the instance space'' \cite{DBLP:series/smpai/RokachM14}.
 Typically, it can be represented as a rooted binary tree, where each internal
 node \emph{splits} the instance space into two regions based on the value of one
-of the features. For example, for some feature $X$ and a particular value $x \in
-\dom{X}$, the left child might be assigned all observations with $X < x$, while
-the right child would get observations with $X \ge x$. For each leaf node, we
-can count how many of its observations belong to each class and assign the most
-common class to that node.
-
-\begin{remark}
-  Other possibilities include a node having more than two children and a split
-  being made in a more complicated way. Although trees with such properties fit
-  the definition of a decision tree, standard machine learning algorithms tend
-  to be more restrictive \cite{James:2014:ISL:2517747,
-    DBLP:series/smpai/RokachM14}.
-\end{remark}
+of the features\footnote{Other possibilities include a node having more than two
+  children and a split being made in a more complicated way. Although trees with
+  such properties fit the definition of a decision tree, standard machine
+  learning algorithms tend to be more restrictive \cite{James:2014:ISL:2517747,
+    DBLP:series/smpai/RokachM14}.}. For example, for some feature $X$ and a
+particular value $x \in \dom{X}$, the left child might be assigned all
+observations with $X < x$, while the right child would get observations with $X
+\ge x$. For each leaf node, we can count how many of its observations belong to
+each class and assign the most common class to that node.
 
 When a decision tree is used to make a classification prediction, a data point
 travels from node to node (starting at the root node) according to the splitting
@@ -1249,9 +1239,15 @@ Figure~\ref{fig:unlabelled_margin_hist}. We note that:
 
 Since the standard deviations of degrees in both target and pattern graphs are
 the most important features, we plot partial dependence plots of the standard
-deviation of degrees in the target graph for $\textsc{McSplit}{\downarrow}$ and
-the clique encoding in Figure~\ref{fig:unlabelled_partials}. The plotted
-function \cite{forest} is defined as
+deviation of degrees in the target graph\footnote{The plots for the standard
+  deviation of degrees of the pattern graph are omitted since they are identical
+  to those of the target graph.} for $\textsc{McSplit}{\downarrow}$ and the
+clique encoding\footnote{We omit the plots for the other two algorithms as the
+  plot for \textsc{McSplit} looks the same as the one for
+  $\textsc{McSplit}{\downarrow}$ and prediction success rate for $k{\downarrow}$
+  is so low that a plot for $k{\downarrow}$ would be meaningless.} in
+Figure~\ref{fig:unlabelled_partials}. The plotted function \cite{forest} is
+defined as
 \[ f(x) = \log{p_k(x)} - \frac{1}{K} \sum_{i=1}^K \log{p_i(x)}, \]
 where:
 
@@ -1274,18 +1270,6 @@ the clique encoding is just barely above 0 and much lower than $\min f(x)$ for
 $\textsc{McSplit}{\downarrow}$, meaning that the standard deviation of degrees
 does not provide enough information to choose the clique encoding over
 \textsc{McSplit} or $\textsc{McSplit}{\downarrow}$.
-
-\begin{remark}
-  We omit the plots for the other two algorithms as the plot for \textsc{McSplit}
-  looks the same as the one for $\textsc{McSplit}{\downarrow}$ and prediction success
-  rate for $k{\downarrow}$ is so low that a plot for $k{\downarrow}$ would be
-  meaningless.
-\end{remark}
-
-\begin{remark}
-  The plots for the standard deviation of degrees of the pattern graph are
-  omitted since they are identical to those of the target graph.
-\end{remark}
 
 \subsection{Runtime Comparison}
 
@@ -1311,22 +1295,6 @@ possible performance represented by the VBS.
 
 \section{Labelled Graphs} \label{sec:ml_labelled}
 
-\begin{figure}
-  \centering
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/vertex_labels_forest_errors.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/both_labels_forest_errors.png}
-  \end{subfigure}
-  \caption{Convergence plots of various error measures as the number of trees in
-    a random forest increases. The plots show the OOB error and $1 -
-    \text{recall}$ for each algorithm.}
-  \label{fig:forest_errors}
-\end{figure}
-
 \begin{table}
   \centering
   \begin{tabular}{l c c}
@@ -1344,42 +1312,15 @@ possible performance represented by the VBS.
   \label{table:errors}
 \end{table}
 
-Once again we plot the error rates (defined in
+In order to save space, we leave the most important data and conclusions in this
+section, while moving supplementary plots to Appendix \ref{appendix:plots2}.
+Just like in the previous section, we plot the error rates (defined in
 Section~\ref{sec:unlabelled_error_rates}) in Figure~\ref{fig:forest_errors}. The
 final error values are summarized in Table~\ref{table:errors}. This time all
 errors converge downwards and are below 50\%. Comparing vertex-labelled and
 fully labelled subproblems, the only noticeable difference is that
 \textsc{McSplit} has a lower error rate for vertex-labelled graphs, which is
 also the worst-recognised algorithm for both types of labelling.
-
-\begin{figure}
-  \centering
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/vertex_labels_variable_importance.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/both_labels_variable_importance.png}
-  \end{subfigure}
-  \caption{Variable importance for both types of labelling, sorted from most to
-    least important.}
-  \label{fig:variable_importance}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/vertex_labels_var_used.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/both_labels_var_used.png}
-  \end{subfigure}
-  \caption{How often was each variable used to make splitting decisions?}
-  \label{fig:var_used}
-\end{figure}
 
 According to the variable importance measures plotted in
 Figure~\ref{fig:variable_importance}, the standard deviations of degrees for
@@ -1399,41 +1340,6 @@ the data to reduce the Gini index (a variation of which is used by the random
 forest algorithm in choosing which predictor to split on \cite{167153}), they
 are rarely used. 
 
-\begin{figure}
-  \centering
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/vertex_labels_margin.png}
-    \includegraphics[width=\textwidth]{images/vertex_labels_margin2.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/both_labels_margin.png}
-    \includegraphics[width=\textwidth]{images/both_labels_margin2.png}
-  \end{subfigure}
-  \caption{Sorted and unsorted margins of all data points, for both types of
-    labelling.}
-  \label{fig:margins}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/vertex_labels_clique_hist.png}
-    \includegraphics[width=\textwidth]{images/vertex_labels_mcsplit_hist.png}
-    \includegraphics[width=\textwidth]{images/vertex_labels_mcsplitdown_hist.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/both_labels_clique_hist.png}
-    \includegraphics[width=\textwidth]{images/both_labels_mcsplit_hist.png}
-    \includegraphics[width=\textwidth]{images/both_labels_mcsplitdown_hist.png}
-  \end{subfigure}
-  \caption{Histograms of margins, for each algorithm and type of labelling.}
-  \label{fig:margin_hist}
-\end{figure}
-
 We show the margin plots and histograms in Figures~\ref{fig:margins} and
 \ref{fig:margin_hist}. Again, the data for both types of labelling is close to
 identical. Note that there are plenty of data points in all three colours and the ML
@@ -1441,44 +1347,7 @@ models are usually very convinced when predicting $\textsc{McSplit}{\downarrow}$
 and the clique encoding and are less sure when dealing with problem instances
 best handled with \textsc{McSplit}.
 
-\begin{figure}
-  \centering
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/vertex_labels_clique_labelling.png}
-    \includegraphics[width=\textwidth]{images/vertex_labels_mcsplit_labelling.png}
-    \includegraphics[width=\textwidth]{images/vertex_labels_mcsplitdown_labelling.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/both_labels_clique_labelling.png}
-    \includegraphics[width=\textwidth]{images/both_labels_mcsplit_labelling.png}
-    \includegraphics[width=\textwidth]{images/both_labels_mcsplitdown_labelling.png}
-  \end{subfigure}
-  \caption{Partial dependence plots of the labelling percentage.}
-  \label{fig:labelling_partials}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/vertex_labels_clique_stddeg.png}
-    \includegraphics[width=\textwidth]{images/vertex_labels_mcsplit_stddeg.png}
-    \includegraphics[width=\textwidth]{images/vertex_labels_mcsplitdown_stddeg.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/both_labels_clique_stddeg.png}
-    \includegraphics[width=\textwidth]{images/both_labels_mcsplit_stddeg.png}
-    \includegraphics[width=\textwidth]{images/both_labels_mcsplitdown_stddeg.png}
-  \end{subfigure}
-  \caption{Partial dependence plots of the standard deviation of degrees in the
-    target graph.}
-  \label{fig:stddeg_partials}
-\end{figure}
-
-This time we show the partial dependence plots for the top 2 most
+This time we show the partial dependence plots for the top two most
 important predictors (the labelling percentage and the standard deviation of
 degrees in the target graph\footnote{The second most important predictor for the
 fully labelled case is the standard deviation of degrees in the pattern graph,
@@ -1899,37 +1768,35 @@ competitive algorithm for solving MCS problem instances.
 We consider switching algorithms at the same place in the \textsc{McSplit}
 algorithm as in the previous section, but this time we want to use running-time
 data and simple statistical/ML models to inform our choice for when to switch.
-We introduce a way to map partially-solved instances inside \textsc{McSplit}
+We introduce a way to map partially solved instances inside \textsc{McSplit}
 into unsolved instances, so that...TODO: complete this sentence. For the rest of
 this section, consider an MCS problem instance between graphs $\mathcal{G} =
 (V_{\mathcal{G}}, E_{\mathcal{G}}, \mu_{\mathcal{G}}, \zeta_{\mathcal{G}})$ and
 $\mathcal{H} = (V_{\mathcal{H}}, E_{\mathcal{H}}, \mu_{\mathcal{H}},
 \zeta_{\mathcal{H}})$ with $\mu_{\mathcal{G}} \colon V_{\mathcal{G}} \to \{ 0,
 \dots, N - 1 \}$ and $\mu_{\mathcal{H}} \colon V_{\mathcal{H}} \to \{ 0, \dots,
-N - 1\}$. We define formal definitions for how each algorithm ``sees'' a
-problem instance (obviously, the definitions are heavily based on the two papers
-describing these algorithms \cite{DBLP:conf/cp/McCreeshNPS16,
-  DBLP:conf/ijcai/McCreeshPT17}):
+N - 1\}$. We formalise how each algorithm ``sees'' a problem instance
+(obviously, the definitions are heavily based on the two papers describing these
+algorithms \cite{DBLP:conf/cp/McCreeshNPS16, DBLP:conf/ijcai/McCreeshPT17}):
 
 \begin{definition} \label{def:mcsplit_instance}
   A \emph{\textsc{McSplit} instance} is a 5-tuple
-  $(\textit{future}, M, \textit{incumbent}, \mathcal{G}, \mathcal{H}$), where:
+  $(\textit{future}, M, \textit{incumbent}, \mathcal{G},
+  \mathcal{H})$\footnote{Note that the state of the algorithm is fully described
+    by the first three elements of the tuple. The graphs are added in order to
+    simplify some of the ideas presented later on.}, where:
   \begin{itemize}
   \item $\textit{future} = \{ \langle G, H \rangle : G \subseteq
     V_{\mathcal{G}}, H \subseteq V_{\mathcal{H}} \}$ represents the fact that
     every vertex in $G$ can only be matched to vertices in $H$ and vice versa.
-    Initially, each element of \textit{future} $\langle G, H \rangle $
-    corresponds to a vertex label $l \in \mu_{\mathcal{G}}(V_{\mathcal{G}}) \cap
-    \mu_{\mathcal{H}}(V_{\mathcal{H}})$, and then $G =
-    \mu_{\mathcal{G}}^{-1}(l)$ and $H = \mu_{\mathcal{H}}^{-1}(l)$.
+    Initially, $\textit{future} = \{ \langle \mu_{\mathcal{G}}^{-1}(l),
+    \mu_{\mathcal{H}}^{-1}(l) \rangle : l \in \mu_{\mathcal{G}}(V_{\mathcal{G}})
+    \cap \mu_{\mathcal{H}}(V_{\mathcal{H}}) \}$.
   \item $M = \{ (v, w) : v \in V_{\mathcal{G}}, w \in V_{\mathcal{H}} \}$
     contains the pairs of vertices that have already been matched.
   \item $\textit{incumbent} = \{ (v, w) : v \in V_{\mathcal{G}}, w \in
     V_{\mathcal{H}} \}$ is the maximum common subgraph known so far.
-  \item $\mathcal{G}$ and $\mathcal{H}$ are the original graphs. The information
-    contained in them is represented in other variables, but considering the
-    original graphs as part of the state of the algorithm's execution will prove
-    to be useful.
+  \item $\mathcal{G}$ and $\mathcal{H}$ are the original graphs.
   \end{itemize}
   We will call this an \emph{unsolved \textsc{McSplit} instance} if $M =
   \emptyset$ and a \emph{partially solved instance} otherwise.
@@ -1966,48 +1833,89 @@ $k$, and \textit{future} is initialised as in Definition
     $|\textit{incumbent}| - |M|$.
   \end{itemize}
 \end{definition}
+% TODO: add info about edge labels
 
 \begin{proposition}
-  A partially solved instance $(\textit{future}, M, \textit{incumbent},
+  Let $(\textit{future}, M, \textit{incumbent}, \mathcal{G}, \mathcal{H})$ be an
+  arbitrary partially solved instance. Order the elements of \textit{future} in
+  an arbitrary way: $\langle G_1, H_1 \rangle, \dots, \langle G_n, H_n \rangle$.
+  Let $V_{\mathcal{G'}} = \bigcup_{i=1}^n G_i$. Let $E_{\mathcal{G'}}$ be a
+  subset of $E_{\mathcal{G}}$, where we remove each edge that has one of its
+  endpoints in $V_{\mathcal{G}} \setminus V_{\mathcal{G'}}$. Let $v \in
+  V_{\mathcal{G'}}$ be arbitrary. Then it belongs to exactly one of $G_1, \dots,
+  G_n$, because all $G_i$'s are disjoint \cite{DBLP:conf/ijcai/McCreeshPT17}.
+  Suppose it is $G_j$. Let $\mu_{\mathcal{G'}}(v) = j - 1$. Since $v \in
+  V_{\mathcal{G'}}$ was arbitrary, this defines a function $\mu_{\mathcal{G'}}
+  \colon V_{\mathcal{G'}} \to \{ 0, \dots, n - 1 \}$. Finally, let
+  $\zeta_{\mathcal{G'}} = \zeta_{\mathcal{G}}|_{E_{\mathcal{G'}}}$. Then the
+  partially solved instance $(\textit{future}, M, \textit{incumbent},
   \mathcal{G}, \mathcal{H})$ is equivalent to an unsolved instance
-  $(\mathcal{G}', \mathcal{H}', |\textit{incumbent}|-|M|)$, where $\mathcal{G}'
-  = (V_{\mathcal{G}'}, E_{\mathcal{G}'}, \mu_{\mathcal{G}'},
-  \zeta_{\mathcal{G}'})$, and:
-\begin{itemize}
-\item $V_{\mathcal{G}'} = V_{\mathcal{G}} \setminus \{ v : (v, w) \in M \}$ (we
-  remove vertices that have already been matched).
-\item $E_{\mathcal{G}'}$ is a subset of $E_{\mathcal{G}}$, where we remove each
-  edge that has one of its endpoints in $V_{\mathcal{G}} \setminus
-  V_{\mathcal{G}'}$.
-\item In order to define $\mu_{\mathcal{G}'}$, we order the elements of $M$ in
-  an arbitrary way: $(v_1, w_1), (v_2, w_2), \dots, (v_k, w_k)$. Then, we let $n
-  = \min \{ l \in \mathbb{N} \cup \{ 0 \} : 2^l \ge N \}$, and, for every $v \in
-  V_{\mathcal{G}'}$, define
-\[\mu_{\mathcal{G}'}(v) = \mu_{\mathcal{G}}(v) + \sum_{\substack{1 \le i \le
-      k,\\\{ v, v_i \} \in E_{\mathcal{G}}}} 2^{n+i-1}. \]
-\item $\zeta_{\mathcal{G}'} = \zeta_{\mathcal{G}}|_{E_{\mathcal{G'}}}$.
-\end{itemize}
-And $\mathcal{H}'$ is set up in a similar way.
+  $(\mathcal{G'}, \mathcal{H'}, |\textit{incumbent}| - |M|)$, where
+  $\mathcal{G'} = (V_{\mathcal{G'}}, E_{\mathcal{G'}}, \mu_{\mathcal{G'}},
+  \zeta_{\mathcal{G'}})$ and $\mathcal{H'}$ is set up in a similar way.
 \end{proposition}
 
-\begin{remark}
-  The idea behind vertex labelling deserves some more explanation. It is
-  essentially a version of vertex labelling introduced by the \textsc{McSplit}
-  algorithm \cite{DBLP:conf/ijcai/McCreeshPT17}: every time a vertex is matched,
-  we extend the current vertex labels so that its neighbours and non-neighbours
-  get different labels. This version is set up with two advantages in
-  efficiency:
-  \begin{itemize}
-  \item for each vertex in $M$, vertices not adjacent to it are not relabelled
-    (assuming that this is the majority of vertices most of the time);
-  \item every addition of a power of two corresponds to flipping a bit in the
-    label's binary representation, since $n$\textsuperscript{th} bit is zero by
-    definition.
-  \end{itemize}
-\end{remark}
-
 \begin{proof}
+  We begin by considering how \textsc{McSplit} behaves on each of the two
+  instances. The unsolved instance gets transformed into a \textsc{McSplit}
+  instance $(\textit{future}', \emptyset, \textit{incumbent}', \mathcal{G'},
+  \mathcal{H'})$, where $\textit{incumbent}'$ is any set of cardinality
+  $|\textit{incumbent}| - |M|$, and $\textit{future}' = \{ \langle
+  \mu_{\mathcal{G'}}^{-1}(l), \mu_{\mathcal{H'}}^{-1}(l) \rangle : l \in
+  \mu_{\mathcal{G'}}(V_{\mathcal{G'}}) \cap \mu_{\mathcal{H'}}(V_{\mathcal{H'}})
+  \}$. We will show that $\textit{future} = \textit{future'}$ in three steps:
+  \begin{enumerate}
+  \item First, we show that \textit{future} and \textit{future'} contain the
+    same elements of $V_{\mathcal{G}}$. All vertices of $\mathcal{G}$ mentioned
+    in \textit{future'} can be expressed as
+    \begin{equation} \label{eq:union_of_vertices}
+    \bigcup_{l \in \mu_{\mathcal{G'}}(V_{\mathcal{G'}}) \cap
+        \mu_{\mathcal{H'}}(V_{\mathcal{H'}})} \mu_{\mathcal{G'}}^{-1}(l).
+    \end{equation}
+    Since
+    \[ V_{\mathcal{G'}} = \bigcup_{i=1}^n G_i \]
+    and $\mu_{\mathcal{G'}}(G_i) = \{ i-1 \}$ by the definitions of
+    $V_{\mathcal{G'}}$ and $\mu_{\mathcal{G'}}$,
+    \[ \mu_{\mathcal{G'}}(V_{\mathcal{G'}}) = \mu_{\mathcal{G'}}\left(
+        \bigcup_{i=1}^n G_i \right) = \{ 0, 1, \dots, n - 1 \}. \]
+    Similarly, $\mu_{\mathcal{H'}}(V_{\mathcal{H'}}) = \{ 0, 1, \dots, n - 1
+    \}$, and thus $\mu_{\mathcal{G'}}(V_{\mathcal{G'}}) \cap
+    \mu_{\mathcal{H'}}(V_{\mathcal{H'}}) = \{ 0, 1, \dots, n - 1 \}$. Then
+    \eqref{eq:union_of_vertices} can be rewritten as
+    \[ \bigcup_{l = 0}^{n-1} \mu_{\mathcal{G'}}^{-1}(l) = \bigcup_{l=0}^{n-1}
+      G_{l+1} = \bigcup_{l=1}^n G_l, \]
+    which is exactly what we wanted to prove. A similar argument can show that
+    \textit{future} and \textit{future'} contain the same elements of
+    $V_{\mathcal{H}}$.
+  \item Next, we show that two vertices of $\mathcal{G'}$ are in the same $G_i'$
+    if and only if they are in the same $G_j$. Indeed, for any $v, w \in
+    V_{\mathcal{G'}}$,
+    \[ v, w \in G_i' \iff \mu_{\mathcal{G}'}(v) = \mu_{\mathcal{G'}}(w) \iff v,
+      w \in G_{\mu_{\mathcal{G'}}(v)+1}. \]
+    Replacing $G$ with $H$ and $\mathcal{G}$ with $\mathcal{H}$ also gives us an
+    equivalent property for vertices of $\mathcal{H}'$.
+  \item Finally, we show that a similar structure is preserved between a pair of
+    vertices belonging to different graphs. For any $v \in V_{\mathcal{G'}}$ and
+    $w \in V_{\mathcal{H'}}$,
+    \[ v \in G_i', w \in H_i' \text{ for some } i \iff \mu_{\mathcal{G'}}(v) =
+      \mu_{\mathcal{H'}}(w) \iff v \in G_{\mu_{\mathcal{G'}}(v)+1}, w \in
+      H_{\mu_{\mathcal{G'}}(v)+1}. \]
+    This completes the proof that $\textit{future} = \textit{future'}$.
+  \end{enumerate}
+  For two \textsc{McSplit} instances to be equivalent, it remains to show that
+  the algorithm behaves exactly the same way with $(\emptyset,
+  \textit{incumbent'})$, as it does with $(M, \textit{incumbent})$. Note that
+  the only places in the algorithm, where these two variables can affect how the
+  algorithm executes, are in lines 3--5 in the original paper
+  \cite{DBLP:conf/ijcai/McCreeshPT17}, where we compare $|M|$ with
+  $|\textit{incumbent}|$ and $|M| + \sum_{\langle G, H \rangle \in
+    \textit{future}} \min(|G|, |H|)$ with $|\textit{incumbent}|$. When replacing
+  $(M, \textit{incumbent})$ with $(\emptyset, \textit{incumbent'})$, we replace
+  $(|M|, |\textit{incumbent}|)$ with $(0, |\textit{incumbent}| - |M|)$, so lines
+  3--5 test the same inequalities with $|M|$ subtracted from both sides.
+  Therefore, \textsc{McSplit} executes the two instances in an identical way.
   
+  For the clique algorithm to find these instances equivalent, TODO:...
 \end{proof}
 
 \chapter{Conclusion and Future Work}
@@ -2028,10 +1936,13 @@ the algorithms to vertex-labelled instances, and propose the idea of switching
 between two algorithms during runtime. We implemented a simple version, capable
 of switching algorithms according to a fixed rule, and laid the theoretical
 groundwork towards making the decision for when to switch in a more intelligent,
-ML-based manner.
+ML-based manner. Although a great deal of work has been done, we would like to
+end with a few suggestions for constructing new algorithm portfolios, analysing
+the performance data of graph algorithms, and building the algorithms of
+tomorrow.
 
-The set of features used for the ML models is far from perfect. A better
-performance should be achieved by removing at least a few of the
+Firstly, the set of features used for the ML models is far from perfect. A
+better performance should be achieved by removing at least a few of the
 worst-performing features. Many things can be calculated from a graph, some of
 them are likely to perform well as new features. In particular, since the
 standard deviations of degrees performed so well, other measures of dispersion
@@ -2039,19 +1950,25 @@ such as the coefficient of variation should be considered. As mentioned earlier
 in the dissertation, considering transformations of feature data might not bring
 massive advantages, but could be worthwhile nonetheless.
 
-In this project, all labels occurred with equal probabilities. This may not be
-true in real world data. Hence, along with varying how many labels a graphs has,
-one could also consider some probability distribution over the set of possible
-labels, making some of them more common than others.
+Secondly, in this project, once we fix the number of different labels in a
+graph, all labels occur with equal probabilities. This may not be very
+representative of real-world data. Hence, along with varying how many labels a
+graphs has, one could also consider some probability distribution over the set
+of possible labels, making some of them more common than others.
 
-As for MCS algorithms, it would be interesting to see an implementation of
-\textsc{SmartFusion} based on new runtime data. One other question that our ML
+Finally, it would be interesting to see an implementation of
+\textsc{SmartFusion} based on new runtime data. Even though our proposed model
+builds two graphs every time it has to make a decision, faster ways are likely
+to exist, once the gathered data enables us to see which features are important
+and should be tracked. Similarly, instead of creating a new association graph
+every time, the same graph could be modified. One last question that our ML
 models were not particularly successful in answering is ``when is
 $\textsc{McSplit}{\downarrow}$ better than \textsc{McSplit}?''
-% TODO: expand this
 
 \begin{appendices}
+
   \chapter{Plots of Distributions of Features} \label{appendix:plots}
+
   \begin{figure}
     \centering
     \includegraphics[scale=0.7]{images/sip_loops.png}
@@ -2248,6 +2165,126 @@ $\textsc{McSplit}{\downarrow}$ better than \textsc{McSplit}?''
       graphs from Section~\ref{sec:unlabelled}.}
     \label{fig:sip_ratio}
   \end{figure}
+
+  \chapter{Plots Analysing the ML Models for Labelled
+    Graphs} \label{appendix:plots2}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/vertex_labels_forest_errors.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/both_labels_forest_errors.png}
+  \end{subfigure}
+  \caption{Convergence plots of various error measures as the number of trees in
+    a random forest increases. The plots show the OOB error and $1 -
+    \text{recall}$ for each algorithm.}
+  \label{fig:forest_errors}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/vertex_labels_variable_importance.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/both_labels_variable_importance.png}
+  \end{subfigure}
+  \caption{Variable importance for both types of labelling, sorted from most to
+    least important.}
+  \label{fig:variable_importance}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/vertex_labels_var_used.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/both_labels_var_used.png}
+  \end{subfigure}
+  \caption{How often was each variable used to make splitting decisions?}
+  \label{fig:var_used}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/vertex_labels_margin.png}
+    \includegraphics[width=\textwidth]{images/vertex_labels_margin2.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/both_labels_margin.png}
+    \includegraphics[width=\textwidth]{images/both_labels_margin2.png}
+  \end{subfigure}
+  \caption{Sorted and unsorted margins of all data points, for both types of
+    labelling.}
+  \label{fig:margins}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/vertex_labels_clique_hist.png}
+    \includegraphics[width=\textwidth]{images/vertex_labels_mcsplit_hist.png}
+    \includegraphics[width=\textwidth]{images/vertex_labels_mcsplitdown_hist.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/both_labels_clique_hist.png}
+    \includegraphics[width=\textwidth]{images/both_labels_mcsplit_hist.png}
+    \includegraphics[width=\textwidth]{images/both_labels_mcsplitdown_hist.png}
+  \end{subfigure}
+  \caption{Histograms of margins, for each algorithm and type of labelling.}
+  \label{fig:margin_hist}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/vertex_labels_clique_labelling.png}
+    \includegraphics[width=\textwidth]{images/vertex_labels_mcsplit_labelling.png}
+    \includegraphics[width=\textwidth]{images/vertex_labels_mcsplitdown_labelling.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/both_labels_clique_labelling.png}
+    \includegraphics[width=\textwidth]{images/both_labels_mcsplit_labelling.png}
+    \includegraphics[width=\textwidth]{images/both_labels_mcsplitdown_labelling.png}
+  \end{subfigure}
+  \caption{Partial dependence plots of the labelling percentage.}
+  \label{fig:labelling_partials}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/vertex_labels_clique_stddeg.png}
+    \includegraphics[width=\textwidth]{images/vertex_labels_mcsplit_stddeg.png}
+    \includegraphics[width=\textwidth]{images/vertex_labels_mcsplitdown_stddeg.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/both_labels_clique_stddeg.png}
+    \includegraphics[width=\textwidth]{images/both_labels_mcsplit_stddeg.png}
+    \includegraphics[width=\textwidth]{images/both_labels_mcsplitdown_stddeg.png}
+  \end{subfigure}
+  \caption{Partial dependence plots of the standard deviation of degrees in the
+    target graph.}
+  \label{fig:stddeg_partials}
+\end{figure}
 
 \end{appendices}
 
