@@ -1791,7 +1791,13 @@ algorithms \cite{DBLP:conf/cp/McCreeshNPS16, DBLP:conf/ijcai/McCreeshPT17}):
     every vertex in $G$ can only be matched to vertices in $H$ and vice versa.
     Initially, $\textit{future} = \{ \langle \mu_{\mathcal{G}}^{-1}(l),
     \mu_{\mathcal{H}}^{-1}(l) \rangle : l \in \mu_{\mathcal{G}}(V_{\mathcal{G}})
-    \cap \mu_{\mathcal{H}}(V_{\mathcal{H}}) \}$.
+    \cap \mu_{\mathcal{H}}(V_{\mathcal{H}}) \}$\footnote{Technically, in order
+      to account for loops, we would have to have a $\langle G, H \rangle$ pair
+      for each unique combination of vertex label and multiset image of loops
+      under the edge-labelling function (where $G \ne \emptyset \ne H$) (the
+      same way the clique algorithm creates vertices in the association graph).
+      To keep the level of complexity down to a managable level, we will stick
+      with this simplification.}.
   \item $M = \{ (v, w) : v \in V_{\mathcal{G}}, w \in V_{\mathcal{H}} \}$
     contains the pairs of vertices that have already been matched.
   \item $\textit{incumbent} = \{ (v, w) : v \in V_{\mathcal{G}}, w \in
@@ -1817,7 +1823,11 @@ $(\mathcal{G} \nablaop \mathcal{H}, \textit{incumbent})$, and to a
 \textsc{McSplit} instance $(\textit{future}, \emptyset, \textit{incumbent},
 \mathcal{G}, \mathcal{H})$, where $\textit{incumbent}$ is any set of cardinality
 $k$, and \textit{future} is initialised as in Definition
-\ref{def:mcsplit_instance}.
+\ref{def:mcsplit_instance}. It is also important to remember from the previous
+section that a \textsc{McSplit} instance $(\textit{future}, M,
+\textit{incumbent}, \mathcal{G}, \mathcal{H})$ can be transformed into a clique
+instance $(\nabla(\textit{future}), X)$, where $X$ is any set of cardinality
+$|\textit{incumbent}| - |M|$.
 
 \begin{definition}
   We call a partially solved instance $(\textit{future}, M, \textit{incumbent},
@@ -1915,7 +1925,32 @@ $k$, and \textit{future} is initialised as in Definition
   3--5 test the same inequalities with $|M|$ subtracted from both sides.
   Therefore, \textsc{McSplit} executes the two instances in an identical way.
   
-  For the clique algorithm to find these instances equivalent, TODO:...
+  The clique algorithm accepts the partially solved instance as
+  $(\nabla(\textit{future}), X)$, and the unsolved instance as $(\mathcal{G'}
+  \nablaop \mathcal{H'}, Y)$, where $X$ and $Y$ are any two sets of cardinality
+  $|\textit{incumbent}| - |M|$. Similarly to the \textsc{McSplit} situation, the
+  elements in $X$ and $Y$ do not affect the algorithm, as long as their
+  cardinalities match. Thus it remains to show that $\nabla(\textit{future}) =
+  \mathcal{G'} \nablaop \mathcal{H'}$. Let $\nabla(\textit{future}) = (V, E)$ and
+  $\mathcal{G'} \nablaop \mathcal{H'} = (V', E')$. Then
+  \[ V = \bigcup_{i = 1}^n G_i \times H_i \]
+  and
+  \begin{align*}
+  V' &= \{ (v, w) \in V_{\mathcal{G'}} \times V_{\mathcal{H'}} :
+       \mu_{\mathcal{G'}}(v) = \mu_{\mathcal{H'}}(w) \} \\
+     &= \{ (v, w) \in V_{\mathcal{G'}} \times V_{\mathcal{H'}} : v \in G_i, w \in H_i \text{ for some } i \}.
+  \end{align*}
+  Now since
+  \[ V_{\mathcal{G'}} = \bigcup_{i = 1}^n G_i, \quad V_{\mathcal{H'}} =
+    \bigcup_{i=1}^n H_i, \]
+  we get that $V' = V$. The rules for adding edges to the association graphs are
+  the same. They refer to different graphs, but $E_{\mathcal{G'}},
+  E_{\mathcal{H'}}, \zeta_{\mathcal{G'}}$, and $\zeta_{\mathcal{H'}}$ are only
+  modified to accomodate the removal of vertices. Therefore, since $V' = V$ and
+  they define what vertices are considered when adding edges to the association
+  graph, $E' = E$, $\nabla(\textit{future}) = \mathcal{G'} \nablaop
+  \mathcal{H'}$, and the association graph receives equivalent input with the
+  unsolved instance as it does with the partially solved instance.
 \end{proof}
 
 \chapter{Conclusion and Future Work}
