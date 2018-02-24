@@ -37,7 +37,23 @@
 \maketitle
 
 \begin{abstract}
-  TODO: obviously
+  Many algorithms have been proposed for solving the maximum common subgraph
+  problem. Some algorithms tend to be better for some types of instances, but
+  there is no overall winner. Machine learning could be employed to choose an
+  algorithm for each problem instance based on various properties of the two
+  graphs. We show the potential performance benefits of this approach over
+  using any single algorithm, and achieve over 85\% of that potential for graphs
+  with just vertex labels and graphs with both vertex and edge labels.
+  Furthermore, we present new data on the drastic changes in algorithms'
+  performance, when changing the number of distinct labels, making the
+  conclusions of many research papers seem questionable and overly
+  simplistic. Moreover, we use our trained machine learning models to gain
+  insight into how well the models can recognise instances favouring each
+  algorithm, which features of the problem instances are the most important, and
+  which algorithms prefer what values of those features. Finally, we explore
+  several ways to improve existing algorithms and create new ones: we adapt the
+  $k{\downarrow}$ algorithm to handle vertex labels, and propose two ways of
+  switching algorithms mid-execution.
 \end{abstract}
 
 \educationalconsent
@@ -887,7 +903,7 @@ graph.
 
 After running the algorithms  with different types and percentages of labelling
 and recording their running times, an ML model can be trained to predict which
-algorithm should be chosen for each pair of graphs. For each pair of graphs,
+algorithm should be chosen for each pair of graphs. For each such pair,
 \textsc{Llama} \cite{llama} (the package that facilitates constructing algorithm
 portfolios) can take:
 
@@ -1295,6 +1311,22 @@ possible performance represented by the VBS.
 
 \section{Labelled Graphs} \label{sec:ml_labelled}
 
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/vertex_labels_forest_errors.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/both_labels_forest_errors.png}
+  \end{subfigure}
+  \caption{Convergence plots of various error measures as the number of trees in
+    a random forest increases. The plots show the OOB error and $1 -
+    \text{recall}$ for each algorithm.}
+  \label{fig:forest_errors}
+\end{figure}
+
 \begin{table}
   \centering
   \begin{tabular}{l c c}
@@ -1312,8 +1344,8 @@ possible performance represented by the VBS.
   \label{table:errors}
 \end{table}
 
-In order to save space, we leave the most important data and conclusions in this
-section, while moving supplementary plots to Appendix \ref{appendix:plots2}.
+%In order to save space, we leave the most important data and conclusions in this
+%section, while moving supplementary plots to Appendix \ref{appendix:plots2}.
 Just like in the previous section, we plot the error rates (defined in
 Section~\ref{sec:unlabelled_error_rates}) in Figure~\ref{fig:forest_errors}. The
 final error values are summarized in Table~\ref{table:errors}. This time all
@@ -1321,6 +1353,35 @@ errors converge downwards and are below 50\%. Comparing vertex-labelled and
 fully labelled subproblems, the only noticeable difference is that
 \textsc{McSplit} has a lower error rate for vertex-labelled graphs, which is
 also the worst-recognised algorithm for both types of labelling.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/vertex_labels_variable_importance.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/both_labels_variable_importance.png}
+  \end{subfigure}
+  \caption{Variable importance for both types of labelling, sorted from most to
+    least important.}
+  \label{fig:variable_importance}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/vertex_labels_var_used.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/both_labels_var_used.png}
+  \end{subfigure}
+  \caption{How often was each variable used to make splitting decisions?}
+  \label{fig:var_used}
+\end{figure}
 
 According to the variable importance measures plotted in
 Figure~\ref{fig:variable_importance}, the standard deviations of degrees for
@@ -1340,12 +1401,84 @@ the data to reduce the Gini index (a variation of which is used by the random
 forest algorithm in choosing which predictor to split on \cite{167153}), they
 are rarely used. 
 
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/vertex_labels_margin.png}
+    \includegraphics[width=\textwidth]{images/vertex_labels_margin2.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/both_labels_margin.png}
+    \includegraphics[width=\textwidth]{images/both_labels_margin2.png}
+  \end{subfigure}
+  \caption{Sorted and unsorted margins of all data points, for both types of
+    labelling.}
+  \label{fig:margins}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/vertex_labels_clique_hist.png}
+    \includegraphics[width=\textwidth]{images/vertex_labels_mcsplit_hist.png}
+    \includegraphics[width=\textwidth]{images/vertex_labels_mcsplitdown_hist.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/both_labels_clique_hist.png}
+    \includegraphics[width=\textwidth]{images/both_labels_mcsplit_hist.png}
+    \includegraphics[width=\textwidth]{images/both_labels_mcsplitdown_hist.png}
+  \end{subfigure}
+  \caption{Histograms of margins, for each algorithm and type of labelling.}
+  \label{fig:margin_hist}
+\end{figure}
+
 We show the margin plots and histograms in Figures~\ref{fig:margins} and
 \ref{fig:margin_hist}. Again, the data for both types of labelling is close to
 identical. Note that there are plenty of data points in all three colours and the ML
 models are usually very convinced when predicting $\textsc{McSplit}{\downarrow}$
 and the clique encoding and are less sure when dealing with problem instances
 best handled with \textsc{McSplit}.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/vertex_labels_clique_labelling.png}
+    \includegraphics[width=\textwidth]{images/vertex_labels_mcsplit_labelling.png}
+    \includegraphics[width=\textwidth]{images/vertex_labels_mcsplitdown_labelling.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/both_labels_clique_labelling.png}
+    \includegraphics[width=\textwidth]{images/both_labels_mcsplit_labelling.png}
+    \includegraphics[width=\textwidth]{images/both_labels_mcsplitdown_labelling.png}
+  \end{subfigure}
+  \caption{Partial dependence plots of the labelling percentage.}
+  \label{fig:labelling_partials}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/vertex_labels_clique_stddeg.png}
+    \includegraphics[width=\textwidth]{images/vertex_labels_mcsplit_stddeg.png}
+    \includegraphics[width=\textwidth]{images/vertex_labels_mcsplitdown_stddeg.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/both_labels_clique_stddeg.png}
+    \includegraphics[width=\textwidth]{images/both_labels_mcsplit_stddeg.png}
+    \includegraphics[width=\textwidth]{images/both_labels_mcsplitdown_stddeg.png}
+  \end{subfigure}
+  \caption{Partial dependence plots of the standard deviation of degrees in the
+    target graph.}
+  \label{fig:stddeg_partials}
+\end{figure}
 
 This time we show the partial dependence plots for the top two most
 important predictors (the labelling percentage and the standard deviation of
@@ -1411,7 +1544,7 @@ graphs, respectively.
 In this chapter we build on the knowledge gained by developing ML models and
 analysing algorithms' performance to extend current algorithms and propose new
 ones. We suggest a way to extend $k{\downarrow}$ to support vertex-labelled
-graphs in a non-trivial manner and introduce the idea of combining
+graphs in a non-trivial manner, and introduce the idea of combining
 \textsc{McSplit} and the clique encoding into a single algorithm.
 
 \section{Modifications to \texorpdfstring{$k{\downarrow}$}{kdown}}
@@ -1521,8 +1654,18 @@ other algorithms in 193 instances, making it worth consideration for an
 inclusion in a portfolio, although it might achieve similar results as with
 unlabelled graphs, where it wins too infrequently to be a valuable inclusion.
 
-\section{The Clique Algorithm and its Association Graph} \label{sec:clique}
-% TODO: intro the whole ordeal once it's done
+\section{Algorithm Switching}
+
+Given the fact that different algorithms perform best on different instances,
+one might ask: if algorithm $A$ performs best on some instance $I$, does $A$
+remain best throughout execution, or could it benefit us to switch to a
+different algorithm mid-execution? More specifically, we investigate the idea of
+switching from \textsc{McSplit} to the clique encoding, hoping that several
+decisions made by the \textsc{McSplit} algorithm simplify the remaining problem
+so much that the corresponding association graph becomes easily solvable by the
+clique algorithm.
+
+\subsection{The Clique Algorithm and its Association Graph} \label{sec:clique}
 
 \begin{figure}
   \centering
@@ -1554,28 +1697,27 @@ unlabelled graphs, where it wins too infrequently to be a valuable inclusion.
     \centering
     \includegraphics[width=\textwidth]{images/time_density.png}
   \end{subfigure}
-  \caption{Density plots of the selected features of the association graph and
+  \caption{Density plots of the selected features of association graphs and
     the clique algorithm's runtime. Note that the number of edges and runtime
     were $\log$-transformed in order to improve clarity.}
   \label{fig:densities}
 \end{figure}
 
-% TODO: rewrite in a better way
-The next question we want to answer is ``how does the clique algorithm's running
-time depend on properties of the association graph?'' To answer this question we
-record some of the features from Section~\ref{sec:features} about the
-association graph. More specifically, we record the features that are easy to
-compute (since association graphs can get quite big) and can be informative:
-number of vertices, number of edges, mean degree, max degree, standard deviation
-of degrees, and density. We record this information for association graphs
-created for all unlabelled instances from Section~\ref{sec:labelled} (since the
-graphs from Section~\ref{sec:unlabelled} often stretch the memory limits of the
-algorithm) as well as the \num{30000} instances previously selected for
-experiments with labelled graphs, for all 7 labelling percentages. As the
-timed-out experiments would make interpreting any results much harder, we remove
-them from the data and are left with about \num{300000} (instead of about
-\num{500000}) observations. The distribution of each column of the remaining
-dataset is plotted in Figure~\ref{fig:densities}.
+We begin with some preliminary analysis of properties of association graphs and
+their relationship with the clique algorithm's running time. We choose some of
+the features described in Section~\ref{sec:features} to record about association
+graphs. More specifically, we record features that are easy to compute (since
+association graphs can get quite big) and can provide meaningful information:
+number of vertices, number of edges, mean degree, maximum degree, standard
+deviation of degrees, and density. We record this information for association
+graphs created for all unlabelled instances from Section~\ref{sec:labelled}
+(since the graphs from Section~\ref{sec:unlabelled} often stretch the memory
+limits) as well as the \num{30000} instances previously selected for experiments
+with labelled graphs, for all seven labelling percentages. As the timed-out
+experiments would make interpreting any results much harder, we remove them from
+the data and are left with about \num{300000} (instead of about \num{500000})
+observations. The distribution of each feature is plotted in
+Figure~\ref{fig:densities}.
 
 \begin{figure}
   \centering
@@ -1587,12 +1729,13 @@ dataset is plotted in Figure~\ref{fig:densities}.
 
 To keep things simple and not violate assumptions about independent variables,
 we will only consider correlations between the variables instead of trying to
-fit some kind of a regression model. The resulting Spearman's rank correlation
-coefficients are in Figure~\ref{fig:correlations}. Note that all variables are
-positively correlated: some correlations are very strong, some average, and one
-very weak (between density and the standard deviation of degrees). Also note
-that all measured characteristics of the association graph are positively
-correlated with the algorithm's running time. 
+fit some kind of a regression model. The Spearman's rank correlation
+coefficients between all measured variables are in
+Figure~\ref{fig:correlations}. Note that all variables are positively
+correlated: some correlations are very strong, some average, and one very weak
+(between density and the standard deviation of degrees). Also note that all
+measured characteristics of the association graph are positively correlated with
+the algorithm's running time.
 
 \begin{figure}
   \centering
@@ -1625,12 +1768,15 @@ correlated with the algorithm's running time.
   \label{fig:bins}
 \end{figure}
 
-The next question we ought to explore is ``can we predict the instances where
-the clique encoding is better than other algorithms based on properties of the
-association graph?'' For each of the 6 measured properties, we divide its range
-of values to 100 bins of equal size (some of them turn out to be empty) and plot
-the proportion of instances in that range where the clique encoding outperformed
+After a basic overview of what association graphs are like in terms of their
+characteristics and correlations between them, we are ready to tackle the main
+question of this section: can we predict the instances where the clique encoding
+is better than other algorithms based on properties of the association graph?
+For each of the six measured properties, we divide its range of values to 100
+bins of equal width (some of them turn out to be empty). For each bin, we plot
+the proportion of instances in that range with the clique encoding outperforming
 other algorithms in Figure~\ref{fig:bins}. We can make three observations:
+
 \begin{itemize}
 \item For all measured properties except density, the clique algorithm is not
   just overall faster, but also faster than other algorithms (i.e., more likely
@@ -1655,11 +1801,11 @@ other algorithms in Figure~\ref{fig:bins}. We can make three observations:
   (and similarly for the right endpoint of the rightmost interval).
 \end{remark}
 
-\section{\textsc{Fusion}: \textsc{McSplit} and the Clique Encoding United}
+\subsection{\textsc{Fusion}: \textsc{McSplit} and the Clique Encoding United}
 
 Even though we were not able to justify re-encoding a problem instance that is
 partially solve by \textsc{McSplit} into the clique encoding using the simple
-techniques of Section \ref{sec:clique}, this section presents the simplest way of
+techniques of Section \ref{sec:clique}, this section explores the simplest way of
 merging the two algorithms, where the clique algorithm overtakes
 \textsc{McSplit} after making a fixed number of choices. The hope is that making
 several decision with \textsc{McSplit} would simplify the association graph
@@ -1762,29 +1908,28 @@ either extreme. This conclusively shows that switching between \textsc{McSplit}
 and the clique encoding at a certain depth of the search tree does not produce a
 competitive algorithm for solving MCS problem instances.
 
-\section{\textsc{SmartFusion}: Can We Switch Algorithms in a More Intelligent
+\subsection{\textsc{SmartFusion}: Can We Switch Algorithms in a More Intelligent
   Manner?}
 
-We consider switching algorithms at the same place in the \textsc{McSplit}
-algorithm as in the previous section, but this time we want to use running-time
-data and simple statistical/ML models to inform our choice for when to switch.
-We introduce a way to map partially solved instances inside \textsc{McSplit}
-into unsolved instances, so that...TODO: complete this sentence. For the rest of
-this section, consider an MCS problem instance between graphs $\mathcal{G} =
-(V_{\mathcal{G}}, E_{\mathcal{G}}, \mu_{\mathcal{G}}, \zeta_{\mathcal{G}})$ and
-$\mathcal{H} = (V_{\mathcal{H}}, E_{\mathcal{H}}, \mu_{\mathcal{H}},
-\zeta_{\mathcal{H}})$ with $\mu_{\mathcal{G}} \colon V_{\mathcal{G}} \to \{ 0,
-\dots, N - 1 \}$ and $\mu_{\mathcal{H}} \colon V_{\mathcal{H}} \to \{ 0, \dots,
-N - 1\}$. We formalise how each algorithm ``sees'' a problem instance
-(obviously, the definitions are heavily based on the two papers describing these
-algorithms \cite{DBLP:conf/cp/McCreeshNPS16, DBLP:conf/ijcai/McCreeshPT17}):
+Switching algorithms at a fixed depth of the search tree is one of the simplest
+possible strategies. In this section we explore an idea for how the decision
+whether to switch can be made using running time data of the two algorithms on
+various (unsolved) problem instances. For that purpose, we introduce a way to
+map partially solved instances inside \textsc{McSplit} into unsolved instances,
+and prove the method's correctness. For the rest of this section, consider an
+MCS problem instance between graphs $\mathcal{G} = (V_{\mathcal{G}},
+E_{\mathcal{G}}, \mu_{\mathcal{G}}, \zeta_{\mathcal{G}})$ and $\mathcal{H} =
+(V_{\mathcal{H}}, E_{\mathcal{H}}, \mu_{\mathcal{H}}, \zeta_{\mathcal{H}})$ with
+$\mu_{\mathcal{G}} \colon V_{\mathcal{G}} \to \{ 0, \dots, N - 1 \}$ and
+$\mu_{\mathcal{H}} \colon V_{\mathcal{H}} \to \{ 0, \dots, N - 1\}$. We
+start by formalising how each algorithm ``sees'' a problem instance (obviously,
+the definitions are heavily based on the two papers describing these algorithms
+\cite{DBLP:conf/cp/McCreeshNPS16, DBLP:conf/ijcai/McCreeshPT17}).
 
 \begin{definition} \label{def:mcsplit_instance}
   A \emph{\textsc{McSplit} instance} is a 5-tuple
   $(\textit{future}, M, \textit{incumbent}, \mathcal{G},
-  \mathcal{H})$\footnote{Note that the state of the algorithm is fully described
-    by the first three elements of the tuple. The graphs are added in order to
-    simplify some of the ideas presented later on.}, where:
+  \mathcal{H})$, where:
   \begin{itemize}
   \item $\textit{future} = \{ \langle G, H \rangle : G \subseteq
     V_{\mathcal{G}}, H \subseteq V_{\mathcal{H}} \}$ represents the fact that
@@ -1795,9 +1940,9 @@ algorithms \cite{DBLP:conf/cp/McCreeshNPS16, DBLP:conf/ijcai/McCreeshPT17}):
       to account for loops, we would have to have a $\langle G, H \rangle$ pair
       for each unique combination of vertex label and multiset image of loops
       under the edge-labelling function (where $G \ne \emptyset \ne H$) (the
-      same way the clique algorithm creates vertices in the association graph).
-      To keep the level of complexity down to a managable level, we will stick
-      with this simplification.}.
+      same way the clique algorithm creates vertices of the association graph).
+      In order to use more succint notation, and avoid long and convoluted
+      sentences, we will stick with this simplification.}.
   \item $M = \{ (v, w) : v \in V_{\mathcal{G}}, w \in V_{\mathcal{H}} \}$
     contains the pairs of vertices that have already been matched.
   \item $\textit{incumbent} = \{ (v, w) : v \in V_{\mathcal{G}}, w \in
@@ -1807,6 +1952,24 @@ algorithms \cite{DBLP:conf/cp/McCreeshNPS16, DBLP:conf/ijcai/McCreeshPT17}):
   We will call this an \emph{unsolved \textsc{McSplit} instance} if $M =
   \emptyset$ and a \emph{partially solved instance} otherwise.
 \end{definition}
+
+\begin{remark}
+  We include both graphs in the definition to make subsequent observations and
+  statements both simpler and more useful. In reality, $\mathcal{G}$ and
+  $\mathcal{H}$ are accessible from inside the \textsc{McSplit} algorithm,
+  although the information about vertices and vertex labels is already encoded
+  in the \textit{future} variable, and the information about edges is stored in
+  two two-dimensional arrays, that can be thought of as functions
+  $A_{\mathcal{G}}, A_{\mathcal{H}}$, where $A_{\mathcal{G}} \colon
+  V_{\mathcal{G}} \times V_{\mathcal{G}} \to \mathbb{M}(\{ 0, \dots, N - 1 \})$
+  encodes the multiset of labels on edges between any two vertices (and
+  similarly for $A_{\mathcal{H}}$). We use the notation $\mathbb{M}(S)$ to
+  denote the (infinite) set of multisets with elements from $S$, where each
+  element of $S$ can be used any number of times. Note that $\emptyset \in
+  \mathbb{M}(S)$, for any set $S$. For any two $u, v \in V_{\mathcal{G}}$,
+  $A_{\mathcal{G}}(u, v)$ is the multiset image of the edges between $u$ and $v$
+  under $\zeta_{\mathcal{G}}$.
+\end{remark}
 
 \begin{definition}
   A \emph{clique instance} is a tuple $(G, \textit{incumbent})$, where $G =
@@ -1821,13 +1984,13 @@ up the initial size of the \textit{incumbent}. An unsolved instance
 $(\mathcal{G}, \mathcal{H}, k)$ can be transformed to a clique instance
 $(\mathcal{G} \nablaop \mathcal{H}, \textit{incumbent})$, and to a
 \textsc{McSplit} instance $(\textit{future}, \emptyset, \textit{incumbent},
-\mathcal{G}, \mathcal{H})$, where $\textit{incumbent}$ is any set of cardinality
-$k$, and \textit{future} is initialised as in Definition
-\ref{def:mcsplit_instance}. It is also important to remember from the previous
-section that a \textsc{McSplit} instance $(\textit{future}, M,
-\textit{incumbent}, \mathcal{G}, \mathcal{H})$ can be transformed into a clique
-instance $(\nabla(\textit{future}), X)$, where $X$ is any set of cardinality
-$|\textit{incumbent}| - |M|$.
+\mathcal{G}, \mathcal{H})$, where $\textit{incumbent}$ is any set of
+cardinality $k$, and \textit{future}, $\mathcal{G}$, $\mathcal{H}$ are
+all initialised as in Definition \ref{def:mcsplit_instance}. It is also
+important to remember from the previous section that a \textsc{McSplit} instance
+$(\textit{future}, M, \textit{incumbent}, \mathcal{G}, \mathcal{H})$ can
+be transformed into a clique instance $(\nabla(\textit{future}), X)$, where $X$
+is any set of cardinality $|\textit{incumbent}| - |M|$.
 
 \begin{definition}
   We call a partially solved instance $(\textit{future}, M, \textit{incumbent},
@@ -1843,26 +2006,26 @@ $|\textit{incumbent}| - |M|$.
     $|\textit{incumbent}| - |M|$.
   \end{itemize}
 \end{definition}
-% TODO: add info about edge labels
 
 \begin{proposition}
-  Let $(\textit{future}, M, \textit{incumbent}, \mathcal{G}, \mathcal{H})$ be an
-  arbitrary partially solved instance. Order the elements of \textit{future} in
-  an arbitrary way: $\langle G_1, H_1 \rangle, \dots, \langle G_n, H_n \rangle$.
-  Let $V_{\mathcal{G'}} = \bigcup_{i=1}^n G_i$. Let $E_{\mathcal{G'}}$ be a
-  subset of $E_{\mathcal{G}}$, where we remove each edge that has one of its
-  endpoints in $V_{\mathcal{G}} \setminus V_{\mathcal{G'}}$. Let $v \in
-  V_{\mathcal{G'}}$ be arbitrary. Then it belongs to exactly one of $G_1, \dots,
-  G_n$, because all $G_i$'s are disjoint \cite{DBLP:conf/ijcai/McCreeshPT17}.
-  Suppose it is $G_j$. Let $\mu_{\mathcal{G'}}(v) = j - 1$. Since $v \in
-  V_{\mathcal{G'}}$ was arbitrary, this defines a function $\mu_{\mathcal{G'}}
-  \colon V_{\mathcal{G'}} \to \{ 0, \dots, n - 1 \}$. Finally, let
-  $\zeta_{\mathcal{G'}} = \zeta_{\mathcal{G}}|_{E_{\mathcal{G'}}}$. Then the
-  partially solved instance $(\textit{future}, M, \textit{incumbent},
-  \mathcal{G}, \mathcal{H})$ is equivalent to an unsolved instance
-  $(\mathcal{G'}, \mathcal{H'}, |\textit{incumbent}| - |M|)$, where
-  $\mathcal{G'} = (V_{\mathcal{G'}}, E_{\mathcal{G'}}, \mu_{\mathcal{G'}},
-  \zeta_{\mathcal{G'}})$ and $\mathcal{H'}$ is set up in a similar way.
+  Let $(\textit{future}, M, \textit{incumbent}, \mathcal{G},
+  \mathcal{H})$ be an arbitrary partially solved instance. Order the
+  elements of \textit{future} in an arbitrary way: $\langle G_1, H_1 \rangle,
+  \dots, \langle G_n, H_n \rangle$. Let $V_{\mathcal{G'}} = \bigcup_{i=1}^n
+  G_i$. Let $E_{\mathcal{G'}}$ be a subset of $E_{\mathcal{G}}$, where we remove
+  each edge that has one of its endpoints in $V_{\mathcal{G}} \setminus
+  V_{\mathcal{G'}}$. Let $v \in V_{\mathcal{G'}}$ be arbitrary. Then it belongs
+  to exactly one of $G_1, \dots, G_n$, because all $G_i$'s are pairwise disjoint
+  \cite{DBLP:conf/ijcai/McCreeshPT17}. Suppose it is $G_j$. Let
+  $\mu_{\mathcal{G'}}(v) = j - 1$. Since $v \in V_{\mathcal{G'}}$ was arbitrary,
+  this defines a function $\mu_{\mathcal{G'}} \colon V_{\mathcal{G'}} \to \{ 0,
+  \dots, n - 1 \}$. Finally, let $\zeta_{\mathcal{G'}} =
+  \zeta_{\mathcal{G}}|_{E_{\mathcal{G'}}}$. Then the partially solved instance
+  $(\textit{future}, M, \textit{incumbent}, \mathcal{G}, \mathcal{H})$ is
+  equivalent to an unsolved instance $(\mathcal{G'}, \mathcal{H'},
+  |\textit{incumbent}| - |M|)$, where $\mathcal{G'} = (V_{\mathcal{G'}},
+  E_{\mathcal{G'}}, \mu_{\mathcal{G'}}, \zeta_{\mathcal{G'}})$ and
+  $\mathcal{H'}$ is set up in a similar way.
 \end{proposition}
 
 \begin{proof}
@@ -1933,7 +2096,7 @@ $|\textit{incumbent}| - |M|$.
   cardinalities match. Thus it remains to show that $\nabla(\textit{future}) =
   \mathcal{G'} \nablaop \mathcal{H'}$. Let $\nabla(\textit{future}) = (V, E)$ and
   $\mathcal{G'} \nablaop \mathcal{H'} = (V', E')$. Then
-  \[ V = \bigcup_{i = 1}^n G_i \times H_i \]
+  \[ V = \bigcup_{i = 1}^n G_i \times H_i, \]
   and
   \begin{align*}
   V' &= \{ (v, w) \in V_{\mathcal{G'}} \times V_{\mathcal{H'}} :
@@ -2200,126 +2363,6 @@ $\textsc{McSplit}{\downarrow}$ better than \textsc{McSplit}?''
       graphs from Section~\ref{sec:unlabelled}.}
     \label{fig:sip_ratio}
   \end{figure}
-
-  \chapter{Plots Analysing the ML Models for Labelled
-    Graphs} \label{appendix:plots2}
-
-\begin{figure}
-  \centering
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/vertex_labels_forest_errors.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/both_labels_forest_errors.png}
-  \end{subfigure}
-  \caption{Convergence plots of various error measures as the number of trees in
-    a random forest increases. The plots show the OOB error and $1 -
-    \text{recall}$ for each algorithm.}
-  \label{fig:forest_errors}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/vertex_labels_variable_importance.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/both_labels_variable_importance.png}
-  \end{subfigure}
-  \caption{Variable importance for both types of labelling, sorted from most to
-    least important.}
-  \label{fig:variable_importance}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/vertex_labels_var_used.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/both_labels_var_used.png}
-  \end{subfigure}
-  \caption{How often was each variable used to make splitting decisions?}
-  \label{fig:var_used}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/vertex_labels_margin.png}
-    \includegraphics[width=\textwidth]{images/vertex_labels_margin2.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/both_labels_margin.png}
-    \includegraphics[width=\textwidth]{images/both_labels_margin2.png}
-  \end{subfigure}
-  \caption{Sorted and unsorted margins of all data points, for both types of
-    labelling.}
-  \label{fig:margins}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/vertex_labels_clique_hist.png}
-    \includegraphics[width=\textwidth]{images/vertex_labels_mcsplit_hist.png}
-    \includegraphics[width=\textwidth]{images/vertex_labels_mcsplitdown_hist.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/both_labels_clique_hist.png}
-    \includegraphics[width=\textwidth]{images/both_labels_mcsplit_hist.png}
-    \includegraphics[width=\textwidth]{images/both_labels_mcsplitdown_hist.png}
-  \end{subfigure}
-  \caption{Histograms of margins, for each algorithm and type of labelling.}
-  \label{fig:margin_hist}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/vertex_labels_clique_labelling.png}
-    \includegraphics[width=\textwidth]{images/vertex_labels_mcsplit_labelling.png}
-    \includegraphics[width=\textwidth]{images/vertex_labels_mcsplitdown_labelling.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/both_labels_clique_labelling.png}
-    \includegraphics[width=\textwidth]{images/both_labels_mcsplit_labelling.png}
-    \includegraphics[width=\textwidth]{images/both_labels_mcsplitdown_labelling.png}
-  \end{subfigure}
-  \caption{Partial dependence plots of the labelling percentage.}
-  \label{fig:labelling_partials}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/vertex_labels_clique_stddeg.png}
-    \includegraphics[width=\textwidth]{images/vertex_labels_mcsplit_stddeg.png}
-    \includegraphics[width=\textwidth]{images/vertex_labels_mcsplitdown_stddeg.png}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{images/both_labels_clique_stddeg.png}
-    \includegraphics[width=\textwidth]{images/both_labels_mcsplit_stddeg.png}
-    \includegraphics[width=\textwidth]{images/both_labels_mcsplitdown_stddeg.png}
-  \end{subfigure}
-  \caption{Partial dependence plots of the standard deviation of degrees in the
-    target graph.}
-  \label{fig:stddeg_partials}
-\end{figure}
 
 \end{appendices}
 
