@@ -19,6 +19,7 @@ for (feature in c("vertices", "edges", "meandeg", "maxdeg", "density",
     features[paste("pattern",feature, sep = ".")] /
       features[paste("target", feature, sep = ".")])
 }
+
 # Construct a vector of feature names
 graph_feature_names <- c("vertices", "edges", "loops", "mean degree",
                          "max degree", "SD of degrees", "density", "connected",
@@ -33,6 +34,8 @@ colnames(features) <- c("ID", full_feature_names)
 
 # Plot correlations
 M <- cor(features[, -1], method = "spearman")
-png("text/dissertation/images/feature_correlations.png", width = 960, height = 640)
-corrplot(M, diag = FALSE, tl.pos = "td", tl.cex = 1, method = "color", type = "upper")
+png("text/dissertation/images/feature_correlations.png", width = 960,
+    height = 640)
+corrplot(M, diag = FALSE, tl.pos = "td", tl.cex = 1, method = "color",
+         type = "upper")
 dev.off()

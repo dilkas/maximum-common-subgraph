@@ -141,13 +141,18 @@ plt <- ecdfplot(~ mcsplitdown + vbs + llama, data = times,
 update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8, name = "Dark2")))
 dev.off()
 
-# Using ggplot2 instead? TODO: finish this
+# Using ggplot2 instead?
 png(paste0("dissertation/images/ecdf_", type, "_llama_ggplot2.png"), width = 480, height = 320)
-ggplot(times, aes(clique)) + stat_ecdf(geom = "step", pad = FALSE)
-plt <- ecdfplot(~ mcsplitdown + vbs + llama, data = times,
-               auto.key = list(space = "right", text = c("McSplit\u2193", "VBS", "Llama")),
-               xlab = "Runtime (ms)", ylim = c(0.9, 1), main = type_label)
-update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8, name = "Dark2")))
+x <- c()
+g <- c()
+for (algorithm in algorithms) {
+  x <- c(x, times[, algorithm])
+  g <- c(g, rep(algorithm, length(times[, algorithm])))
+}
+g <- g[x > 0]
+x <- x[x > 0]
+df <- data.frame(x = x, g = g)
+ggplot(df, aes(x, color = g)) + geom_density() + stat_ecdf(geom = "step", pad = FALSE) + scale_x_log10()
 dev.off()
 
 png(paste0("dissertation/images/ecdf_", type, ".png"), width = 480, height = 320)

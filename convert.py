@@ -1,3 +1,6 @@
+# Reads a CSV file with features for two graphs, and writes a CSV file with a
+# line of features, for each unique graph in the input file
+
 d = {}
 with open('results/mcs_features.csv') as data:
     for line in data:
