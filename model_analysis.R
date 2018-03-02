@@ -3,9 +3,10 @@ library(llama)
 library(RColorBrewer)
 library(lattice)
 library(latticeExtra)
+library(ggplot2)
 
-type <- "vertex_labels"
-type_label <- "Vertex labels"
+type <- "both_labels"
+type_label <- "Both labels"
 p_values <- c(5, 10, 15, 20, 25, 33, 50)
 
 model <- readRDS(paste0("models/", type, ".rds"))
@@ -139,6 +140,16 @@ plt <- ecdfplot(~ mcsplitdown + vbs + llama, data = times,
                xlab = "Runtime (ms)", ylim = c(0.9, 1), main = type_label)
 update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8, name = "Dark2")))
 dev.off()
+
+# Using ggplot2 instead? TODO: finish this
+png(paste0("dissertation/images/ecdf_", type, "_llama_ggplot2.png"), width = 480, height = 320)
+ggplot(times, aes(clique)) + stat_ecdf(geom = "step", pad = FALSE)
+plt <- ecdfplot(~ mcsplitdown + vbs + llama, data = times,
+               auto.key = list(space = "right", text = c("McSplit\u2193", "VBS", "Llama")),
+               xlab = "Runtime (ms)", ylim = c(0.9, 1), main = type_label)
+update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8, name = "Dark2")))
+dev.off()
+
 png(paste0("dissertation/images/ecdf_", type, ".png"), width = 480, height = 320)
 plt <- ecdfplot(~ clique + kdown + mcsplit + mcsplitdown + vbs, data = times,
                auto.key = list(space = "right", text = labels[-6]),
@@ -149,13 +160,13 @@ dev.off()
 sum(times$kdown <= times$vbs)
 sum(times$clique <= times$vbs)
 #times2 <- times[startsWith(as.character(times$ID), "data/sip-instances/"),]
-#times2 <- times[startsWith(as.character(times$ID), "data/mcs-instances/"),]
-#png("dissertation/images/ecdf_mcs.png", width = 480, height = 320)
-#plt <- ecdfplot(~ clique + kdown + mcsplit + mcsplitdown, data = times2,
-#                auto.key = list(space = "right", text = c("clique", "k\u2193", "McSplit", "McSplit\u2193")),
-#                xlab = "Runtime (ms)", main = "Unlabelled")
-#update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8, name = "Dark2")))
-#dev.off()
+times2 <- times[startsWith(as.character(times$ID), "data/mcs-instances/"),]
+png("dissertation/images/ecdf_mcs.png", width = 480, height = 320)
+plt <- ecdfplot(~ clique + kdown + mcsplit + mcsplitdown, data = times2,
+                auto.key = list(space = "right", text = c("clique", "k\u2193", "McSplit", "McSplit\u2193")),
+                xlab = "Runtime (ms)", main = "Unlabelled")
+update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8, name = "Dark2")))
+dev.off()
 
 # llama metrics
 
@@ -290,3 +301,16 @@ legend("topright", c("clique", "McSplit", "McSplit\u2193"), fill = colours)
 #image(as.matrix(nFeatures$features), axes = F, col = cols)
 #axis(2, labels = full_feature_names,
 #     at = seq(0, 1, 1/(length(data$features) - 1)), las = 2)
+
+# Plotting a single tree (abandoned)
+ 
+library(rpart)
+library(RColorBrewer)
+library(rattle)
+fit <- rpart(data$data$mcsplit_success ~ data$data$pattern.vertices + data$data$pattern.maxdistance, cu.summary)
+fancyRpartPlot(fit)
+rpart.plot(fit)
+prp(fit)
+par(xpd = TRUE)
+plot(fit, compress = TRUE)
+text(fit, use.n = TRUE)

@@ -7,7 +7,8 @@ labelling <- "both" # "vertex" or "both"
 type <- "both_labels"
 p_values <- c(5, 10, 15, 20, 25, 33, 50)
 
-algorithms <- c("clique", "mcsplit", "mcsplitdown", "fusion1", "fusion2")
+algorithms <- c("clique", "mcsplit", "mcsplitdown"
+#algorithms <- c("clique", "mcsplit", "mcsplitdown", "fusion1", "fusion2")
 if (labelling == "vertex") {
   algorithms <- c(algorithms, "kdown")
 }
@@ -104,8 +105,7 @@ data <- input(features, performance, success,
 #data <- input(features, performance, success)
 rm("features", "performance", "success", "costs")
 saveRDS(data, sprintf("models/%s_labels_data.rds", labelling))
-model <- classify(makeLearner("classif.randomForest"),
-                  cvFolds(data, stratify = TRUE))
+model <- classify(makeLearner("classif.randomForest"), cvFolds(data, stratify = TRUE))
 saveRDS(model, sprintf("models/%s_labels.rds", labelling))
 parallelStop()
 
