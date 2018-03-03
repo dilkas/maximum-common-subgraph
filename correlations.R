@@ -1,33 +1,33 @@
 library(corrgram)
 
-p.values <- c(5, 10, 15, 20, 25, 33, 50)
-runtime.names <- c("ID", "nodes", "time", "size")
-runtime.classes <- c("character", "NULL", "integer", "NULL")
-feature.names <- c("ID", "vertices", "edges", "meandeg", "maxdeg", "stddeg",
+p_values <- c(5, 10, 15, 20, 25, 33, 50)
+runtime_names <- c("ID", "nodes", "time", "size")
+runtime_classes <- c("character", "NULL", "integer", "NULL")
+feature_names <- c("ID", "vertices", "edges", "meandeg", "maxdeg", "stddeg",
                    "density")
-nice.feature.names <- c("ID", "Vertices", "Edges", "Mean degree", "Max degree",
+nice_feature_names <- c("ID", "Vertices", "Edges", "Mean degree", "Max degree",
                         "Standard deviation of degrees", "Density")
 
-ReadFiles <- function(feature.filename, runtime.filename) {
-  features <- read.csv(feature.filename, header = FALSE,
-                       col.names = feature.names)
-  runtimes <- read.csv(runtime.filename, header = FALSE,
-                       colClasses = runtime.classes, col.names = runtime.names)
+read_files <- function(feature_filename, runtime_filename) {
+  features <- read.csv(feature_filename, header = FALSE,
+                       col.names = feature_names)
+  runtimes <- read.csv(runtime_filename, header = FALSE,
+                       colClasses = runtime_classes, col.names = runtime_names)
   features <- merge(features, runtimes)
   features$time <- pmin(features$time, 1e6)
   return(features)
 }
 
 # Read in the data
-data <- ReadFiles("results/association.mcs.csv", "results/clique.mcs.csv")
-for (p in p.values) {
+data <- read_files("results/association.mcs.csv", "results/clique.mcs.csv")
+for (p in p_values) {
   for (labelling in c("vertex", "both")) {
-    local.data <- ReadFiles(paste("results/association", labelling, "labels",
+    local_data <- read_files(paste("results/association", labelling, "labels",
                                   p, "csv", sep = "."),
-                            paste("results/clique",labelling, "labels", p,
+                            paste("results/clique", labelling, "labels", p,
                                   "csv", sep = "."))
-    local.data$ID <- sprintf("%s %02d %s", labelling, p, local.data$ID)
-    data <- rbind(data, local.data)
+    local_data$ID <- sprintf("%s %02d %s", labelling, p, local_data$ID)
+    data <- rbind(data, local_data)
   }
 }
 data$time[is.na(data$time)] <- 1e6
@@ -35,10 +35,10 @@ rm("local.data")
 #data <- subset(data, time < 1e6)
 
 # Density plots
-for (i in 2:length(feature.names)) {
-  png(paste0("text/dissertation/images/", feature.names[i], "_density.png"),
+for (i in 2:length(feature_names)) {
+  png(paste0("text/dissertation/images/", feature_names[i], "_density.png"),
       width = 480, height = 320)
-  plot(density(data[, feature.names[i]]), main = nice.feature.names[i])
+  plot(density(data[, feature_names[i]]), main = nice_feature_names[i])
   dev.off()
 }
 png("text/dissertation/images/edges_density.png", width = 480, height = 320)
@@ -50,7 +50,7 @@ dev.off()
 
 # Correlation plot
 png("text/dissertation/images/correlations.png", width = 480, height = 320)
-corrgram(data[, -1], labels = c(nice.feature.names[2:5], "SD of degrees",
+corrgram(data[, -1], labels = c(nice_feature_names[2:5], "SD of degrees",
                                 "Density", "Time"), lower.panel = NULL,
          panel = panel.cor, cor.method = "spearman", cex = 1.2)
 dev.off()

@@ -16,7 +16,7 @@ rm("features2", "feature_names")
 for (feature in c("vertices", "edges", "meandeg", "maxdeg", "density",
                   "meandistance", "maxdistance")) {
   features[paste(feature, "ratio", sep = ".")] <- (
-    features[paste("pattern",feature, sep = ".")] /
+    features[paste("pattern", feature, sep = ".")] /
       features[paste("target", feature, sep = ".")])
 }
 

@@ -6,11 +6,9 @@ parallelLibrary("llama")
 labelling <- "both" # "vertex" or "both"
 type <- "both_labels"
 p_values <- c(5, 10, 15, 20, 25, 33, 50)
-
-algorithms <- c("clique", "mcsplit", "mcsplitdown")
-#algorithms <- c("clique", "mcsplit", "mcsplitdown", "fusion1", "fusion2")
-
 filtered_instances <- readLines("results/filtered_instances2")
+algorithms <- c("clique", "mcsplit", "mcsplitdown")
+algorithms <- c("clique", "mcsplit", "mcsplitdown", "fusion1", "fusion2")
 
 costs <- read.csv("results/costs.csv", header = FALSE)
 colnames(costs) <- c("ID", "group1")
@@ -21,31 +19,8 @@ costs$ID <- sprintf("%02d %s", costs$labelling, costs$ID)
 costs <- costs[, c("ID", "group1")]
 
 # Construct the feature data frame
-feature_names <- c("vertices", "edges", "loops", "meandeg", "maxdeg", "stddeg",
-                   "density", "isconnected", "meandistance", "maxdistance",
-                   "proportiondistancege2", "proportiondistancege3",
-                   "proportiondistancege4")
-original_features <- read.csv("results/mcs_features.csv", header = FALSE)
-colnames(original_features) <- c("ID",
-                                 paste("pattern", feature_names, sep = "."),
-                                 paste("target", feature_names, sep = "."))
-rm("feature_names")
-original_features <- subset(original_features,
-                            gsub(" .*$", "", original_features$ID)
-                            %in% filtered_instances)
-for (feature in c("vertices", "edges", "meandeg", "maxdeg", "density",
-                  "meandistance", "maxdistance")) {
-  original_features[paste(feature, "ratio", sep = ".")] <- (
-    original_features[paste("pattern", feature, sep = ".")] /
-      original_features[paste("target", feature, sep = ".")])
-}
-rm("feature")
-features <- original_features[rep(seq_len(nrow(original_features)),
-                                  each = length(p_values)),]
-rm("original_features")
-features$labelling <- p_values
-features$ID <- sprintf("%02d %s", features$labelling, features$ID)
-features <- features[order(features$ID), ]
+source("common.R")
+features <- get_features(p_values, filtered_instances)
 
 #Construct the performance (running time) data frame
 names <- c("ID", "nodes", "time", "size")
@@ -63,7 +38,7 @@ for (algorithm in algorithms) {
                         sub(" .*$", "", data_file$ID) %in% filtered_instances)
     data_file$ID <- sprintf("%02d %s", p, data_file$ID)
     algorithm_runtimes <- rbind(algorithm_runtimes,
-                                data_file[order(data_file$ID),])
+                                data_file[order(data_file$ID), ])
   }
   algorithm_runtimes$time <- pmin(algorithm_runtimes$time, 1e6)
   performance[, algorithm] <- algorithm_runtimes$time
@@ -85,13 +60,15 @@ performance[performance$mcsplitdown < performance$mins, ]
 performance <- performance[performance$mins < 1e6,
                            names(performance) != "mins"]
 features <- features[features$ID %in% performance$ID, ]
-costs <- costs[costs$ID %in% features$ID, ]
+costs <- costs[costs$ID %in% performance$ID, ]
 
 success <- cbind(performance)
 success[, -1] <- success[, -1] < 1e6
-answers <- answers[answers$ID %in% performance$ID,]
+answers <- answers[answers$ID %in% performance$ID, ]
 answers$all_finished <- apply(success[, -1], 1, all)
-answers <- answers[answers$all_finished,]
+answers <- answers[answers$all_finished, ]
+
+# All should be true
 all(answers$mcsplit == answers$mcsplitdown)
 all(answers$mcsplit == answers$kdown)
 all(answers$clique == answers$mcsplit)
@@ -101,10 +78,10 @@ all(answers$clique == answers$fusion2)
 data <- input(features, performance, success,
               list(groups = list(group1 = colnames(features)[-1]),
                    values = costs))
-#data <- input(features, performance, success)
 rm("features", "performance", "success", "costs")
 saveRDS(data, sprintf("models/%s_labels_data.rds", labelling))
-model <- classify(makeLearner("classif.randomForest"), cvFolds(data, stratify = TRUE))
+model <- classify(makeLearner("classif.randomForest"),
+                  cvFolds(data, stratify = TRUE))
 saveRDS(model, sprintf("models/%s_labels.rds", labelling))
 parallelStop()
 
@@ -127,6 +104,8 @@ update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8,
                                                           name = "Dark2")))
 dev.off()
 
+# Cumulative runtime dependence on the labelling percentage
+colours <- rainbow(length(algorithms))
 cumulative <- expand.grid(algorithm = algorithms, labelling = p_values)
 cumulative$time <- apply(cumulative, 1, function(row)
   sum(performance[startsWith(as.character(performance$ID),
