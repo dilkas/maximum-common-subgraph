@@ -7,18 +7,15 @@ labelling <- "both" # "vertex" or "both"
 type <- "both_labels"
 p_values <- c(5, 10, 15, 20, 25, 33, 50)
 
-algorithms <- c("clique", "mcsplit", "mcsplitdown"
+algorithms <- c("clique", "mcsplit", "mcsplitdown")
 #algorithms <- c("clique", "mcsplit", "mcsplitdown", "fusion1", "fusion2")
-if (labelling == "vertex") {
-  algorithms <- c(algorithms, "kdown")
-}
 
 filtered_instances <- readLines("results/filtered_instances2")
 
 costs <- read.csv("results/costs.csv", header = FALSE)
 colnames(costs) <- c("ID", "group1")
 costs <- subset(costs, costs$ID %in% filtered_instances)
-costs <- costs[rep(seq_len(nrow(costs)), each = length(p_values)),]
+costs <- costs[rep(seq_len(nrow(costs)), each = length(p_values)), ]
 costs$labelling <- p_values
 costs$ID <- sprintf("%02d %s", costs$labelling, costs$ID)
 costs <- costs[, c("ID", "group1")]
@@ -62,12 +59,13 @@ for (algorithm in algorithms) {
     data_file <- read.csv(paste0("results/", algorithm, ".", labelling,
                                  ".labels.", p, ".csv"), header = FALSE,
                           colClasses = classes, col.names = names)
-    data_file <- subset(data_file, sub(" .*$", "", data_file$ID) %in% filtered_instances)
+    data_file <- subset(data_file,
+                        sub(" .*$", "", data_file$ID) %in% filtered_instances)
     data_file$ID <- sprintf("%02d %s", p, data_file$ID)
     algorithm_runtimes <- rbind(algorithm_runtimes,
                                 data_file[order(data_file$ID),])
   }
-  algorithm_runtimes$time <- pmin(algorithm_runtimes$time, 1000000)
+  algorithm_runtimes$time <- pmin(algorithm_runtimes$time, 1e6)
   performance[, algorithm] <- algorithm_runtimes$time
   answers[, algorithm] <- algorithm_runtimes$size
 }
@@ -77,19 +75,20 @@ rm("algorithm", "algorithm_runtimes", "classes", "data_file",
 # "Warning message: NAs introduced by coercion" is normal and is fixed on the
 # next line
 performance$mins <- as.numeric(apply(performance, 1, min))
-performance$mins[is.na(performance$mins)] <- 1000000
+performance$mins[is.na(performance$mins)] <- 1e6
 
-#performance[performance$clique < performance$mins,]
-#performance[performance$mcsplit < performance$mins,]
-#performance[performance$mcsplitdown < performance$mins,]
+# Sanity check: all should be empty
+performance[performance$clique < performance$mins, ]
+performance[performance$mcsplit < performance$mins, ]
+performance[performance$mcsplitdown < performance$mins, ]
 
-performance <- performance[performance$mins < 1000000,
+performance <- performance[performance$mins < 1e6,
                            names(performance) != "mins"]
-features <- features[features$ID %in% performance$ID,]
-costs <- costs[costs$ID %in% features$ID,]
+features <- features[features$ID %in% performance$ID, ]
+costs <- costs[costs$ID %in% features$ID, ]
 
 success <- cbind(performance)
-success[, -1] <- success[, -1] < 1000000
+success[, -1] <- success[, -1] < 1e6
 answers <- answers[answers$ID %in% performance$ID,]
 answers$all_finished <- apply(success[, -1], 1, all)
 answers <- answers[answers$all_finished,]
