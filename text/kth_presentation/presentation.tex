@@ -9,6 +9,7 @@
 \usepackage[clock]{ifsym}
 \usepackage{adjustbox}
 \usepackage{booktabs}
+\usepackage{csquotes}
 \usetikzlibrary{positioning, shapes.arrows}
 
 % TODO: different theme
@@ -21,14 +22,16 @@
 \subtitle{Algorithms and Algorithm Portfolios}
 % TODO: change the date
 \institute{School of Computing Science\\University of Glasgow}
+% TODO: fix how school is formatted
 
 \begin{document}
 
 \maketitle
 
-%\begin{frame}{Outline}
-%\tableofcontents
-%\end{frame}
+% TODO: fix sections
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
 
 \begin{frame}{Maximum Common Subgraph}
   \begin{definition}
@@ -38,10 +41,29 @@
   \end{definition}
 \end{frame}
 
-\begin{frame}
+\section{Algorithms}
+
+\begin{frame}{Algorithms}
+  \begin{itemize}
+  \item \textsc{McSplit}, $\textsc{McSplit}\downarrow$
+    \begin{itemize}
+    \item \parencite{DBLP:conf/ijcai/McCreeshPT17}
+    \end{itemize}
+  \item clique encoding
+    \begin{itemize}
+    \item \parencite{DBLP:conf/cp/McCreeshNPS16}
+    \end{itemize}
+  \item $k\downarrow$
+    \begin{itemize}
+    \item \parencite{DBLP:conf/aaai/HoffmannMR17}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{\textsc{McSplit}: a Branch and Bound Algorithm}
   \begin{columns}
     \begin{column}{0.5\textwidth}
-      \begin{adjustbox}{max totalsize={\textwidth}{\textheight},center}
+      \begin{adjustbox}{max totalsize={0.9\textwidth}{0.9\textheight},center}
         \begin{tikzpicture}
           \begin{scope}[every node/.style={circle,draw}]
             \node (u1) [fill=gray,] at (0, 5) {$u_1$};
@@ -71,16 +93,126 @@
             \path (v2) edge node {} (v4);
             \path (v2) edge node {} (v5);
           \end{scope}
+          \begin{scope}[color=red,thick]
+            \onslide<2->{\path[->] (u1) edge [bend left=40] (v4);}
+            \onslide<8->{\path[->] (u2) edge [bend right=20] (v1);}
+            \onslide<5->{\path[->] (u3) edge [] (v3);}
+          \end{scope}
         \end{tikzpicture}
       \end{adjustbox}
     \end{column}
+
     \begin{column}{0.5\textwidth}
-      table here
+      \begin{overprint}
+        Partial solution: \only<4>{\alert{$u_1 \mapsto v_4$}}\only<5-6>{$u_1 \mapsto v_4$}\only<7>{$u_1 \mapsto v_4$, \alert{$u_3 \mapsto v_3$}}\only<8->{$u_1 \mapsto v_4$, $u_3 \mapsto v_3$}
+
+        Upper bound: \only<1-3>{$4$}\only<4>{\alert{$1+2$}}\only<5-6>{$1+2$}\only<7>{\alert{$2+1$}}\only<8->{$2+1$}
+      \end{overprint}
+      \begin{table}
+        \begin{overlayarea}{\textwidth}{2cm}
+          \centering
+          \only<-2>{
+            \begin{tabular}{c c c}
+              \toprule
+              Label & $G_1$ & $G_2$ \\
+              \midrule
+              0 & $u_2, u_3, u_4, u_5$ & $v_1, v_2, v_3$ \\
+              1 & $u_1$ & $v_4, v_5$ \\
+              \bottomrule
+            \end{tabular}
+          }
+          \only<3>{
+            \begin{tabular}{c c c}
+              \toprule
+              Label & $G_1$ & $G_2$ \\
+              \midrule
+              00 & $u_3$ & $v_3$ \\
+              01 & $u_4, u_5$ & $\emptyset$ \\
+              02 & $u_2$ & $v_1, v_2$ \\
+              10 & $\emptyset$ & $v_5$ \\
+              \bottomrule
+            \end{tabular}
+          }
+          \only<4-5>{
+            \begin{tabular}{c c c}
+              \toprule
+              Label & $G_1$ & $G_2$ \\
+              \midrule
+              00 & $u_3$ & $v_3$ \\
+              01 & $u_2$ & $v_1, v_2$ \\
+              \bottomrule
+            \end{tabular}
+          }
+          \only<6>{
+            \begin{tabular}{c c c}
+              \toprule
+              Label & $G_1$ & $G_2$ \\
+              \midrule
+              010 & $u_2$ & $v_1, v_2$ \\
+              011 & $u_4, u_5$ & $\emptyset$ \\
+              \bottomrule
+            \end{tabular}
+          }
+          \only<7->{
+            \begin{tabular}{c c c}
+              \toprule
+              Label & $G_1$ & $G_2$ \\
+              \midrule
+              010 & $u_2$ & $v_1, v_2$ \\
+              \bottomrule
+            \end{tabular}
+          }
+        \end{overlayarea}
+      \end{table}
+      \begin{overprint}
+        \onslide<2>
+        Decision: $u_1 \mapsto v_4$
+        \onslide<5>
+        Decision: $u_3 \mapsto v_3$
+        \onslide<8>
+        Decision: $u_2 \mapsto v_1$\\ Found a solution! \\ Backtrack to confirm optimality
+      \end{overprint}
     \end{column}
   \end{columns}
 \end{frame}
 
+\begin{frame}{The Clique Encoding}
+    \begin{adjustbox}{max totalsize={0.9\textwidth}{0.9\textheight},center}
+    \begin{tikzpicture}
+      \begin{scope}[every node/.style={circle,draw}]
+        \node (i1) at (360/11 * 1:7cm) {$\epsilon \to v_1$};
+        \node (i2) at (360/11 * 2:7cm) {$\epsilon \to v_2$};
+        \node (i3) [color=blue,ultra thick] at (360/11 * 3:7cm) {$\epsilon \to v_3$};
+
+        \node (d1) at (360/11 * 4:7cm) {$u_1 \to \epsilon$};
+        \node (s11) [color=blue,ultra thick] at (360/11 * 5:7cm) {$u_1 \to v_1$};
+        \node (s12) at (360/11 * 6:7cm) {$u_1 \to v_2$};
+        \node (s13) at (360/11 * 7:7cm) {$u_1 \to v_3$};
+
+        \node (d2) at (360/11 * 8:7cm) {$u_2 \to \epsilon$};
+        \node (s21) at (360/11 * 9:7cm) {$u_2 \to v_1$};
+        \node (s22) [color=blue,ultra thick] at (360/11 * 10:7cm) {$u_2 \to v_2$};
+        \node (s23) at (360:7cm) {$u_2 \to v_3$};
+      \end{scope}
+
+      %\begin{scope}[color=blue]
+      %  \path (s11) [ultra thick] edge node {} (s22) edge node {} (i3);
+      %  \path (s22) [ultra thick] edge node {} (i3);
+      %\end{scope}
+
+      \path (i1) edge node {} (i2) edge node {} (i3) edge node {} (d1) edge node {} (s12) edge node {} (s13) edge node {} (d2) edge node {} (s22) edge node {} (s23);
+      \path (i2) edge node {} (i3) edge node {} (d1) edge node {} (s11) edge node {} (s13) edge node {} (d2) edge node {} (s21) edge node {} (s23);
+      \path (i3) edge node {} (d1) edge node {} (s12) edge node {} (d2) edge node {} (s21);
+      \path (d1) edge node {} (d2) edge node {} (s21) edge node {} (s22) edge node {} (s23);
+      \path (s11) edge node {} (d2) edge node {} (s23);
+      \path (s12) edge node {} (d2) edge node {} (s21) edge node {} (s23);
+      \path (s13) edge node {} (d2) edge node {} (s21) edge node {} (s22);
+    \end{tikzpicture}
+  \end{adjustbox}
+\end{frame}
+
 \section{Algorithm selection}
+
 \begin{frame}{Algorithm selection}
   \begin{definition}[\cite{DBLP:journals/ai/BischlKKLMFHHLT16}]
     Given a set $\mathcal{I}$ of problem instances, a space of algorithms
@@ -95,24 +227,6 @@
     \centering
     \includegraphics[scale=0.5]{llama.jpg}
   \end{figure}
-\end{frame}
-
-\section{Algorithms}
-\begin{frame}{Algorithms}
-  \begin{itemize}
-  \item \textsc{McSplit}, $\textsc{McSplit}\downarrow$
-    \begin{itemize}
-    \item \parencite{DBLP:conf/ijcai/McCreeshPT17}
-    \end{itemize}
-  \item clique encoding
-    \begin{itemize}
-    \item \parencite{DBLP:conf/cp/McCreeshNPS16}
-    \end{itemize}
-  \item $k\downarrow$
-    \begin{itemize}
-    \item \parencite{DBLP:conf/aaai/HoffmannMR17}
-    \end{itemize}
-  \end{itemize}
 \end{frame}
 
 \section{Labelling}
@@ -156,17 +270,17 @@
   \end{itemize}
 \end{frame}
 
-%\begin{frame}{Distribution of vertices per label}
-%  \begin{figure}
-%    \centering
-%    \includegraphics[scale=0.4]{../dissertation/images/labelling_histogram.png}
-%  \end{figure}
-%  For each graph and label
-%  \begin{itemize}
-%  \item $C$ is the number of vertices with that label
-%  \item $E(C)$ is the number we would expect from a (discrete) uniform distribution
-%  \end{itemize}
-%\end{frame}
+% \begin{frame}{Distribution of vertices per label}
+%   \begin{figure}
+%     \centering
+%     \includegraphics[scale=0.4]{../dissertation/images/labelling_histogram.png}
+%   \end{figure}
+%   For each graph and label
+%   \begin{itemize}
+%   \item $C$ is the number of vertices with that label
+%   \item $E(C)$ is the number we would expect from a (discrete) uniform distribution
+%   \end{itemize}
+% \end{frame}
 
 \section{Features}
 \begin{frame}{Features (34 in total)}
@@ -250,15 +364,15 @@
   \end{figure}
 \end{frame}
 
-%\begin{frame}{Other observations}
-%  \begin{itemize}
-%  \item Most important features
-%    \begin{itemize}
-%    \item labelling percentage
-%    \item standard deviation of degrees (for both graphs)
-%    \end{itemize}
-%  \end{itemize}
-%\end{frame}
+% \begin{frame}{Other observations}
+%   \begin{itemize}
+%   \item Most important features
+%     \begin{itemize}
+%     \item labelling percentage
+%     \item standard deviation of degrees (for both graphs)
+%     \end{itemize}
+%   \end{itemize}
+% \end{frame}
 
 \begin{frame}{Errors}
   \begin{itemize}
@@ -327,14 +441,14 @@
   \end{itemize}
 \end{frame}
 
-%\begin{frame}{Margins}
-%  \begin{definition}
-%    Let $c_1, \dots, c_n$ be $n$ classes and let $p$ be a data point that belongs
-%    to class $c_p$. Let $v_1, \dots, v_n$ denote the number of votes for each
-%    class when given $p$ as input. The \emph{margin} of $p$ is
-%    \[ \frac{v_p}{\sum_{i=1}^n v_i} - \max_{i \ne p} \frac{v_i}{\sum_{j=1}^n v_j}, \]
-%    which is a number in $[-1, 1]$.
-%  \end{definition}
-%\end{frame}
+% \begin{frame}{Margins}
+%   \begin{definition}
+%     Let $c_1, \dots, c_n$ be $n$ classes and let $p$ be a data point that belongs
+%     to class $c_p$. Let $v_1, \dots, v_n$ denote the number of votes for each
+%     class when given $p$ as input. The \emph{margin} of $p$ is
+%     \[ \frac{v_p}{\sum_{i=1}^n v_i} - \max_{i \ne p} \frac{v_i}{\sum_{j=1}^n v_j}, \]
+%     which is a number in $[-1, 1]$.
+%   \end{definition}
+% \end{frame}
 
 \end{document}
