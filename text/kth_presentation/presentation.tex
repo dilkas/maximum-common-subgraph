@@ -12,17 +12,16 @@
 \usepackage{csquotes}
 \usetikzlibrary{positioning, shapes.arrows}
 
-% TODO: different theme
 \usetheme{CambridgeUS}
-\usecolortheme{orchid}
+\usecolortheme{rose}
 \beamertemplatenavigationsymbolsempty
 \addbibresource{../dissertation/references.bib}
 \author{Paulius Dilkas}
 \title{Maximum Common Subgraph}
 \subtitle{Algorithms and Algorithm Portfolios}
 % TODO: change the date
-\institute{School of Computing Science\\University of Glasgow}
-% TODO: fix how school is formatted
+\institute[]{School of Computing Science\\University of Glasgow}
+\DeclareMathOperator{\E}{E}
 
 \begin{document}
 
@@ -39,23 +38,59 @@
     $G_2$ is a graph $G_3$ such that $G_3 = (V_3, E_3)$ is isomorphic to induced
     subgraphs of both $G_1$ and $G_2$ with $|V_3|$ maximised.
   \end{definition}
+  \pause
+  \begin{adjustbox}{max totalsize={0.6\textwidth}{0.6\textheight},center}
+    \begin{tikzpicture}
+      \begin{scope}[every node/.style={circle,draw}]
+        \node (u1) [fill=gray,] at (0, 5) {$u_1$};
+        \node (u2) at (0, 3) {$u_2$};
+        \node (u3) at (0, 1) {$u_3$};
+        \onslide<2>{\node (u4) at (2, 4) {$u_4$};}
+        \onslide<2>{\node (u5) at (2, 2) {$u_5$};}
+      \end{scope}
+      \path (u1) [color=blue,ultra thick] edge node {} (u2);
+      \onslide<2>{\path (u1) edge node {} (u4);}
+      \onslide<2>{\path (u1) edge node {} (u5);}
+      \onslide<2>{\path (u2) edge node {} (u4);}
+      \onslide<2>{\path (u3) edge node {} (u4);}
+      \onslide<2>{\path (u3) edge node {} (u5);}
+      \begin{scope}[every node/.style={circle, draw},xshift=4cm]
+        \node (v1) at (0, 5) {$v_1$};
+        \onslide<2>{\node (v2) at (0, 3) {$v_2$};}
+        \node (v3) at (0, 1) {$v_3$};
+        \node (v4) [fill=gray] at (2, 4) {$v_4$};
+        \onslide<2>{\node (v5) [fill=gray] at (2, 2) {$v_5$};}
+      \end{scope}
+      \begin{scope}[color=blue,ultra thick]
+        \onslide<2>{\path (v1) edge node {} (v2);}
+        \path (v1) edge node {} (v4);
+        \onslide<2>{\path (v2) edge node {} (v4);}
+        \onslide<2>{\path (v2) edge node {} (v5);}
+      \end{scope}
+      \begin{scope}[color=red,thick]
+        \onslide<3->{\path[->] (u1) edge [bend left=40] (v4);}
+        \onslide<3->{\path[->] (u2) edge (v1);}
+        \onslide<3->{\path[->] (u3) edge (v3);}
+      \end{scope}
+    \end{tikzpicture}
+  \end{adjustbox}
 \end{frame}
 
 \section{Algorithms}
 
 \begin{frame}{Algorithms}
   \begin{itemize}
-  \item \textsc{McSplit}, $\textsc{McSplit}\downarrow$
+  \item \textsc{McSplit}, $\textsc{McSplit}{\downarrow}$
     \begin{itemize}
-    \item \parencite{DBLP:conf/ijcai/McCreeshPT17}
+    \item \cite{DBLP:conf/ijcai/McCreeshPT17}
     \end{itemize}
   \item clique encoding
     \begin{itemize}
-    \item \parencite{DBLP:conf/cp/McCreeshNPS16}
+    \item \cite{DBLP:conf/cp/McCreeshNPS16}
     \end{itemize}
-  \item $k\downarrow$
+  \item $k{\downarrow}$
     \begin{itemize}
-    \item \parencite{DBLP:conf/aaai/HoffmannMR17}
+    \item \cite{DBLP:conf/aaai/HoffmannMR17}
     \end{itemize}
   \end{itemize}
 \end{frame}
@@ -176,44 +211,104 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}{The Clique Encoding}
-    \begin{adjustbox}{max totalsize={0.9\textwidth}{0.9\textheight},center}
-    \begin{tikzpicture}
-      \begin{scope}[every node/.style={circle,draw}]
-        \node (i1) at (360/11 * 1:7cm) {$\epsilon \to v_1$};
-        \node (i2) at (360/11 * 2:7cm) {$\epsilon \to v_2$};
-        \node (i3) [color=blue,ultra thick] at (360/11 * 3:7cm) {$\epsilon \to v_3$};
-
-        \node (d1) at (360/11 * 4:7cm) {$u_1 \to \epsilon$};
-        \node (s11) [color=blue,ultra thick] at (360/11 * 5:7cm) {$u_1 \to v_1$};
-        \node (s12) at (360/11 * 6:7cm) {$u_1 \to v_2$};
-        \node (s13) at (360/11 * 7:7cm) {$u_1 \to v_3$};
-
-        \node (d2) at (360/11 * 8:7cm) {$u_2 \to \epsilon$};
-        \node (s21) at (360/11 * 9:7cm) {$u_2 \to v_1$};
-        \node (s22) [color=blue,ultra thick] at (360/11 * 10:7cm) {$u_2 \to v_2$};
-        \node (s23) at (360:7cm) {$u_2 \to v_3$};
-      \end{scope}
-
-      %\begin{scope}[color=blue]
-      %  \path (s11) [ultra thick] edge node {} (s22) edge node {} (i3);
-      %  \path (s22) [ultra thick] edge node {} (i3);
-      %\end{scope}
-
-      \path (i1) edge node {} (i2) edge node {} (i3) edge node {} (d1) edge node {} (s12) edge node {} (s13) edge node {} (d2) edge node {} (s22) edge node {} (s23);
-      \path (i2) edge node {} (i3) edge node {} (d1) edge node {} (s11) edge node {} (s13) edge node {} (d2) edge node {} (s21) edge node {} (s23);
-      \path (i3) edge node {} (d1) edge node {} (s12) edge node {} (d2) edge node {} (s21);
-      \path (d1) edge node {} (d2) edge node {} (s21) edge node {} (s22) edge node {} (s23);
-      \path (s11) edge node {} (d2) edge node {} (s23);
-      \path (s12) edge node {} (d2) edge node {} (s21) edge node {} (s23);
-      \path (s13) edge node {} (d2) edge node {} (s21) edge node {} (s22);
-    \end{tikzpicture}
-  \end{adjustbox}
+\begin{frame}{$k{\downarrow}$}
+  \begin{itemize}
+  \item $k = 0$: search for a complete subgraph isomorphism
+  \item $k = 1$: allow one vertex of the smaller graph to not match anything
+  \item ... and so on
+  \item Developed to handle large instances
+  \item Implements many domain filtering techniques
+  \end{itemize}
 \end{frame}
 
-\section{Algorithm selection}
+\begin{frame}{$\textsc{McSplit}{\downarrow}$}
+  \begin{itemize}
+  \item TODO
+  \end{itemize}
+\end{frame}
 
-\begin{frame}{Algorithm selection}
+\begin{frame}{Clique Encoding}
+  \begin{columns}
+    \begin{column}{0.3\textwidth}
+      \begin{adjustbox}{max totalsize={0.9\textwidth}{0.9\textheight},center}
+        \begin{tikzpicture}
+          \begin{scope}[every node/.style={circle,draw}]
+            \node (u1) [fill=gray,] at (0, 5) {$u_1$};
+            \node (u2) at (0, 3) {$u_2$};
+            \node (u3) at (0, 1) {$u_3$};
+            \node (u4) at (2, 4) {$u_4$};
+            \node (u5) at (2, 2) {$u_5$};
+          \end{scope}
+          \path (u1) [color=blue,ultra thick] edge node {} (u2);
+          \path (u1) edge node {} (u4);
+          \path (u1) edge node {} (u5);
+          \path (u2) edge node {} (u4);
+          \path (u3) edge node {} (u4);
+          \path (u3) edge node {} (u5);
+          \begin{scope}[every node/.style={circle, draw},xshift=4cm]
+            \node (v1) at (0, 5) {$v_1$};
+            \node (v2) at (0, 3) {$v_2$};
+            \node (v3) at (0, 1) {$v_3$};
+            \node (v4) [fill=gray] at (2, 4) {$v_4$};
+            \node (v5) [fill=gray] at (2, 2) {$v_5$};
+          \end{scope}
+          \begin{scope}[color=blue,ultra thick]
+            \path (v1) edge node {} (v2);
+            \path (v1) edge node {} (v4);
+            \path (v2) edge node {} (v4);
+            \path (v2) edge node {} (v5);
+          \end{scope}
+          \begin{scope}[color=red,thick]
+            \path[->] (u1) edge [bend left=40] (v4);
+            \path[->] (u2) edge [bend right=20] (v1);
+            \path[->] (u3) edge [] (v3);
+          \end{scope}
+        \end{tikzpicture}
+      \end{adjustbox}
+    \end{column}
+
+    \begin{column}{0.7\textwidth}
+      \begin{adjustbox}{max totalsize={0.9\textwidth}{0.9\textheight},center}
+        \begin{tikzpicture}
+          \begin{scope}[every node/.style={circle,draw}]
+            \node (u1v4) [color=red,ultra thick,text=black] at (360/14 * 1:9cm) {$u_1 \mapsto v_4$};
+            \node (u1v5) at (360/14 * 2:9cm) {$u_1 \mapsto v_5$};
+            \node (u2v1) [color=red,ultra thick,text=black] at (360/14 * 3:9cm) {$u_2 \mapsto v_1$};
+            \node (u2v2) at (360/14 * 4:9cm) {$u_2 \mapsto v_2$};
+            \node (u2v3) at (360/14 * 5:9cm) {$u_2 \mapsto v_3$};
+            \node (u3v1) at (360/14 * 6:9cm) {$u_3 \mapsto v_1$};
+            \node (u3v2) at (360/14 * 7:9cm) {$u_3 \mapsto v_2$};
+            \node (u3v3) [color=red,ultra thick,text=black] at (360/14 * 8:9cm) {$u_3 \mapsto v_3$};
+            \node (u4v1) at (360/14 * 9:9cm) {$u_4 \mapsto v_1$};
+            \node (u4v2) at (360/14 * 10:9cm) {$u_4 \mapsto v_2$};
+            \node (u4v3) at (360/14 * 11:9cm) {$u_4 \mapsto v_3$};
+            \node (u5v1) at (360/14 * 12:9cm) {$u_5 \mapsto v_1$};
+            \node (u5v2) at (360/14 * 13:9cm) {$u_5 \mapsto v_2$};
+            \node (u5v3) at (360/14 * 14:9cm) {$u_5 \mapsto v_3$};
+          \end{scope}
+
+          \begin{scope}[color=red,ultra thick]
+            \path (u1v4) edge (u2v1) edge (u3v3);
+            \path (u2v1) edge (u3v3);
+          \end{scope}
+
+          \path (u1v4) edge (u2v2);
+          \path (u1v5) edge (u2v2) edge (u3v1) edge (u3v3);
+          \path (u2v1) edge (u5v3);
+          \path (u2v2) edge (u3v3) edge (u5v3);
+          \path (u2v3) edge (u3v1) edge (u3v2) edge (u5v1) edge (u5v2);
+          \path (u4v1) edge (u5v3);
+          \path (u4v2) edge (u5v3);
+          \path (u4v3) edge (u5v1) edge (u5v2);
+        \end{tikzpicture}
+      \end{adjustbox}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\section{Algorithm Selection}
+
+\begin{frame}{(Per-Instance) Algorithm Selection}
   \begin{definition}[\cite{DBLP:journals/ai/BischlKKLMFHHLT16}]
     Given a set $\mathcal{I}$ of problem instances, a space of algorithms
     $\mathcal{A}$, and a performance measure $m \colon \mathcal{I} \times
@@ -221,15 +316,33 @@
     find a mapping $s \colon \mathcal{I} \to \mathcal{A}$ that optimises
     $\mathbb{E}[m(i, s(i))]$.
   \end{definition}
-  \pause
-  \centering{\textsc{Llama} \parencite{kotthoff_llama_2013}}
   \begin{figure}
     \centering
-    \includegraphics[scale=0.5]{llama.jpg}
+    \begin{tikzpicture}
+      \onslide<2->{\node (graphs) at (0, 4) {$(G_1, G_2)$};}
+      \onslide<3->{\node (features) at (2, 4) {$\begin{bmatrix}f_1\\ \vdots \\ f_n\end{bmatrix}$};}
+      \onslide<4->{\node[draw] (ml) at (5, 4) {ML\includegraphics[scale=0.1]{llama.jpg}};}
+      \onslide<5->{\node (mcsplit) at (2, 2) {\textsc{McSplit}};}
+      \onslide<5->{\node (mcsplitdown) at (4, 2) {$\textsc{McSplit}{\downarrow}$};}
+      \onslide<5->{\node (clique) at (6, 2) {clique};}
+      \onslide<5->{\node (kdown) at (8, 2) {$k{\downarrow}$};}
+      \onslide<7->{\node (answer) at (4, 0) {answer};}
+      \path[->]<3-> (graphs) edge node[above] {\VarClock} (features);
+      \path[->]<4-> (features) edge (ml);
+      \path[->]<5-> (ml) edge (mcsplit);
+      \only<1-5>{\tikzset{properties/.style={}}}
+      \only<6->{\tikzset{properties/.style={ultra thick}}}
+      \draw<5-> [->] (ml) edge[properties] (mcsplitdown);
+      \path[->]<5-> (ml) edge (clique);
+      \path[->]<5-> (ml) edge (kdown);
+      \path[->]<7-> (mcsplitdown) edge node[right] {\VarClock} (answer);
+      \path[->]<7-> (graphs) edge [bend right=50] (4, 1);
+    \end{tikzpicture}
   \end{figure}
 \end{frame}
 
 \section{Labelling}
+
 \begin{frame}{Labelling}
   Data from \cite{foggia2001-2, DBLP:journals/prl/SantoFSV03} (81400 pairs
   of graphs)
@@ -270,17 +383,17 @@
   \end{itemize}
 \end{frame}
 
-% \begin{frame}{Distribution of vertices per label}
-%   \begin{figure}
-%     \centering
-%     \includegraphics[scale=0.4]{../dissertation/images/labelling_histogram.png}
-%   \end{figure}
-%   For each graph and label
-%   \begin{itemize}
-%   \item $C$ is the number of vertices with that label
-%   \item $E(C)$ is the number we would expect from a (discrete) uniform distribution
-%   \end{itemize}
-% \end{frame}
+\begin{frame}{The Number of Vertices Per Label}
+  \begin{figure}
+    \centering
+    \includegraphics[scale=0.4]{../dissertation/images/labelling_histogram.png}
+  \end{figure}
+  For each graph and label
+  \begin{itemize}
+  \item $C$ is the number of vertices with that label
+  \item $\E(C)$ is the number we would expect from a (discrete) uniform distribution
+  \end{itemize}
+\end{frame}
 
 \section{Features}
 \begin{frame}{Features (34 in total)}
@@ -302,9 +415,9 @@
   \end{enumerate}
 \end{frame}
 
-\section{Random forests}
+\section{Random Forests}
 
-\begin{frame}{Random forests \parencite{DBLP:journals/ml/Breiman01}}
+\begin{frame}{Random Forests \parencite{DBLP:journals/ml/Breiman01}}
   \begin{figure}
     \centering
     \includegraphics[scale=0.5]{random_forests_2.png} \\
@@ -312,7 +425,7 @@
   \end{figure}
 \end{frame}
 
-\begin{frame}{Random forests \parencite{DBLP:journals/ml/Breiman01}}
+\begin{frame}{Random Forests \parencite{DBLP:journals/ml/Breiman01}}
   \begin{figure}
     \centering
     \includegraphics[scale=0.5]{rand-forest-1.jpg} \\
@@ -392,53 +505,47 @@
 
 \begin{frame}{Errors (\%)}
   \centering
-  \begin{tabular}{l | c c c}
+  \begin{tabular}{l c c c}
+    \toprule
     \multirow{2}{*}{Error} & \multicolumn{3}{c}{Labelling} \\
+    \cmidrule(lr){2-4}
                            & no & vertex & both \\
-    \hline
+    \midrule
     out-of-bag & 17 & 13 & 14 \\
     clique & 30 & 8 & 7 \\
     \textsc{McSplit} & 29 & 22 & 29 \\
     $\textsc{McSplit}\downarrow$ & 11 & 11 & 11 \\
-    $k\downarrow$ & 80 & &
+    $k\downarrow$ & 80 & & \\
+    \bottomrule
   \end{tabular}
 \end{frame}
 
-\begin{frame}{Convergence of errors for unlabelled graphs}
+\begin{frame}{Convergence of Errors for Unlabelled Graphs}
   \begin{figure}
     \centering
     \includegraphics[scale=0.5]{../dissertation/images/unlabelled_forest_errors.png}
   \end{figure}
 \end{frame}
 
-\section{What happens when labelling changes?}
-\begin{frame}{What happens when labelling changes?} % total runtime is equivalent
+\section{What Happens When Labelling Changes?}
+
+\begin{frame}{What Happens When Labelling Changes?}
   \begin{columns}
     \begin{column}{0.5\textwidth}
       \begin{figure}
         \centering
-        \includegraphics[width=\textwidth]{../dissertation/images/vertex_labels_linechart.png}
-        \visible<2>{\includegraphics[width=\textwidth]{../dissertation/images/vertex_labels_linechart3.png}}
+        \includegraphics[width=0.9\textwidth]{../dissertation/images/vertex_labels_linechart.png}
+        \visible<2>{\includegraphics[width=0.9\textwidth]{../dissertation/images/vertex_labels_linechart3.png}}
       \end{figure}
     \end{column}
     \begin{column}{0.5\textwidth}
       \begin{figure}
         \centering
-        \includegraphics[width=\textwidth]{../dissertation/images/both_labels_linechart.png}
-        \visible<2>{\includegraphics[width=\textwidth]{../dissertation/images/both_labels_linechart3.png}}
+        \includegraphics[width=0.9\textwidth]{../dissertation/images/both_labels_linechart.png}
+        \visible<2>{\includegraphics[width=0.9\textwidth]{../dissertation/images/both_labels_linechart3.png}}
       \end{figure}
     \end{column}
   \end{columns}
-\end{frame}
-
-\section{Future work}
-\begin{frame}{Future work}
-  \begin{itemize}
-  \item Relationships between clique algorithm's performance and properties of
-    the association graph
-  \item How the association graph changes after making a decision
-  \item Can $k\downarrow$ and clique work together?
-  \end{itemize}
 \end{frame}
 
 % \begin{frame}{Margins}
@@ -450,5 +557,33 @@
 %     which is a number in $[-1, 1]$.
 %   \end{definition}
 % \end{frame}
+
+\section{Switching Algorithms Mid-Execution}
+
+\begin{frame}{Idea 1: Switch After Making $d$ Decisions}
+  \pause
+  \begin{itemize}
+  \item Vertices of the association graph can be constructed from \textsc{McSplit}
+    label classes, edges from the original input graphs
+  \item Only a few extra lines of code:
+    \[ |\textit{incumbent}_{\text{clique}}| \gets
+      |\textit{incumbent}_{\text{\textsc{McSplit}}}| - |M| \]
+    and then
+    \[ \textit{incumbent}_{\textsc{McSplit}} \gets
+      \textit{incumbent}_{\textsc{McSplit}} \cup
+      \textit{incumbent}_{\text{clique}} \]
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Not That Good...}
+  \centering
+  \includegraphics[scale=0.5]{../dissertation/images/fusion_linechart.png}
+\end{frame}
+
+\begin{frame}{Idea 2: Map Partially Solved Instances to Unsolved Instances}
+  \begin{itemize}
+  \item ...
+  \end{itemize}
+\end{frame}
 
 \end{document}
