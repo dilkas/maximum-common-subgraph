@@ -18,7 +18,7 @@ get_features <- function(p_values, filtered_instances, labelled = TRUE) {
 
   if (!missing(filtered_instances)) {
     original_features <- subset(original_features,
-                                gsub(" .*$", "", original_features$ID)
+                                gsub("^\\d\\d", "", original_features$ID)
                                 %in% filtered_instances)
   }
 

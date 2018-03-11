@@ -6,9 +6,8 @@ parallelLibrary("llama")
 labelling <- "both" # "vertex" or "both"
 type <- "both_labels"
 p_values <- c(5, 10, 15, 20, 25, 33, 50)
-filtered_instances <- readLines("results/filtered_instances2")
+filtered_instances <- readLines("results/filtered_instances")
 algorithms <- c("clique", "mcsplit", "mcsplitdown")
-algorithms <- c("clique", "mcsplit", "mcsplitdown", "fusion1", "fusion2")
 
 costs <- read.csv("results/costs.csv", header = FALSE)
 colnames(costs) <- c("ID", "group1")
@@ -35,7 +34,7 @@ for (algorithm in algorithms) {
                                  ".labels.", p, ".csv"), header = FALSE,
                           colClasses = classes, col.names = names)
     data_file <- subset(data_file,
-                        sub(" .*$", "", data_file$ID) %in% filtered_instances)
+                        sub("^\\d\\d", "", data_file$ID) %in% filtered_instances)
     data_file$ID <- sprintf("%02d %s", p, data_file$ID)
     algorithm_runtimes <- rbind(algorithm_runtimes,
                                 data_file[order(data_file$ID), ])
@@ -53,9 +52,9 @@ performance$mins <- as.numeric(apply(performance, 1, min))
 performance$mins[is.na(performance$mins)] <- 1e6
 
 # Sanity check: all should be empty
-performance[performance$clique < performance$mins, ]
-performance[performance$mcsplit < performance$mins, ]
-performance[performance$mcsplitdown < performance$mins, ]
+#performance[performance$clique < performance$mins, ]
+#performance[performance$mcsplit < performance$mins, ]
+#performance[performance$mcsplitdown < performance$mins, ]
 
 performance <- performance[performance$mins < 1e6,
                            names(performance) != "mins"]
@@ -78,8 +77,8 @@ all(answers$clique == answers$fusion2)
 data <- input(features, performance, success,
               list(groups = list(group1 = colnames(features)[-1]),
                    values = costs))
-rm("features", "performance", "success", "costs")
-saveRDS(data, sprintf("models/%s_labels_data.rds", labelling))
+#rm("features", "performance", "success", "costs")
+#saveRDS(data, sprintf("models/%s_labels_data.rds", labelling))
 model <- classify(makeLearner("classif.randomForest"),
                   cvFolds(data, stratify = TRUE))
 saveRDS(model, sprintf("models/%s_labels.rds", labelling))

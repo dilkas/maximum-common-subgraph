@@ -10,6 +10,7 @@
 \usepackage{adjustbox}
 \usepackage{booktabs}
 \usepackage{csquotes}
+\usepackage{array}
 \usetikzlibrary{positioning, shapes.arrows}
 
 \usetheme{CambridgeUS}
@@ -31,6 +32,8 @@
 \begin{frame}{Outline}
   \tableofcontents
 \end{frame}
+
+\section{The Problem}
 
 \begin{frame}{Maximum Common Subgraph}
   \begin{definition}
@@ -223,7 +226,10 @@
 
 \begin{frame}{$\textsc{McSplit}{\downarrow}$}
   \begin{itemize}
-  \item TODO
+  \item The main idea of $k{\downarrow}$ applied to \textsc{McSplit}
+  \item Looks for a common subgraph of a set size (decreasing with
+    every iteration)
+  \item This allows us to prune more search tree branches
   \end{itemize}
 \end{frame}
 
@@ -383,7 +389,7 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{The Number of Vertices Per Label}
+\begin{frame}{Number of Vertices Per Label}
   \begin{figure}
     \centering
     \includegraphics[scale=0.4]{../dissertation/images/labelling_histogram.png}
@@ -396,6 +402,7 @@
 \end{frame}
 
 \section{Features}
+
 \begin{frame}{Features (34 in total)}
   1--8 are from \cite{DBLP:conf/lion/KotthoffMS16}
   \begin{enumerate}
@@ -438,42 +445,42 @@
 \begin{frame}{Results}
   \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{../dissertation/images/ecdf_unlabelled.png}
+    \includegraphics[width=0.9\textwidth]{../dissertation/images/ecdf_unlabelled.png}
   \end{figure}
 \end{frame}
 
 \begin{frame}{Results (27\%)}
   \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{../dissertation/images/ecdf_unlabelled_llama.png}
+    \includegraphics[width=0.9\textwidth]{../dissertation/images/ecdf_unlabelled_llama.png}
   \end{figure}
 \end{frame}
 
 \begin{frame}{Results}
   \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{../dissertation/images/ecdf_vertex_labels.png}
+    \includegraphics[width=0.9\textwidth]{../dissertation/images/ecdf_vertex_labels.png}
   \end{figure}
 \end{frame}
 
 \begin{frame}{Results (86\%)}
   \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{../dissertation/images/ecdf_vertex_labels_llama.png}
+    \includegraphics[width=0.9\textwidth]{../dissertation/images/ecdf_vertex_labels_llama.png}
   \end{figure}
 \end{frame}
 
 \begin{frame}{Results}
   \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{../dissertation/images/ecdf_both_labels.png}
+    \includegraphics[width=0.9\textwidth]{../dissertation/images/ecdf_both_labels.png}
   \end{figure}
 \end{frame}
 
 \begin{frame}{Results (88\%)}
   \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{../dissertation/images/ecdf_both_labels_llama.png}
+    \includegraphics[width=0.9\textwidth]{../dissertation/images/ecdf_both_labels_llama.png}
   \end{figure}
 \end{frame}
 
@@ -580,10 +587,104 @@
   \includegraphics[scale=0.5]{../dissertation/images/fusion_linechart.png}
 \end{frame}
 
-\begin{frame}{Idea 2: Map Partially Solved Instances to Unsolved Instances}
-  \begin{itemize}
-  \item ...
-  \end{itemize}
+\begin{frame}{Idea 2: From Partially Solved to Unsolved Instances}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \begin{adjustbox}{max totalsize={0.9\textwidth}{0.4\textheight},center}
+        \begin{tikzpicture}
+          \begin{scope}[every node/.style={circle,draw}]
+            \node (u1) [fill=gray,] at (0, 5) {$u_1$};
+            \node (u2) at (0, 3) {$u_2$};
+            \node (u3) at (0, 1) {$u_3$};
+            \node (u4) at (2, 4) {$u_4$};
+            \node (u5) at (2, 2) {$u_5$};
+          \end{scope}
+          \node (name1) at (1, 0) {$G_1$};
+          \path (u1) [color=blue,ultra thick] edge node {} (u2);
+          \path (u1) edge node {} (u4);
+          \path (u1) edge node {} (u5);
+          \path (u2) edge node {} (u4);
+          \path (u3) edge node {} (u4);
+          \path (u3) edge node {} (u5);
+          \begin{scope}[every node/.style={circle, draw},xshift=4cm]
+            \node (v1) at (0, 5) {$v_1$};
+            \node (v2) at (0, 3) {$v_2$};
+            \node (v3) at (0, 1) {$v_3$};
+            \node (v4) [fill=gray] at (2, 4) {$v_4$};
+            \node (v5) [fill=gray] at (2, 2) {$v_5$};
+          \end{scope}
+          \node (name2) [xshift=4cm] at (1, 0) {$G_2$};
+          \begin{scope}[color=blue,ultra thick]
+            \path (v1) edge node {} (v2);
+            \path (v1) edge node {} (v4);
+            \path (v2) edge node {} (v4);
+            \path (v2) edge node {} (v5);
+          \end{scope}
+          \begin{scope}[color=red,thick]
+            \path[->] (u1) edge [bend left=40] (v4);
+          \end{scope}
+        \end{tikzpicture}
+      \end{adjustbox}
+      \begin{table}
+          \centering
+          \begin{tabular}{c c c <{\onslide<4->}c<{\onslide}}
+            \toprule
+            Label & $G_1$ & $G_2$ & \alert{New label} \\
+            \midrule
+            00 & $u_3$ & $v_3$ & \alert{0} \\
+            01 & $u_2$ & $v_1, v_2$ & \alert{1} \\
+            \bottomrule
+          \end{tabular}
+      \end{table}
+      Partial solution and incumbent: $\textit{incumbent} = M = \{ u_1 \mapsto
+      v_4 \}$
+    \end{column}
+
+    \begin{column}{0.5\textwidth}
+      \pause
+      \begin{figure}
+      \begin{adjustbox}{max totalsize={0.9\textwidth}{0.4\textheight},center}
+        \begin{tikzpicture}
+          \only<1-3>{\tikzset{properties/.style={}}}
+          \only<4->{\tikzset{properties/.style={fill=gray}}}
+          \begin{scope}[every node/.style={circle,draw}]
+            \node[properties] (u2) at (0, 3) {$u_2$};
+            \node (u3) at (0, 1) {$u_3$};
+          \end{scope}
+          \node (name1) at (0, 0) {$G_1'$};
+          \begin{scope}[every node/.style={circle, draw},xshift=4cm]
+            \node[properties] (v1) at (0, 5) {$v_1$};
+            \node[properties] (v2) at (0, 3) {$v_2$};
+            \node (v3) at (0, 1) {$v_3$};
+          \end{scope}
+          \node (name2) [xshift=4cm] at (0, 0) {$G_2'$};
+          \begin{scope}[color=blue,ultra thick]
+            \path<3-> (v1) edge node {} (v2);
+          \end{scope}
+        \end{tikzpicture}
+      \end{adjustbox}
+      \end{figure}
+
+      \begin{overprint}
+        \onslide<2>
+        Step 1: Add vertices from label classes
+        \onslide<3>
+        Step 2: $E' = E \cap (V_1' \times V_1')$ \\
+        (preserving edge labels)
+        \onslide<4>
+        Step 3: label vertices according to vertex classes
+        \onslide<5>
+        Step 4: Set \[ |\textit{incumbent}'| = |\textit{incumbent}| - |M| \]
+      \end{overprint}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Proof of Equivalence}
+\end{frame}
+
+\begin{frame}{Is it usable?}
+  Nobody knows...
 \end{frame}
 
 \end{document}

@@ -1,0 +1,51 @@
+When given two graphs, maximum common subgraph is a problem that asks us to find
+a graph with maximum number of vertices, isomorphic to induced subgraphs of
+both input graphs. We typically represent this as a matching of vertices, that
+is, a bijection between subsets of vertices. In this project, I analyse three
+different situations: graphs with no labels, graphs with labels on vertices,
+and graphs with labels on both vertices and edges.
+
+In this case, we have two graphs with both vertex and edge labels (denoted by
+different colours).We will see how we can construct a common subgraph of size 3
+step-by-step. First, notice that u1 can only be mapped to either v4 or v5,
+because of its label. Since u1 and u2 are adjacent, u2 can only be mapped to v1
+or v2. If we were to pick u3 next, regardless of the specific mappings of u1
+and u2, u3 can only be mapped to v3. For this pair of graphs, 3 is indeed the
+maximum size of a common subgraph, and our line of reasoning gives us 3
+different solutions.
+
+With algorithm selection, we are given a problem instance, which in this case
+is a pair of graphs. We extract a vector of features, and feed it to a machine
+learning algorithm, which decides which algorithm is likely to perform best on
+this instance. We then run the selected algorithm on our problem instance, and
+hope that the extra time taken by feature extraction pays off, and our
+portfolio performs much better than simply running one of the algorithm on every
+instance.
+
+Here we can see how the runtime data is read and prepared for training the
+machine learning model. We start by reading files that list the problem
+instances we are interested in, and the feature extraction costs. We then load
+the features themselves, and set up to load the runtime data of each algorithm.
+
+The script reads multiple files, combines them into a single data frame, and
+then fills different data frames with different information, for example
+recording answers separately, so that they can be compared with the answers
+provided by other algorithms. We also set up a dataframe for running time, and
+one for noting whether the algorithm was successful or not.
+
+We check whether the answers match, and pass the data to the Llama package, so
+that it can train the machine learning model.
+
+Finally, let's briefly cover our main results. This is a cumulative plot, where
+we have time on the x axis, and the y axis shows what proportion of instances
+was solved by the algorithm in that amount of time or less, so the algorithm
+with a higher curve is the faster algorithm. Along with algorithms, we also
+plot the virtual best solver (VBS), which represents the perfect algorithm
+portfolio, that always makes the right choice in 0 ms. As we can see, the gap
+between McSplitdown and VBS is very small, making this a bad situation for a
+portfolio. And, indeed, our portfolio is only able to achieve 27% of the gap
+between doing the simplest thing, and doing what's optimal. For vertex labels,
+the situation looks a lot more promising, and we are able to perform quite well.
+Having both vertex and edge labels leads to an even better situation, and even
+better results, with our portfolios performing significantly better than
+individual algorithms, and reaching most of the theoretical potential.
