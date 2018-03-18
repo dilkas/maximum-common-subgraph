@@ -53,3 +53,20 @@ generate_feature_names <- function(labelled) {
     full_feature_names <- c(full_feature_names, "labelling")
   full_feature_names
 }
+
+# Both arguments are optional
+get_costs <- function(filtered_instances, p_values) {
+  costs <- read.csv("results/costs.csv", header = FALSE)
+  colnames(costs) <- c("ID", "group1")
+
+  if (!missing(filtered_instances))
+    costs <- subset(costs, costs$ID %in% filtered_instances)
+
+  if (!missing(p_values)) {
+    costs <- costs[rep(seq_len(nrow(costs)), each = length(p_values)), ]
+    costs$labelling <- p_values
+    costs$ID <- sprintf("%02d %s", costs$labelling, costs$ID)
+    costs <- costs[, c("ID", "group1")]
+  }
+  costs
+}

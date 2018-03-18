@@ -3,21 +3,28 @@ library(RColorBrewer)
 library(lattice)
 library(latticeExtra)
 library(randomForest)
+source("common.R")
 
 type <- "unlabelled"
 type_label <- "Unlabelled"
-p_values <- c(5, 10, 15, 20, 25, 33, 50)
 
-# TODO: finish this
-if (type == "unlabelled")
+if (type == "unlabelled") {
+  algorithms <- c("clique", "kdown", "mcsplit", "mcsplitdown")
+  algorithm_labels <- c("clique", "k\u2193", "McSplit", "McSplit\u2193")
+  labels <- c("clique", "k\u2193", "McSplit", "McSplit\u2193", "VBS", "Llama")
+  costs <- get_costs()
+} else {
+  algorithms <- c("clique", "mcsplit", "mcsplitdown")
   algorith_labels <- c("clique", "McSplit", "McSplit\u2193")
+  labels <- c("clique", "McSplit", "McSplit\u2193", "VBS", "Llama")
+  p_values <- c(5, 10, 15, 20, 25, 33, 50)
+  filtered_instances <- readLines("results/filtered_instances")
+  costs <- get_costs(filtered_instances, p_values)
+}
 
 model <- readRDS(paste0("models/", type, ".rds"))
 forest <- model[["models"]][[1]][["learner.model"]]
 data <- readRDS(paste0("models/", type, "_data.rds"))
-
-
-source("common.R")
 full_feature_names <- generate_feature_names(type != "unlabelled")
 
 # From random forest
@@ -76,8 +83,6 @@ rm("margin")
 
 # Partial dependence plots
 
-algorithms <- c("clique", "mcsplit", "mcsplitdown")
-algorithm_labels <- c("clique", "McSplit", "McSplit\u2193")
 features <- c("labelling", "target.stddeg")
 feature_labels <- c("Labelling (%)", "Target SD of degrees")
 for (j in 1:length(features)) {
@@ -93,16 +98,6 @@ for (j in 1:length(features)) {
 
 # ECDF
 
-filtered_instances <- readLines("results/filtered_instances")
-costs <- read.csv("results/costs.csv", header = FALSE)
-colnames(costs) <- c("ID", "cost")
-costs <- subset(costs, costs$ID %in% filtered_instances)
-costs <- costs[rep(seq_len(nrow(costs)), each = length(p_values)),]
-costs$labelling <- p_values
-costs$ID <- sprintf("%02d %s", costs$labelling, costs$ID)
-costs <- costs[, c("ID", "cost")]
-
-labels <- c("clique", "k\u2193", "McSplit", "McSplit\u2193", "VBS", "Llama")
 times <- subset(data$data, T, c("ID", data$performance))
 times$vbs <- apply(times[,-1], 1, min)
 winning_algorithms <- model$predictions[model$predictions$score == 1,
@@ -114,21 +109,22 @@ times <- merge(times, winning_algorithms, by = "ID", all.x = TRUE)
 times$llama <- as.numeric(times[cbind(seq_along(times$algorithm),
                                      times$algorithm)])
 times <- merge(times, costs, by = c("ID"), all.x = TRUE)
-times$llama <- times$llama + times$cost
+times$llama <- times$llama + times$group1
 
 summary(times$llama < 10e6)
 summary(times$mcsplitdown < 10e6)
-sum(startsWith(times$ID, "50 "))
 
-png(paste0("dissertation/images/ecdf_", type, "_llama.png"), width = 480,
-    height = 320)
-plt <- ecdfplot(~ mcsplitdown + vbs + llama, data = times,
-               auto.key = list(space = "right", text = c("McSplit\u2193",
-                                                         "VBS", "Llama")),
-               xlab = "Runtime (ms)", ylim = c(0.9, 1), main = type_label)
-update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8,
-                                                          name = "Dark2")))
-dev.off()
+if (type == "unlabelled") {
+  png(paste0("dissertation/images/ecdf_", type, "_llama.png"), width = 480,
+      height = 320)
+  plt <- ecdfplot(~ mcsplitdown + vbs + llama, data = times,
+                  auto.key = list(space = "right", text = c("McSplit\u2193",
+                                                            "VBS", "Llama")),
+                  xlab = "Runtime (ms)", ylim = c(0.9, 1), main = type_label)
+  update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8,
+                                                            name = "Dark2")))
+  dev.off()
+}
 
 # Using ggplot2 instead
 library(ggplot2)
@@ -143,7 +139,8 @@ x <- x[x > 0]
 df <- data.frame(x = x, g = g)
 png(paste0("dissertation/images/ecdf_", type, "_llama_ggplot2.png"),
     width = 480, height = 320)
-ggplot(df, aes(x, color = g)) + stat_ecdf(geom = "step", pad = FALSE) + scale_x_log10()
+(ggplot(df, aes(x, color = g)) + stat_ecdf(geom = "step", pad = FALSE)
+  + scale_x_log10())
 dev.off()
 
 png(paste0("dissertation/images/ecdf_", type, ".png"), width = 480, height = 320)
@@ -168,7 +165,6 @@ dev.off()
 
 # llama metrics
 
-library(ggplot2)
 sum(successes(data, model))
 sum(successes(data, vbs))
 sum(successes(data, singleBest))

@@ -20,11 +20,7 @@
 \begin{document}
 \maketitle
 
-%\begin{frame}{Outline}
-%\tableofcontents
-%\end{frame}
-
-\begin{frame}{Maximum Common Subgraph}
+\begin{frame}{The Problem: Maximum Common Subgraph}
   \begin{figure}
     \centering
   \begin{tikzpicture}
@@ -65,7 +61,22 @@
   \end{figure}
 \end{frame}
 
-\begin{frame}{Algorithms}
+\begin{frame}{Why Is It Important?}
+  \begin{columns}[t]
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=0.8\textwidth]{chemistry.png}
+      \includegraphics[width=0.8\textwidth]{electronics.png}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=0.8\textwidth]{proteins.png}
+      \includegraphics[width=0.8\textwidth]{electronics2.png}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Existing Ways to Solve It}
   \begin{itemize}
   \item \textsc{McSplit}, $\textsc{McSplit}{\downarrow}$
     \begin{itemize}
@@ -82,7 +93,7 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Algorithm Selection}
+\begin{frame}{Solution: Algorithm Selection}
   \begin{figure}
     \centering
     \begin{tikzpicture}
@@ -102,11 +113,13 @@
       \draw<4-> [->] (ml) edge[properties] (mcsplitdown);
       \path[->]<4-> (ml) edge (clique);
       \path[->]<4-> (ml) edge (kdown);
-      \path[->]<6-> (mcsplitdown) edge node[right] {\VarClock} (answer);
-      \path[->]<6-> (graphs) edge [bend right=50] (4, 1);
+      \onslide<6->{\path[->] (mcsplitdown) edge node[right] {\VarClock} (answer);}
+      \onslide<6->{\path[->]<6-> (graphs) edge [bend right=50] (4, 1);}
     \end{tikzpicture}
   \end{figure}
 \end{frame}
+
+% TODO: the process
 
 \begin{frame}{Features (34 in total)}
   1--8 are from \cite{DBLP:conf/lion/KotthoffMS16}
@@ -127,21 +140,21 @@
   \end{enumerate}
 \end{frame}
 
-\begin{frame}{Random forests \parencite{DBLP:journals/ml/Breiman01}}
-  \begin{figure}
-    \centering
-    \includegraphics[scale=0.5]{random_forests_2.png} \\
-    {\tiny\color{gray}Source: Tae-Kyun Kim \& Bjorn Stenger, Intelligent Systems and Networks (ISN) Research Group,\\[-7pt] Imperial College London}
-  \end{figure}
-\end{frame}
+%\begin{frame}{Random forests \parencite{DBLP:journals/ml/Breiman01}}
+%  \begin{figure}
+%    \centering
+%    \includegraphics[scale=0.5]{random_forests_2.png} \\
+%    {\tiny\color{gray}Source: Tae-Kyun Kim \& Bjorn Stenger, Intelligent Systems and Networks (ISN) Research Group,\\[-7pt] Imperial College London}
+%  \end{figure}
+%\end{frame}
 
-\begin{frame}{Random forests \parencite{DBLP:journals/ml/Breiman01}}
-  \begin{figure}
-    \centering
-    \includegraphics[scale=0.5]{rand-forest-1.jpg} \\
-    {\tiny\color{gray}Source: Random Forests(r), Explained, Ilan Reinstein, KDnuggets}
-  \end{figure}
-\end{frame}
+%\begin{frame}{Random forests \parencite{DBLP:journals/ml/Breiman01}}
+%  \begin{figure}
+%    \centering
+%    \includegraphics[scale=0.5]{rand-forest-1.jpg} \\
+%    {\tiny\color{gray}Source: Random Forests(r), Explained, Ilan Reinstein, KDnuggets}
+%  \end{figure}
+%\end{frame}
 
 \begin{frame}{Results}
   \begin{figure}
@@ -185,24 +198,24 @@
   \end{figure}
 \end{frame}
 
-\begin{frame} % TODO: title here
-  \begin{columns}
-    \begin{column}{0.5\textwidth}
-      \begin{figure}
-        \centering
-        \includegraphics[width=\textwidth]{../dissertation/images/vertex_labels_linechart.png}
-        \visible<2>{\includegraphics[width=\textwidth]{../dissertation/images/vertex_labels_linechart3.png}}
-      \end{figure}
-    \end{column}
-    \begin{column}{0.5\textwidth}
-      \begin{figure}
-        \centering
-        \includegraphics[width=\textwidth]{../dissertation/images/both_labels_linechart.png}
-        \visible<2>{\includegraphics[width=\textwidth]{../dissertation/images/both_labels_linechart3.png}}
-      \end{figure}
-    \end{column}
-  \end{columns}
-\end{frame}
+%\begin{frame} % TODO: title here
+%  \begin{columns}
+%    \begin{column}{0.5\textwidth}
+%      \begin{figure}
+%        \centering
+%        \includegraphics[width=\textwidth]{../dissertation/images/vertex_labels_linechart.png}
+%        \visible<2>{\includegraphics[width=\textwidth]{../dissertation/images/vertex_labels_linechart3.png}}
+%      \end{figure}
+%    \end{column}
+%    \begin{column}{0.5\textwidth}
+%      \begin{figure}
+%        \centering
+%        \includegraphics[width=\textwidth]{../dissertation/images/both_labels_linechart.png}
+%        \visible<2>{\includegraphics[width=\textwidth]{../dissertation/images/both_labels_linechart3.png}}
+%      \end{figure}
+%    \end{column}
+%  \end{columns}
+%\end{frame}
 
 \begin{frame}{Other Accomplishments}
   \begin{itemize}

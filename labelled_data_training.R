@@ -2,6 +2,7 @@ library(parallelMap)
 library(llama)
 parallelStartSocket(64)
 parallelLibrary("llama")
+source("common.R")
 
 labelling <- "both" # "vertex" or "both"
 type <- "both_labels"
@@ -9,16 +10,7 @@ p_values <- c(5, 10, 15, 20, 25, 33, 50)
 filtered_instances <- readLines("results/filtered_instances")
 algorithms <- c("clique", "mcsplit", "mcsplitdown")
 
-costs <- read.csv("results/costs.csv", header = FALSE)
-colnames(costs) <- c("ID", "group1")
-costs <- subset(costs, costs$ID %in% filtered_instances)
-costs <- costs[rep(seq_len(nrow(costs)), each = length(p_values)), ]
-costs$labelling <- p_values
-costs$ID <- sprintf("%02d %s", costs$labelling, costs$ID)
-costs <- costs[, c("ID", "group1")]
-
-# Construct the feature data frame
-source("common.R")
+costs <- get_costs(filtered_instances, p_values)
 features <- get_features(p_values, filtered_instances)
 
 #Construct the performance (running time) data frame
