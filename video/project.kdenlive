@@ -365,7 +365,7 @@
   <property name="kdenlive:docproperties.generateimageproxy">0</property>
   <property name="kdenlive:docproperties.generateproxy">0</property>
   <property name="kdenlive:docproperties.kdenliveversion">17.12.3</property>
-  <property name="kdenlive:docproperties.position">321</property>
+  <property name="kdenlive:docproperties.position">2</property>
   <property name="kdenlive:docproperties.previewchunks"/>
   <property name="kdenlive:docproperties.previewextension"/>
   <property name="kdenlive:docproperties.previewparameters"/>
@@ -515,6 +515,21 @@
   <property name="meta.media.0.codec.long_name">Vorbis</property>
   <property name="meta.media.0.codec.bit_rate">160000</property>
  </producer>
+ <producer title="Anonymous Submission" id="10_playlist2" in="0" out="584">
+  <property name="length">585</property>
+  <property name="eof">pause</property>
+  <property name="resource">action-2.ogg</property>
+  <property name="audio_index">0</property>
+  <property name="video_index">-1</property>
+  <property name="mute_on_pause">1</property>
+  <property name="mlt_service">avformat-novalidate</property>
+  <property name="seekable">1</property>
+  <property name="kdenlive:folderid">-1</property>
+  <property name="kdenlive:file_size">478345</property>
+  <property name="kdenlive:file_hash">aacb916e2a8fc0f757afa702f08cc936</property>
+  <property name="global_feed">1</property>
+  <property name="xml">was here</property>
+ </producer>
  <producer title="Anonymous Submission" id="11_playlist2" in="0" out="204">
   <property name="length">205</property>
   <property name="eof">pause</property>
@@ -538,37 +553,15 @@
   <property name="meta.media.0.codec.long_name">Vorbis</property>
   <property name="meta.media.0.codec.bit_rate">160000</property>
  </producer>
- <producer title="Anonymous Submission" id="10_playlist2" in="0" out="584">
-  <property name="length">585</property>
-  <property name="eof">pause</property>
-  <property name="resource">action-2.ogg</property>
-  <property name="audio_index">0</property>
-  <property name="video_index">-1</property>
-  <property name="mute_on_pause">1</property>
-  <property name="mlt_service">avformat-novalidate</property>
-  <property name="seekable">1</property>
-  <property name="kdenlive:folderid">-1</property>
-  <property name="kdenlive:file_size">478345</property>
-  <property name="kdenlive:file_hash">aacb916e2a8fc0f757afa702f08cc936</property>
-  <property name="global_feed">1</property>
-  <property name="xml">was here</property>
-  <property name="meta.media.nb_streams">1</property>
-  <property name="meta.media.0.stream.type">audio</property>
-  <property name="meta.media.0.codec.sample_fmt">fltp</property>
-  <property name="meta.media.0.codec.sample_rate">44100</property>
-  <property name="meta.media.0.codec.channels">2</property>
-  <property name="meta.media.0.codec.name">vorbis</property>
-  <property name="meta.media.0.codec.long_name">Vorbis</property>
-  <property name="meta.media.0.codec.bit_rate">160000</property>
- </producer>
  <playlist id="playlist2">
   <property name="kdenlive:audio_track">1</property>
   <property name="kdenlive:track_name">Audio 1</property>
   <blank length="2851"/>
   <entry producer="9_playlist2" in="0" out="501"/>
-  <blank length="1200"/>
-  <entry producer="11_playlist2" in="0" out="204"/>
+  <blank length="320"/>
   <entry producer="10_playlist2" in="0" out="584"/>
+  <blank length="735"/>
+  <entry producer="11_playlist2" in="0" out="204"/>
  </playlist>
  <playlist id="playlist0">
   <property name="kdenlive:track_name">Video 2</property>

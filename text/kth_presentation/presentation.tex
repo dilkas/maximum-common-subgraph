@@ -11,6 +11,7 @@
 \usepackage{booktabs}
 \usepackage{csquotes}
 \usepackage{array}
+\usepackage[group-separator={,}]{siunitx}
 \usetikzlibrary{positioning, shapes.arrows}
 
 \usetheme{CambridgeUS}
@@ -23,26 +24,34 @@
 % TODO: change the date
 \institute[]{School of Computing Science\\University of Glasgow}
 \DeclareMathOperator{\E}{E}
+\DeclareMathOperator{\nablaop}{\nabla}
 
 \begin{document}
 
 \maketitle
 
-% TODO: fix sections
 \begin{frame}{Outline}
   \tableofcontents
 \end{frame}
+
+\AtBeginSection[]
+  {
+     \begin{frame}<beamer>
+     \frametitle{Outline}
+     \tableofcontents[currentsection]
+     \end{frame}
+  }
 
 \section{The Problem}
 
 \begin{frame}{Maximum Common Subgraph}
   \begin{definition}
     A \emph{maximum common (induced) subgraph} between graphs $G_1$ and
-    $G_2$ is a graph $G_3$ such that $G_3 = (V_3, E_3)$ is isomorphic to induced
+    $G_2$ is a graph $G_3 = (V_3, E_3)$ such that $G_3$ is isomorphic to induced
     subgraphs of both $G_1$ and $G_2$ with $|V_3|$ maximised.
   \end{definition}
   \pause
-  \begin{adjustbox}{max totalsize={0.6\textwidth}{0.6\textheight},center}
+  \begin{adjustbox}{max totalsize={0.5\textwidth}{0.5\textheight},center}
     \begin{tikzpicture}
       \begin{scope}[every node/.style={circle,draw}]
         \node (u1) [fill=gray,] at (0, 5) {$u_1$};
@@ -77,6 +86,25 @@
       \end{scope}
     \end{tikzpicture}
   \end{adjustbox}
+\end{frame}
+
+\begin{frame}{Why Is It Important?}
+  \begin{columns}[t]
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=0.9\textwidth,height=0.4\textheight,keepaspectratio]{chemistry.png} \\[-7pt]
+      {\tiny Source: \cite{WCMS:WCMS5}}
+      \includegraphics[width=0.9\textwidth,height=0.4\textheight,keepaspectratio]{electronics.png} \\[-7pt]
+      {\tiny Source: \cite{DBLP:journals/jair/CookH94}}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=0.9\textwidth,height=0.4\textheight,keepaspectratio]{proteins.png} \\[-7pt]
+      {\tiny Source: \cite{grindley}}
+      \includegraphics[width=0.9\textwidth,height=0.4\textheight,keepaspectratio]{electronics2.png} \\[-7pt]
+      {\tiny Source: \cite{617051}}
+    \end{column}
+  \end{columns}
 \end{frame}
 
 \section{Algorithms}
@@ -147,7 +175,7 @@
         Upper bound: \only<1-3>{$4$}\only<4>{\alert{$1+2$}}\only<5-6>{$1+2$}\only<7>{\alert{$2+1$}}\only<8->{$2+1$}
       \end{overprint}
       \begin{table}
-        \begin{overlayarea}{\textwidth}{2cm}
+        \begin{overlayarea}{\textwidth}{3cm}
           \centering
           \only<-2>{
             \begin{tabular}{c c c}
@@ -227,8 +255,10 @@
 \begin{frame}{$\textsc{McSplit}{\downarrow}$}
   \begin{itemize}
   \item The main idea of $k{\downarrow}$ applied to \textsc{McSplit}
-  \item Looks for a common subgraph of a set size (decreasing with
-    every iteration)
+  \item Looks for a common subgraph of a set size
+    \begin{itemize}
+    \item (decreasing with every iteration)
+    \end{itemize}
   \item This allows us to prune more search tree branches
   \end{itemize}
 \end{frame}
@@ -322,7 +352,6 @@
     find a mapping $s \colon \mathcal{I} \to \mathcal{A}$ that optimises
     $\mathbb{E}[m(i, s(i))]$.
   \end{definition}
-  \begin{figure}
     \centering
     \begin{tikzpicture}
       \onslide<2->{\node (graphs) at (0, 4) {$(G_1, G_2)$};}
@@ -344,14 +373,11 @@
       \path[->]<7-> (mcsplitdown) edge node[right] {\VarClock} (answer);
       \path[->]<7-> (graphs) edge [bend right=50] (4, 1);
     \end{tikzpicture}
-  \end{figure}
 \end{frame}
 
-\section{Labelling}
-
 \begin{frame}{Labelling}
-  Data from \cite{foggia2001-2, DBLP:journals/prl/SantoFSV03} (81400 pairs
-  of graphs)
+  Data from \cite{foggia2001-2, DBLP:journals/prl/SantoFSV03}
+  (\num{81400} pairs of graphs)
   \pause
   \begin{definition}
     A \emph{vertex-labelled graph} is a 3-tuple $G = (V, E, \mu)$, where $\mu
@@ -380,7 +406,7 @@
     \pause
   \item In my data: 5\%, 10\%, 15\%, 20\%, 25\%, 33\%, 50\%
     \pause
-  \item 3 subproblems
+  \item 3 different cases:
     \begin{itemize}
     \item no labels
     \item vertex labels
@@ -401,8 +427,6 @@
   \end{itemize}
 \end{frame}
 
-\section{Features}
-
 \begin{frame}{Features (34 in total)}
   1--8 are from \cite{DBLP:conf/lion/KotthoffMS16}
   \begin{enumerate}
@@ -422,8 +446,6 @@
   \end{enumerate}
 \end{frame}
 
-\section{Random Forests}
-
 \begin{frame}{Random Forests \parencite{DBLP:journals/ml/Breiman01}}
   \begin{figure}
     \centering
@@ -439,8 +461,6 @@
     {\tiny\color{gray}Source: Random Forests(r), Explained, Ilan Reinstein, KDnuggets}
   \end{figure}
 \end{frame}
-
-\section{Results}
 
 \begin{frame}{Results}
   \begin{figure}
@@ -534,40 +554,79 @@
   \end{figure}
 \end{frame}
 
-\section{What Happens When Labelling Changes?}
+\section{Observations and Insights}
 
-\begin{frame}{What Happens When Labelling Changes?}
-  \begin{columns}
+\begin{frame}{Margins}
+  \begin{definition}
+    Let $c_1, \dots, c_n$ be $n$ classes and let $p$ be a data point that belongs
+    to class $c_p$. Let $v_1, \dots, v_n$ denote the number of votes for each
+    class when given $p$ as input. The \emph{margin} of $p$ is
+    \[ \frac{v_p}{\sum_{i=1}^n v_i} - \max_{i \ne p} \frac{v_i}{\sum_{j=1}^n v_j}, \]
+    which is a number in $[-1, 1]$.
+  \end{definition}
+\end{frame}
+
+\begin{frame}{Margins: Unlabelled Graphs}
+  \begin{columns}[t]
     \begin{column}{0.5\textwidth}
-      \begin{figure}
-        \centering
-        \includegraphics[width=0.9\textwidth]{../dissertation/images/vertex_labels_linechart.png}
-        \visible<2>{\includegraphics[width=0.9\textwidth]{../dissertation/images/vertex_labels_linechart3.png}}
-      \end{figure}
+      \centering
+      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/mcsplit_hist.png}
+      \includegraphics[width=0.9\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/clique_hist.png}
     \end{column}
     \begin{column}{0.5\textwidth}
-      \begin{figure}
-        \centering
-        \includegraphics[width=0.9\textwidth]{../dissertation/images/both_labels_linechart.png}
-        \visible<2>{\includegraphics[width=0.9\textwidth]{../dissertation/images/both_labels_linechart3.png}}
-      \end{figure}
+      \centering
+      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/mcsplitdown_hist.png}
+      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/kdown_hist.png}
     \end{column}
   \end{columns}
 \end{frame}
 
-% \begin{frame}{Margins}
-%   \begin{definition}
-%     Let $c_1, \dots, c_n$ be $n$ classes and let $p$ be a data point that belongs
-%     to class $c_p$. Let $v_1, \dots, v_n$ denote the number of votes for each
-%     class when given $p$ as input. The \emph{margin} of $p$ is
-%     \[ \frac{v_p}{\sum_{i=1}^n v_i} - \max_{i \ne p} \frac{v_i}{\sum_{j=1}^n v_j}, \]
-%     which is a number in $[-1, 1]$.
-%   \end{definition}
-% \end{frame}
+\begin{frame}{Margins: Vertex and Edge Labels}
+  \begin{columns}[t]
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/both_labels_mcsplit_hist.png}
+      \includegraphics[width=0.9\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/both_labels_clique_hist.png}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/both_labels_mcsplitdown_hist.png}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Partial Dependence}
+  \begin{block}{Defined as}
+    \[ f(x) = \log{p_k(x)} - \frac{1}{K} \sum_{i=1}^K \log{p_i(x)} \]
+    \begin{itemize}
+    \item $x$ iterates over all values of a feature
+    \item $p_i(x)$ is the proportion of votes for algorithm $i$, for a given
+      value of $x$
+    \item $K$ is the number of different algorithms
+    \item $k$ is the algorithm under consideration
+    \end{itemize}
+    % TODO: add some plots here, and more on the next slide
+  \end{block}
+\end{frame}
+
+\begin{frame}{What Happens When Labelling Changes?}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=0.9\textwidth]{../dissertation/images/vertex_labels_linechart.png}
+      \visible<2>{\includegraphics[width=0.9\textwidth]{../dissertation/images/vertex_labels_linechart3.png}}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=0.9\textwidth]{../dissertation/images/both_labels_linechart.png}
+      \visible<2>{\includegraphics[width=0.9\textwidth]{../dissertation/images/both_labels_linechart3.png}}
+    \end{column}
+  \end{columns}
+\end{frame}
 
 \section{Switching Algorithms Mid-Execution}
 
-\begin{frame}{Idea 1: Switch After Making $d$ Decisions}
+\begin{frame}{Idea 1: Switch After a Fixed Number of Decisions}
   \pause
   \begin{itemize}
   \item Vertices of the association graph can be constructed from \textsc{McSplit}
@@ -585,6 +644,34 @@
 \begin{frame}{Not That Good...}
   \centering
   \includegraphics[scale=0.5]{../dissertation/images/fusion_linechart.png}
+\end{frame}
+
+\begin{frame}{Idea 2: From Partially Solved to Unsolved Instances}
+\begin{itemize}
+\item Goal: switch algorithms in a more intelligent way
+\item Plan: use runtime data on unsolved instances
+  \begin{itemize}
+  \item using either machine learning or simple guidelines
+  \end{itemize}
+  \pause
+\item Implementation can be optimised to:
+  \begin{itemize}
+  \item only track important information
+  \item reuse information between iterations
+  \end{itemize}
+  \pause
+\item Is it any good?
+  \pause
+  \begin{itemize}
+  \item Remains to be seen
+  \item Could be that...
+    \pause
+    \begin{itemize}
+    \item the answer is ``never switch''
+    \item or the performance gains are minimal
+    \end{itemize}
+  \end{itemize}
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Idea 2: From Partially Solved to Unsolved Instances}
@@ -680,11 +767,87 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}{Proof of Equivalence}
-\end{frame}
+%\begin{frame}{(Ideas Behind the) Proof of Equivalence}
+%  \begin{definition}[unsolved instance]
+%    An \emph{unsolved instance} is a pair of graphs and a non-negative integer
+%    $(\mathcal{G}, \mathcal{H}, k)$, where $k$ is the initial size of the
+%    incumbent.
+%  \end{definition}
+%  \pause
+%  \begin{definition}[clique instance]
+%    A \emph{clique instance} is a tuple $(G, \textit{incumbent})$, where $G =
+%    \mathcal{G} \nablaop \mathcal{H} = (V, E)$ is the association graph, and
+%    $\textit{incumbent} \subseteq V$ is the maximum clique in the association
+%    graph known so far.
+%  \end{definition}
+%\end{frame}
 
-\begin{frame}{Is it usable?}
-  Nobody knows...
-\end{frame}
+%\begin{frame}{(Ideas Behind the) Proof of Equivalence}
+%  \begin{definition}[\textsc{McSplit} instance]
+%    A \emph{\textsc{McSplit} instance} is a 5-tuple
+%    $(\textit{future}, M, \textit{incumbent}, \mathcal{G},
+%    \mathcal{H})$, where:
+%    \begin{itemize}
+%      \pause
+%    \item $\textit{future} = \{ \langle G, H \rangle : G \subseteq
+%      V_{\mathcal{G}}, H \subseteq V_{\mathcal{H}} \}$ is a set of label classes.
+%      Initially, $\textit{future} = \{ \langle \mu_{\mathcal{G}}^{-1}(l),
+%      \mu_{\mathcal{H}}^{-1}(l) \rangle : l \in \mu_{\mathcal{G}}(V_{\mathcal{G}})
+%      \cap \mu_{\mathcal{H}}(V_{\mathcal{H}}) \}$.
+%      \pause
+%    \item $M = \{ (v, w) : v \in V_{\mathcal{G}}, w \in V_{\mathcal{H}} \}$ is a
+%      partial solution.
+%      \pause
+%    \item $\textit{incumbent} = \{ (v, w) : v \in V_{\mathcal{G}}, w \in
+%      V_{\mathcal{H}} \}$ is the maximum common subgraph known so far.
+%      \pause
+%    \item $\mathcal{G}$ and $\mathcal{H}$ are the original graphs.
+%    \end{itemize}
+%    \pause
+%    We will call this an \emph{unsolved \textsc{McSplit} instance} if $M =
+%    \emptyset$ and a \emph{partially solved instance} otherwise.
+%  \end{definition}
+%\end{frame}
+
+%\begin{frame}{(Ideas Behind the) Proof of Equivalence}
+%  \begin{block}{Observation 1}
+%    An unsolved instance $(\mathcal{G}, \mathcal{H}, k)$ can be transformed to:
+%    \begin{itemize}
+%    \item a clique instance $(\mathcal{G} \nablaop \mathcal{H},
+%      \textit{incumbent})$,
+%    \item a \textsc{McSplit} instance $(\textit{future}, \emptyset,
+%      \textit{incumbent}, \mathcal{G}, \mathcal{H})$,
+%    \end{itemize}
+%    where $\textit{incumbent}$ is any set of cardinality $k$.
+%  \end{block}
+%  \pause
+%  \begin{block}{Observation 2}
+%    A \textsc{McSplit} instance $(\textit{future}, M, \textit{incumbent},
+%    \mathcal{G}, \mathcal{H})$ can be transformed into a clique instance
+%    $(\nablaop (\textit{future}), X)$, where $X$ is any set of cardinality
+%    $|\textit{incumbent}| - |M|$.
+%  \end{block}
+%  \pause
+%  \begin{block}{Observation 3}
+%    If $M = \emptyset$, then $(\nablaop (\textit{future}), X) = (\nablaop
+%    (\textit{future}), \emptyset) = (\mathcal{G} \nablaop \mathcal{H},
+%    \emptyset)$.
+%  \end{block}
+%\end{frame}
+
+\section{}
+
+{
+  \usebackgroundtemplate{\includegraphics[width=\paperwidth]{background.jpg}}
+  \begin{frame}{Thank You!}
+    \begin{block}{The project was supervised by}
+      Dr Patrick Prosser and Dr Ciaran McCreesh
+    \end{block}
+    \bigskip
+    \begin{block}{Dissertation and code available at}
+    \url{https://github.com/dilkas/maximum-common-subgraph}
+    \end{block}
+  \end{frame}
+}
 
 \end{document}

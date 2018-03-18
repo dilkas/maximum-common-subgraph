@@ -7,12 +7,14 @@
 \usepackage[style=authoryear]{biblatex}
 \usepackage{tikz}
 \usepackage[clock]{ifsym}
+\usepackage[group-separator={,}]{siunitx}
 \usetikzlibrary{positioning, shapes.arrows}
 
 \usecolortheme{rose}
 \beamertemplatenavigationsymbolsempty
 \addbibresource{../dissertation/references.bib}
-\author{Paulius Dilkas}
+\author{Paulius Dilkas\\{\small Supervisors: Dr Patrick Prosser and Dr Ciaran
+    McCreesh}}
 \title{Algorithm Selection for Maximum Common Subgraph}
 \date{23rd March 2018}
 \institute{School of Computing Science\\University of Glasgow}
@@ -65,13 +67,17 @@
   \begin{columns}[t]
     \begin{column}{0.5\textwidth}
       \centering
-      \includegraphics[width=0.8\textwidth]{chemistry.png}
-      \includegraphics[width=0.8\textwidth]{electronics.png}
+      \includegraphics[width=0.9\textwidth,height=0.4\textheight,keepaspectratio]{chemistry.png} \\[-7pt]
+      {\tiny Source: \cite{WCMS:WCMS5}}
+      \includegraphics[width=0.9\textwidth,height=0.4\textheight,keepaspectratio]{electronics.png} \\[-7pt]
+      {\tiny Source: \cite{DBLP:journals/jair/CookH94}}
     \end{column}
     \begin{column}{0.5\textwidth}
       \centering
-      \includegraphics[width=0.8\textwidth]{proteins.png}
-      \includegraphics[width=0.8\textwidth]{electronics2.png}
+      \includegraphics[width=0.9\textwidth,height=0.4\textheight,keepaspectratio]{proteins.png} \\[-7pt]
+      {\tiny Source: \cite{grindley}}
+      \includegraphics[width=0.9\textwidth,height=0.4\textheight,keepaspectratio]{electronics2.png} \\[-7pt]
+      {\tiny Source: \cite{617051}}
     \end{column}
   \end{columns}
 \end{frame}
@@ -119,26 +125,56 @@
   \end{figure}
 \end{frame}
 
-% TODO: the process
-
-\begin{frame}{Features (34 in total)}
-  1--8 are from \cite{DBLP:conf/lion/KotthoffMS16}
-  \begin{enumerate}
-  \item number of vertices
-  \item number of edges
-  \item mean/max degree
-  \item density
-  \item mean/max distance between pairs of vertices
-  \item number of loops
-  \item proportion of vertex pairs with distance $\ge$ 2, 3, 4
-  \item connectedness
+\begin{frame}{The Process}
+  \begin{itemize}
+  \item Three cases:
+    \begin{itemize}
+    \item no labels
+    \item vertex labels
+    \item vertex and edge labels
+    \end{itemize}
     \pause
-  \item standard deviation of degrees
-  \item labelling percentage
+  \item How many different labels?
+    \begin{itemize}
+    \item Measured as a percentage of the number of vertices/edges
+    \item 5\%, 10\%, 15\%, 20\%, 25\%, 33\%, 50\%
+    \end{itemize}
     \pause
-  \item ratios of features 1--5
-  \end{enumerate}
+  \item Run every algorithm on every instance
+    \begin{itemize}
+    \item $\sim\num{500000}$ experiments for each algorithm
+    \end{itemize}
+    \pause
+  \item Identify and extract features
+    \begin{itemize}
+    \item 34 in total
+    \item some from \cite{DBLP:conf/lion/KotthoffMS16}
+    \item some new
+    \end{itemize}
+    \pause
+  \item Train machine learning models
+  \item Evaluate their performance and usefulness
+  \end{itemize}
 \end{frame}
+
+%\begin{frame}{Features (34 in total)}
+%  1--8 are from \cite{DBLP:conf/lion/KotthoffMS16}
+%  \begin{enumerate}
+%  \item number of vertices
+%  \item number of edges
+%  \item mean/max degree
+%  \item density
+%  \item mean/max distance between pairs of vertices
+%  \item number of loops
+%  \item proportion of vertex pairs with distance $\ge$ 2, 3, 4
+%  \item connectedness
+%    \pause
+%  \item standard deviation of degrees
+%  \item labelling percentage
+%    \pause
+%  \item ratios of features 1--5
+%  \end{enumerate}
+%\end{frame}
 
 %\begin{frame}{Random forests \parencite{DBLP:journals/ml/Breiman01}}
 %  \begin{figure}
@@ -198,7 +234,7 @@
   \end{figure}
 \end{frame}
 
-%\begin{frame} % TODO: title here
+%\begin{frame} % title?
 %  \begin{columns}
 %    \begin{column}{0.5\textwidth}
 %      \begin{figure}
@@ -221,8 +257,9 @@
   \begin{itemize}
   \item Identified important features:
     \begin{itemize}
-    \item labelling, standard deviation of degrees
+    \item labelling percentage, standard deviation of degrees
     \end{itemize}
+  \item Discovered how algorithms' performance changes with fewer labels
   \item Extended $k{\downarrow}$ to support vertex labels
     \begin{itemize}
     \item using neighbourhood degree sequences
