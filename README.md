@@ -1,5 +1,7 @@
 # Algorithm Selection for Maximum Common Subgraph
 
+NOTE: the `models` directory is too large to be on GitHub, and (for a while) can be downloaded from [Google Drive](https://drive.google.com/drive/folders/1YKQlTZPxYIHjLtq1-tq2fdtiy7NYf3ua?usp=sharing).
+
 ## Directory Structure
 
 * `algorithms`: the three original algorithms (clique, kdown, McSplit), and a combination of McSplit and clique called Fusion.

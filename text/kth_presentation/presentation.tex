@@ -18,7 +18,7 @@
 \usecolortheme{rose}
 \beamertemplatenavigationsymbolsempty
 \addbibresource{../dissertation/references.bib}
-\author{Paulius Dilkas}
+\author[Paulius Dilkas]{Paulius Dilkas\\ {\small Supervisors: Dr Patrick Prosser and Dr Ciaran McCreesh}}
 \title{Maximum Common Subgraph}
 \subtitle{Algorithms and Algorithm Portfolios}
 % TODO: change the date
@@ -60,6 +60,7 @@
         \onslide<2>{\node (u4) at (2, 4) {$u_4$};}
         \onslide<2>{\node (u5) at (2, 2) {$u_5$};}
       \end{scope}
+      \node (name1) at (1, 0) {$G_1$};
       \path (u1) [color=blue,ultra thick] edge node {} (u2);
       \onslide<2>{\path (u1) edge node {} (u4);}
       \onslide<2>{\path (u1) edge node {} (u5);}
@@ -73,6 +74,7 @@
         \node (v4) [fill=gray] at (2, 4) {$v_4$};
         \onslide<2>{\node (v5) [fill=gray] at (2, 2) {$v_5$};}
       \end{scope}
+      \node (name2) [xshift=4cm] at (1, 0) {$G_2$};
       \begin{scope}[color=blue,ultra thick]
         \onslide<2>{\path (v1) edge node {} (v2);}
         \path (v1) edge node {} (v4);
@@ -83,6 +85,44 @@
         \onslide<3->{\path[->] (u1) edge [bend left=40] (v4);}
         \onslide<3->{\path[->] (u2) edge (v1);}
         \onslide<3->{\path[->] (u3) edge (v3);}
+      \end{scope}
+    \end{tikzpicture}
+  \end{adjustbox}
+\end{frame}
+
+\begin{frame}{Related: Subgraph Isomorphism}
+  \begin{itemize}
+    \item A decision problem: is $G_1$ isomorphic to a subgraph of $G_2$?
+    \item $G_1$ is the \alert{pattern} graph
+    \item $G_2$ is the \alert{target} graph
+  \end{itemize}
+  \begin{adjustbox}{max totalsize={0.6\textwidth}{0.6\textheight},center}
+    \begin{tikzpicture}
+      \begin{scope}[every node/.style={circle,draw}]
+        \node (u1) [fill=gray,] at (0, 5) {$u_1$};
+        \node (u2) at (0, 3) {$u_2$};
+        \node (u3) at (0, 1) {$u_3$};
+      \end{scope}
+      \node (name1) at (0, 0) {$G_1$};
+      \path (u1) [color=blue,ultra thick] edge node {} (u2);
+      \begin{scope}[every node/.style={circle, draw},xshift=4cm]
+        \node (v1) at (0, 5) {$v_1$};
+        \node (v2) at (0, 3) {$v_2$};
+        \node (v3) at (0, 1) {$v_3$};
+        \node (v4) [fill=gray] at (2, 4) {$v_4$};
+        \node (v5) [fill=gray] at (2, 2) {$v_5$};
+      \end{scope}
+      \node (name2) [xshift=4cm] at (1, 0) {$G_2$};
+      \begin{scope}[color=blue,ultra thick]
+        \path (v1) edge node {} (v2);
+        \path (v1) edge node {} (v4);
+        \path (v2) edge node {} (v4);
+        \path (v2) edge node {} (v5);
+      \end{scope}
+      \begin{scope}[color=red,thick]
+        \onslide<2->{\path[->] (u1) edge [bend left=40] (v4);}
+        \onslide<2->{\path[->] (u2) edge (v1);}
+        \onslide<2->{\path[->] (u3) edge (v3);}
       \end{scope}
     \end{tikzpicture}
   \end{adjustbox}
@@ -504,16 +544,6 @@
   \end{figure}
 \end{frame}
 
-% \begin{frame}{Other observations}
-%   \begin{itemize}
-%   \item Most important features
-%     \begin{itemize}
-%     \item labelling percentage
-%     \item standard deviation of degrees (for both graphs)
-%     \end{itemize}
-%   \end{itemize}
-% \end{frame}
-
 \begin{frame}{Errors}
   \begin{itemize}
   \item Out-of-bag error
@@ -556,11 +586,43 @@
 
 \section{Observations and Insights}
 
+\begin{frame}{Overview}
+  \begin{itemize}
+  \item Most important features:
+    \begin{itemize}
+    \item labelling percentage
+    \item standard deviation of degrees (for both graphs)
+    \end{itemize}
+  \item Looking at a single feature is not enough
+    \pause
+  \item $k{\downarrow}$ is no longer competitive
+  \item Unclear when \textsc{McSplit} outperforms $\textsc{McSplit}{\downarrow}$
+    \pause
+  \item Benchmarking algorithms with just a few different labels is important
+  \item No work has ben done on non-uniform distributions of labels
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{What Happens When Labelling Changes?}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=0.9\textwidth]{../dissertation/images/vertex_labels_linechart.png}
+      \visible<2>{\includegraphics[width=0.9\textwidth]{../dissertation/images/vertex_labels_linechart3.png}}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=0.9\textwidth]{../dissertation/images/both_labels_linechart.png}
+      \visible<2>{\includegraphics[width=0.9\textwidth]{../dissertation/images/both_labels_linechart3.png}}
+    \end{column}
+  \end{columns}
+\end{frame}
+
 \begin{frame}{Margins}
   \begin{definition}
-    Let $c_1, \dots, c_n$ be $n$ classes and let $p$ be a data point that belongs
-    to class $c_p$. Let $v_1, \dots, v_n$ denote the number of votes for each
-    class when given $p$ as input. The \emph{margin} of $p$ is
+    Let $c_1, \dots, c_n$ be $n$ \alert{classes} and let $p$ be a \alert{data point} that belongs
+    to class $c_p$. Let $v_1, \dots, v_n$ denote the \alert{number of votes} for each
+    class when given $p$ as input. The \alert{\emph{margin}} of $p$ is
     \[ \frac{v_p}{\sum_{i=1}^n v_i} - \max_{i \ne p} \frac{v_i}{\sum_{j=1}^n v_j}, \]
     which is a number in $[-1, 1]$.
   \end{definition}
@@ -595,31 +657,54 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}{Partial Dependence}
-  \begin{block}{Defined as}
-    \[ f(x) = \log{p_k(x)} - \frac{1}{K} \sum_{i=1}^K \log{p_i(x)} \]
-    \begin{itemize}
-    \item $x$ iterates over all values of a feature
-    \item $p_i(x)$ is the proportion of votes for algorithm $i$, for a given
-      value of $x$
-    \item $K$ is the number of different algorithms
-    \item $k$ is the algorithm under consideration
-    \end{itemize}
-    % TODO: add some plots here, and more on the next slide
-  \end{block}
-\end{frame}
-
-\begin{frame}{What Happens When Labelling Changes?}
+\begin{frame}{Partial Dependence: Unlabelled Graphs}
   \begin{columns}
     \begin{column}{0.5\textwidth}
       \centering
-      \includegraphics[width=0.9\textwidth]{../dissertation/images/vertex_labels_linechart.png}
-      \visible<2>{\includegraphics[width=0.9\textwidth]{../dissertation/images/vertex_labels_linechart3.png}}
+      \includegraphics[width=0.8\textwidth,height=0.8\textheight,keepaspectratio]{../dissertation/images/mcsplit_partial.png}
     \end{column}
     \begin{column}{0.5\textwidth}
       \centering
-      \includegraphics[width=0.9\textwidth]{../dissertation/images/both_labels_linechart.png}
-      \visible<2>{\includegraphics[width=0.9\textwidth]{../dissertation/images/both_labels_linechart3.png}}
+      \includegraphics[width=0.8\textwidth,height=0.8\textheight,keepaspectratio]{../dissertation/images/clique_partial.png}
+    \end{column}
+  \end{columns}
+  \begin{block}{Defined as}
+    \[ f(x) = \log{p_k(x)} - \frac{1}{K} \sum_{i=1}^K \log{p_i(x)} \]
+    \begin{itemize}
+    \item $p_i(x)$ is the proportion of votes for class $i$
+    \item $K$ is the number of different classes
+    \item $k$ is the class under consideration
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Partial Dependence: Vertex and Edge Labels}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/both_labels_mcsplitdown_stddeg.png}
+      \visible<2->{\includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/both_labels_mcsplitdown_labelling.png}}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/both_labels_clique_stddeg.png}
+      \visible<2->{\includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/both_labels_clique_labelling.png}}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Features of the Association Graph}
+  \pause
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/density_bins.png}
+      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/vertices_bins.png}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/meandeg_bins.png}
+      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/edges_bins.png}
     \end{column}
   \end{columns}
 \end{frame}
@@ -840,10 +925,6 @@
 {
   \usebackgroundtemplate{\includegraphics[width=\paperwidth]{background.jpg}}
   \begin{frame}{Thank You!}
-    \begin{block}{The project was supervised by}
-      Dr Patrick Prosser and Dr Ciaran McCreesh
-    \end{block}
-    \bigskip
     \begin{block}{Dissertation and code available at}
     \url{https://github.com/dilkas/maximum-common-subgraph}
     \end{block}
