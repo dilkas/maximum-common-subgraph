@@ -382,38 +382,7 @@
   \end{columns}
 \end{frame}
 
-\section{Algorithm Selection}
-
-\begin{frame}{(Per-Instance) Algorithm Selection}
-  \begin{definition}[\cite{DBLP:journals/ai/BischlKKLMFHHLT16}]
-    Given a set $\mathcal{I}$ of problem instances, a space of algorithms
-    $\mathcal{A}$, and a performance measure $m \colon \mathcal{I} \times
-    \mathcal{A} \to \mathbb{R}$, the \emph{algorithm selection problem} is to
-    find a mapping $s \colon \mathcal{I} \to \mathcal{A}$ that optimises
-    $\mathbb{E}[m(i, s(i))]$.
-  \end{definition}
-    \centering
-    \begin{tikzpicture}
-      \onslide<2->{\node (graphs) at (0, 4) {$(G_1, G_2)$};}
-      \onslide<3->{\node (features) at (2, 4) {$\begin{bmatrix}f_1\\ \vdots \\ f_n\end{bmatrix}$};}
-      \onslide<4->{\node[draw] (ml) at (5, 4) {ML\includegraphics[scale=0.1]{llama.jpg}};}
-      \onslide<5->{\node (mcsplit) at (2, 2) {\textsc{McSplit}};}
-      \onslide<5->{\node (mcsplitdown) at (4, 2) {$\textsc{McSplit}{\downarrow}$};}
-      \onslide<5->{\node (clique) at (6, 2) {clique};}
-      \onslide<5->{\node (kdown) at (8, 2) {$k{\downarrow}$};}
-      \onslide<7->{\node (answer) at (4, 0) {answer};}
-      \path[->]<3-> (graphs) edge node[above] {\VarClock} (features);
-      \path[->]<4-> (features) edge (ml);
-      \path[->]<5-> (ml) edge (mcsplit);
-      \only<1-5>{\tikzset{properties/.style={}}}
-      \only<6->{\tikzset{properties/.style={ultra thick}}}
-      \draw<5-> [->] (ml) edge[properties] (mcsplitdown);
-      \path[->]<5-> (ml) edge (clique);
-      \path[->]<5-> (ml) edge (kdown);
-      \path[->]<7-> (mcsplitdown) edge node[right] {\VarClock} (answer);
-      \path[->]<7-> (graphs) edge [bend right=50] (4, 1);
-    \end{tikzpicture}
-\end{frame}
+\section{Understanding the Data}
 
 \begin{frame}{Labelling}
   Data from \cite{foggia2001-2, DBLP:journals/prl/SantoFSV03}
@@ -465,6 +434,39 @@
   \item $C$ is the number of vertices with that label
   \item $\E(C)$ is the number we would expect from a (discrete) uniform distribution
   \end{itemize}
+\end{frame}
+
+\section{Algorithm Selection}
+
+\begin{frame}{(Per-Instance) Algorithm Selection}
+  \begin{definition}[\cite{DBLP:journals/ai/BischlKKLMFHHLT16}]
+    Given a set $\mathcal{I}$ of problem instances, a space of algorithms
+    $\mathcal{A}$, and a performance measure $m \colon \mathcal{I} \times
+    \mathcal{A} \to \mathbb{R}$, the \emph{algorithm selection problem} is to
+    find a mapping $s \colon \mathcal{I} \to \mathcal{A}$ that optimises
+    $\mathbb{E}[m(i, s(i))]$.
+  \end{definition}
+    \centering
+    \begin{tikzpicture}
+      \onslide<2->{\node (graphs) at (0, 4) {$(G_1, G_2)$};}
+      \onslide<3->{\node (features) at (2, 4) {$\begin{bmatrix}f_1\\ \vdots \\ f_n\end{bmatrix}$};}
+      \onslide<4->{\node[draw] (ml) at (5, 4) {ML\includegraphics[scale=0.1]{llama.jpg}};}
+      \onslide<5->{\node (mcsplit) at (2, 2) {\textsc{McSplit}};}
+      \onslide<5->{\node (mcsplitdown) at (4, 2) {$\textsc{McSplit}{\downarrow}$};}
+      \onslide<5->{\node (clique) at (6, 2) {clique};}
+      \onslide<5->{\node (kdown) at (8, 2) {$k{\downarrow}$};}
+      \onslide<7->{\node (answer) at (4, 0) {answer};}
+      \path[->]<3-> (graphs) edge node[above] {\VarClock} (features);
+      \path[->]<4-> (features) edge (ml);
+      \path[->]<5-> (ml) edge (mcsplit);
+      \only<1-5>{\tikzset{properties/.style={}}}
+      \only<6->{\tikzset{properties/.style={ultra thick}}}
+      \draw<5-> [->] (ml) edge[properties] (mcsplitdown);
+      \path[->]<5-> (ml) edge (clique);
+      \path[->]<5-> (ml) edge (kdown);
+      \path[->]<7-> (mcsplitdown) edge node[right] {\VarClock} (answer);
+      \path[->]<7-> (graphs) edge [bend right=50] (4, 1);
+    \end{tikzpicture}
 \end{frame}
 
 \begin{frame}{Features (34 in total)}
@@ -693,7 +695,9 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}{Features of the Association Graph}
+\section{Switching Algorithms Mid-Execution}
+
+\begin{frame}{Some Preliminary Analysis}
   \pause
   \begin{columns}
     \begin{column}{0.5\textwidth}
@@ -708,8 +712,6 @@
     \end{column}
   \end{columns}
 \end{frame}
-
-\section{Switching Algorithms Mid-Execution}
 
 \begin{frame}{Idea 1: Switch After a Fixed Number of Decisions}
   \pause

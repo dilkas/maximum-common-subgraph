@@ -2,10 +2,11 @@
 
 NOTE: the `models` directory is too large to be on GitHub, and (for a while) can be downloaded from [Google Drive](https://drive.google.com/drive/folders/1YKQlTZPxYIHjLtq1-tq2fdtiy7NYf3ua?usp=sharing).
 
-## Directory Structure
+## Directories and Files
 
 * `algorithms`: the three original algorithms (clique, kdown, McSplit), and a combination of McSplit and clique called Fusion.
 * `data`: two databases of graphs for MCS and SIP algorithms, and an AIDS dataset, which was never used.
+* `gnuplot`: gnuplot scripts and generated cumulative plots
 * `graph_stats`: a graph feature extractor taken from Kotthoff, McCreesh, and Solnon, 2016. Portfolios of subgraph isomorphism algorithms.
 * `results`: all (mostly CSV) data that was generated during this project.
   * `.mcs.` and `.sip.` denote which database the data came from.
@@ -25,5 +26,6 @@ NOTE: the `models` directory is too large to be on GitHub, and (for a while) can
   * `mcs_features.csv` and `sip_features.csv` record the features for unlabelled MCS and SIP instances (ratio features are calculated later).
   * `mcs_features_individual.csv` and `sip_features_individual.csv` record features of each individual graph separately.
   * `mcs_instances` and `sip_instances` contain the complete lists of instances, for both graph databases.
+  * `unlabelled.csv`, `vertex_labels.csv`, and `both_labels.csv` contain summaries of the data, used for plotting cumulative plots
 * `text`: the dissertation, a short status report, and three sets of slides for different presentations.
 * `video`: everything related to the video describing this project.

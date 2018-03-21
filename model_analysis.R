@@ -5,8 +5,9 @@ library(latticeExtra)
 library(randomForest)
 source("common.R")
 
-type <- "unlabelled"
-type_label <- "Unlabelled"
+type <- "unlabelled" # unlabelled/vertex_labels/both_labels
+type_label <- "Unlabelled" # Printing-friendly version of the above
+include_fusion <- FALSE # Only compatible with the "both_labels" type
 
 if (type == "unlabelled") {
   algorithms <- c("clique", "kdown", "mcsplit", "mcsplitdown")
@@ -15,13 +16,19 @@ if (type == "unlabelled") {
   costs <- get_costs()
 } else {
   algorithms <- c("clique", "mcsplit", "mcsplitdown")
-  algorith_labels <- c("clique", "McSplit", "McSplit\u2193")
+  algorithm_labels <- c("clique", "McSplit", "McSplit\u2193")
   labels <- c("clique", "McSplit", "McSplit\u2193", "VBS", "Llama")
   p_values <- c(5, 10, 15, 20, 25, 33, 50)
   filtered_instances <- readLines("results/filtered_instances")
   costs <- get_costs(filtered_instances, p_values)
 }
 
+if (include_fusion) {
+  algorithms <- c(algorithms, c("fusion1", "fusion2"))
+  algorithm_labels <- c(algorithm_labels, c("Fusion 1", "Fusion 2"))
+}
+
+colours <- rainbow(length(algorithms))
 model <- readRDS(paste0("models/", type, ".rds"))
 forest <- model[["models"]][[1]][["learner.model"]]
 data <- readRDS(paste0("models/", type, "_data.rds"))
@@ -111,8 +118,8 @@ times$llama <- as.numeric(times[cbind(seq_along(times$algorithm),
 times <- merge(times, costs, by = c("ID"), all.x = TRUE)
 times$llama <- times$llama + times$group1
 
-summary(times$llama < 10e6)
-summary(times$mcsplitdown < 10e6)
+# Compile results into a single file
+write.csv(times, paste0("results/", type, ".csv"), row.names = FALSE)
 
 if (type == "unlabelled") {
   png(paste0("dissertation/images/ecdf_", type, "_llama.png"), width = 480,
@@ -126,171 +133,48 @@ if (type == "unlabelled") {
   dev.off()
 }
 
-# Using ggplot2 instead
-library(ggplot2)
-x <- c()
-g <- c()
-for (algorithm in algorithms) {
-  x <- c(x, times[, algorithm])
-  g <- c(g, rep(algorithm, length(times[, algorithm])))
-}
-g <- g[x > 0]
-x <- x[x > 0]
-df <- data.frame(x = x, g = g)
-png(paste0("dissertation/images/ecdf_", type, "_llama_ggplot2.png"),
-    width = 480, height = 320)
-(ggplot(df, aes(x, color = g)) + stat_ecdf(geom = "step", pad = FALSE)
-  + scale_x_log10())
-dev.off()
-
-png(paste0("dissertation/images/ecdf_", type, ".png"), width = 480, height = 320)
-plt <- ecdfplot(~ clique + mcsplit + mcsplitdown + vbs, data = times,
-               auto.key = list(space = "right", text = labels[-6]),
-               xlab = "Runtime (ms)", ylim = c(0.4, 1), main = type_label)
-update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8, name = "Dark2")))
-dev.off()
-
-sum(times$clique <= times$vbs)
-#times2 <- times[startsWith(as.character(times$ID), "data/sip-instances/"),]
-times2 <- times[startsWith(as.character(times$ID), "data/mcs-instances/"),]
-png("dissertation/images/ecdf_mcs.png", width = 480, height = 320)
-plt <- ecdfplot(~ clique + kdown + mcsplit + mcsplitdown, data = times2,
-                auto.key = list(space = "right",
-                                text = c("clique", "k\u2193", "McSplit",
-                                         "McSplit\u2193")),
-                xlab = "Runtime (ms)", main = "Unlabelled")
-update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8,
-                                                          name = "Dark2")))
-dev.off()
-
-# llama metrics
-
-sum(successes(data, model))
-sum(successes(data, vbs))
-sum(successes(data, singleBest))
-sum(misclassificationPenalties(data, model))
-mean(parscores(data, model))
-mean(parscores(data, vbs))
-mean(parscores(data, singleBest))
-contributions(data)
-png("dissertation/images/unlabelled_scatterplot1.png", width = 480,
-    height = 320)
-(perfScatterPlot(parscores, model, vbs, cvFolds(data, stratify = TRUE), data) +
-    xlab("Llama") + ylab("VBS"))
-dev.off()
-png("dissertation/images/unlabelled_scatterplot2.png", width = 480,
-    height = 320)
-(perfScatterPlot(parscores, model, singleBest, data) + xlab("Llama") +
-    ylab("McSplit\u2193"))
-dev.off()
-
 # Line graphs
-algorithms <- c("clique", "mcsplit", "mcsplitdown", "fusion1", "fusion2")
-colours <- rainbow(length(algorithms))
-solved <- expand.grid(algorithm = algorithms, labelling = p_values)
-solved$proportion <- apply(solved, 1, function(row)
-  sum(data[["data"]]$labelling == as.numeric(row[2])))
-solved$proportion <- apply(solved, 1, function(row)
-  sum(data[["data"]]$labelling == as.numeric(row[2]) &
-        data[["data"]][paste0(row[1], "_success")] == TRUE) /
-    as.numeric(row[3]))
-png(paste0("dissertation/images/", type, "_linechart.png"), width = 480,
-    height = 320)
-plot(range(solved$labelling), range(solved$proportion), xlab = "Labelling (%)",
-     ylab = "Proportion solved", type = "n", main = type_label)
-for (i in 1:length(algorithms)) {
-  individual_results <- subset(solved, solved$algorithm == algorithms[i])
-  lines(individual_results$labelling, individual_results$proportion,
-        col = colours[i])
+
+construct_line_graph <- function(data, y_variable, variable_label,
+                                 legend_position) {
+  plot(range(data$labelling), range(data[, y_variable]), xlab = "Labelling (%)",
+       ylab = variable_label, type = "n", main = type_label)
+  for (i in 1:length(algorithms)) {
+    individual_results <- subset(data, data$algorithm == algorithms[i])
+    lines(individual_results$labelling, individual_results[, y_variable],
+          col = colours[i])
+  }
+  legend(legend_position, algorithm_labels, fill = colours)
 }
-legend("bottomright", c("clique", "McSplit", "McSplit\u2193"), fill = colours)
-dev.off()
- 
-cumulative <- expand.grid(algorithm = algorithms, labelling = p_values)
-cumulative$time <- apply(cumulative, 1, function(row)
-  sum(data$data[data$data$labelling == as.numeric(row[2]), row[1]]))
-png(paste0("dissertation/images/", type, "_linechart2.png"), width = 480,
-    height = 320)
-plot(range(cumulative$labelling), range(cumulative$time),
-     xlab = "Labelling (%)", ylab = "Total runtime (ms)", type = "n", main = type_label)
-for (i in 1:length(algorithms)) {
-  individual_results <- subset(cumulative,
-                               cumulative$algorithm == algorithms[i])
-  lines(individual_results$labelling, individual_results$time,
-        col = colours[i])
+
+if (type != "unlabelled") {
+  solved <- expand.grid(algorithm = algorithms, labelling = p_values)
+  solved$proportion <- apply(solved, 1, function(row)
+    sum(data[["data"]]$labelling == as.numeric(row[2])))
+  solved$proportion <- apply(solved, 1, function(row)
+    sum(data[["data"]]$labelling == as.numeric(row[2]) &
+          data[["data"]][paste0(row[1], "_success")] == TRUE) /
+      as.numeric(row[3]))
+  png(paste0("dissertation/images/", type, "_linechart.png"), width = 480,
+      height = 320)
+  construct_line_graph(solved, "proportion", "Proportion solved", "bottomright")
+  dev.off()
+
+  cumulative <- expand.grid(algorithm = algorithms, labelling = p_values)
+  cumulative$time <- apply(cumulative, 1, function(row)
+    sum(data$data[data$data$labelling == as.numeric(row[2]), row[1]]))
+  png(paste0("dissertation/images/", type, "_linechart2.png"), width = 480,
+      height = 320)
+  construct_line_graph(cumulative, "time", "Total runtime (ms)", "topright")
+  dev.off()
+
+  mins <- data$data[, c("labelling", algorithms)]
+  mins$min <- apply(mins[,algorithms], 1, min)
+  won <- expand.grid(algorithm = algorithms, labelling = p_values)
+  won$count <- apply(won, 1, function(row)
+    sum(mins$labelling == as.numeric(row[2]) & mins[row[1]] == mins$min))
+  png(paste0("dissertation/images/", type, "_linechart3.png"), width = 480,
+      height = 320)
+  construct_line_graph(won, "count", "Times won", "bottomright")
+  dev.off()
 }
-legend("topright", c("clique", "McSplit", "McSplit\u2193"), fill = colours)
- dev.off()
- 
-mins <- data$data[, c("labelling", algorithms)]
-mins$min <- apply(mins[,algorithms], 1, min)
-won <- expand.grid(algorithm = algorithms, labelling = p_values)
-won$count <- apply(won, 1, function(row)
-  sum(mins$labelling == as.numeric(row[2]) & mins[row[1]] == mins$min))
-png(paste0("dissertation/images/", type, "_linechart3.png"), width = 480,
-    height = 320)
-plot(range(won$labelling), range(won$count),
-     xlab = "Labelling (%)", ylab = "Times won", type = "n", main = type_label)
-for (i in 1:length(algorithms)) {
-  individual_results <- subset(won, won$algorithm == algorithms[i])
-  lines(individual_results$labelling, individual_results$count,
-        col = colours[i])
-}
-legend("bottomright", c("clique", "McSplit", "McSplit\u2193"), fill = colours)
-dev.off()
-rm("mins", "won", "individual_results")
-won$count[won$algorithm == "clique" & won$labelling == 50]
-
-# Log runtimes by solver and instance
-png(paste0("dissertation/images/", type, "_runtime_heatmap.png"), width = 480,
-    height = 320)
-image(log10(t(as.matrix(times))), axes = F, col = cols)
-axis(1, labels = labels, at = seq(0, 1, 1/(length(data$performance))),
-     las = 2)
-dev.off()
-
-# White - first, black - last (weird results because of equal timing out values)
-image(apply(times , 1, order), axes = F, col = cols)
-axis(1, labels = labels, at = seq(0, 1, 1/(length(data$performance) - 1)), las = 2)
-
-# Tables for best algorithms
-times <- performance[grep("data/sip-instances/images-CVIU11", performance$ID), ]
-times <- performance[grep("data/sip-instances/images-PR15", performance$ID), ]
-times <- performance[grep("data/sip-instances/largerGraphs", performance$ID), ]
-times <- performance[grep("data/sip-instances/LV", performance$ID), ]
-times <- performance[grep("data/sip-instances/meshes-CVIU11", performance$ID), ]
-times <- performance[grep("data/sip-instances/phase", performance$ID), ]
-times <- performance[grep("data/sip-instances/scalefree", performance$ID), ]
-times <- performance[grep("data/sip-instances/si", performance$ID), ]
-times <- performance[grep("data/mcs-instances", performance$ID), ]
-
-# How many times is each algorithm the best?
-times = performance
-length(which(times$clique <= times$mcsplit & times$clique <= times$mcsplitdown))
-length(which(times$mcsplit <= times$clique & times$mcsplit <= times$mcsplitdown))
-length(which(times$mcsplitdown <= times$clique &
-               times$mcsplitdown <= times$mcsplit))
-
-summary(times[!(times$clique < times$kdown & times$clique < times$mcsplit &
-                  times$clique < times$mcsplitdown) &
-                !(times$kdown < times$clique & times$kdown < times$mcsplit &
-                    times$kdown < times$mcsplitdown) &
-                !(times$mcsplit < times$clique & times$mcsplit < times$kdown &
-                    times$mcsplit < times$mcsplitdown) &
-                !(times$mcsplitdown < times$clique &
-                    times$mcsplitdown < times$kdown &
-                    times$mcsplitdown < times$mcsplit), ])
-
-# Heatmaps for pattern/target features. Group differently?
-features <- subset(data$data, T, data$features)
-nFeatures <- normalize(features)
-graph_feature_names <- c("vertices", "edges", "loops", "mean degree",
-                         "max degree", "SD of degrees", "density", "connected",
-                         "mean distance", "max distance", "distance \u2265 2",
-                         "distance \u2265 3", "distance \u2265 4")
-full_feature_names <- c(paste("pattern", graph_feature_names),
-                        paste("target", graph_feature_names))
-par(mar = c(1, 10, 1, 1))
-image(as.matrix(nFeatures$features), axes = F, col = cols)
-axis(2, labels = full_feature_names,
-     at = seq(0, 1, 1/(length(data$features) - 1)), las = 2)

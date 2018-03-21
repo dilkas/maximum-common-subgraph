@@ -115,3 +115,24 @@ for (i in 1:length(algorithms)) {
 legend("topright", c("clique", "McSplit", "McSplit\u2193", "Fusion 1",
                      "Fusion 2"), fill = colours)
 dev.off()
+
+# llama metrics
+
+sum(successes(data, model))
+sum(successes(data, vbs))
+sum(successes(data, singleBest))
+sum(misclassificationPenalties(data, model))
+mean(parscores(data, model))
+mean(parscores(data, vbs))
+mean(parscores(data, singleBest))
+contributions(data)
+png("dissertation/images/unlabelled_scatterplot1.png", width = 480,
+    height = 320)
+(perfScatterPlot(parscores, model, vbs, cvFolds(data, stratify = TRUE), data) +
+    xlab("Llama") + ylab("VBS"))
+dev.off()
+png("dissertation/images/unlabelled_scatterplot2.png", width = 480,
+    height = 320)
+(perfScatterPlot(parscores, model, singleBest, data) + xlab("Llama") +
+    ylab("McSplit\u2193"))
+dev.off()
