@@ -50,41 +50,40 @@
     $G_2$ is a graph $G_3 = (V_3, E_3)$ such that $G_3$ is isomorphic to induced
     subgraphs of both $G_1$ and $G_2$ with $|V_3|$ maximised.
   \end{definition}
-  \pause
   \begin{adjustbox}{max totalsize={0.5\textwidth}{0.5\textheight},center}
     \begin{tikzpicture}
       \begin{scope}[every node/.style={circle,draw}]
         \node (u1) [fill=gray,] at (0, 5) {$u_1$};
         \node (u2) at (0, 3) {$u_2$};
         \node (u3) at (0, 1) {$u_3$};
-        \onslide<2>{\node (u4) at (2, 4) {$u_4$};}
-        \onslide<2>{\node (u5) at (2, 2) {$u_5$};}
+        \onslide<1>{\node (u4) at (2, 4) {$u_4$};}
+        \onslide<1>{\node (u5) at (2, 2) {$u_5$};}
       \end{scope}
       \node (name1) at (1, 0) {$G_1$};
       \path (u1) [color=blue,ultra thick] edge node {} (u2);
-      \onslide<2>{\path (u1) edge node {} (u4);}
-      \onslide<2>{\path (u1) edge node {} (u5);}
-      \onslide<2>{\path (u2) edge node {} (u4);}
-      \onslide<2>{\path (u3) edge node {} (u4);}
-      \onslide<2>{\path (u3) edge node {} (u5);}
+      \onslide<1>{\path (u1) edge node {} (u4);}
+      \onslide<1>{\path (u1) edge node {} (u5);}
+      \onslide<1>{\path (u2) edge node {} (u4);}
+      \onslide<1>{\path (u3) edge node {} (u4);}
+      \onslide<1>{\path (u3) edge node {} (u5);}
       \begin{scope}[every node/.style={circle, draw},xshift=4cm]
         \node (v1) at (0, 5) {$v_1$};
-        \onslide<2>{\node (v2) at (0, 3) {$v_2$};}
+        \onslide<1>{\node (v2) at (0, 3) {$v_2$};}
         \node (v3) at (0, 1) {$v_3$};
         \node (v4) [fill=gray] at (2, 4) {$v_4$};
-        \onslide<2>{\node (v5) [fill=gray] at (2, 2) {$v_5$};}
+        \onslide<1>{\node (v5) [fill=gray] at (2, 2) {$v_5$};}
       \end{scope}
       \node (name2) [xshift=4cm] at (1, 0) {$G_2$};
       \begin{scope}[color=blue,ultra thick]
-        \onslide<2>{\path (v1) edge node {} (v2);}
+        \onslide<1>{\path (v1) edge node {} (v2);}
         \path (v1) edge node {} (v4);
-        \onslide<2>{\path (v2) edge node {} (v4);}
-        \onslide<2>{\path (v2) edge node {} (v5);}
+        \onslide<1>{\path (v2) edge node {} (v4);}
+        \onslide<1>{\path (v2) edge node {} (v5);}
       \end{scope}
       \begin{scope}[color=red,thick]
-        \onslide<3->{\path[->] (u1) edge [bend left=40] (v4);}
-        \onslide<3->{\path[->] (u2) edge (v1);}
-        \onslide<3->{\path[->] (u3) edge (v3);}
+        \onslide<2->{\path[->] (u1) edge [bend left=40] (v4);}
+        \onslide<2->{\path[->] (u2) edge (v1);}
+        \onslide<2->{\path[->] (u3) edge (v3);}
       \end{scope}
     \end{tikzpicture}
   \end{adjustbox}
@@ -210,7 +209,7 @@
 
     \begin{column}{0.5\textwidth}
       \begin{overprint}
-        Partial solution: \only<4>{\alert{$u_1 \mapsto v_4$}}\only<5-6>{$u_1 \mapsto v_4$}\only<7>{$u_1 \mapsto v_4$, \alert{$u_3 \mapsto v_3$}}\only<8->{$u_1 \mapsto v_4$, $u_3 \mapsto v_3$}
+        Partial solution: \only<3>{\alert{$u_1 \mapsto v_4$}}\only<4-5>{$u_1 \mapsto v_4$}\only<6>{$u_1 \mapsto v_4$, \alert{$u_3 \mapsto v_3$}}\only<7->{$u_1 \mapsto v_4$, $u_3 \mapsto v_3$}
 
         Upper bound: \only<1-3>{$4$}\only<4>{\alert{$1+2$}}\only<5-6>{$1+2$}\only<7>{\alert{$2+1$}}\only<8->{$2+1$}
       \end{overprint}
@@ -284,11 +283,12 @@
 
 \begin{frame}{$k{\downarrow}$}
   \begin{itemize}
+  \item Developed to handle large instances
+  \item Implements many domain filtering techniques
+  \item Only supports unlabelled graphs
   \item $k = 0$: search for a complete subgraph isomorphism
   \item $k = 1$: allow one vertex of the smaller graph to not match anything
   \item ... and so on
-  \item Developed to handle large instances
-  \item Implements many domain filtering techniques
   \end{itemize}
 \end{frame}
 
@@ -315,6 +315,7 @@
             \node (u4) at (2, 4) {$u_4$};
             \node (u5) at (2, 2) {$u_5$};
           \end{scope}
+          \node (name1) at (1, 0) {$G_1$};
           \path (u1) [color=blue,ultra thick] edge node {} (u2);
           \path (u1) edge node {} (u4);
           \path (u1) edge node {} (u5);
@@ -328,6 +329,7 @@
             \node (v4) [fill=gray] at (2, 4) {$v_4$};
             \node (v5) [fill=gray] at (2, 2) {$v_5$};
           \end{scope}
+          \node (name2) [xshift=4cm] at (1, 0) {$G_2$};
           \begin{scope}[color=blue,ultra thick]
             \path (v1) edge node {} (v2);
             \path (v1) edge node {} (v4);
@@ -424,17 +426,17 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Number of Vertices Per Label}
-  \begin{figure}
-    \centering
-    \includegraphics[scale=0.4]{../dissertation/images/labelling_histogram.png}
-  \end{figure}
-  For each graph and label
-  \begin{itemize}
-  \item $C$ is the number of vertices with that label
-  \item $\E(C)$ is the number we would expect from a (discrete) uniform distribution
-  \end{itemize}
-\end{frame}
+%\begin{frame}{Number of Vertices Per Label}
+%  \begin{figure}
+%    \centering
+%    \includegraphics[scale=0.4]{../dissertation/images/labelling_histogram.png}
+%  \end{figure}
+%  For each graph and label
+%  \begin{itemize}
+%  \item $C$ is the number of vertices with that label
+%  \item $\E(C)$ is the number we would expect from a (discrete) uniform distribution
+%  \end{itemize}
+%\end{frame}
 
 \section{Algorithm Selection}
 
@@ -504,6 +506,8 @@
   \end{figure}
 \end{frame}
 
+\section{Results}
+
 \begin{frame}{Results}
   \begin{figure}
     \centering
@@ -546,49 +550,49 @@
   \end{figure}
 \end{frame}
 
-\begin{frame}{Errors}
-  \begin{itemize}
-  \item Out-of-bag error
-  \item For each algorithm
-    \begin{itemize}
-    \item $1 - \text{recall}$
-    \end{itemize}
-  \end{itemize}
-  \begin{definition}
-    For an algorithm $A$, \emph{recall} (sensitivity) is
-    \[ \frac{\text{the number of instances that were correctly predicted as
-          $A$}}{\text{the number of instances where $A$ is the correct
-          prediction}}. \]
-  \end{definition}
-\end{frame}
+%\begin{frame}{Errors}
+%  \begin{itemize}
+%  \item Out-of-bag error
+%  \item For each algorithm
+%    \begin{itemize}
+%    \item $1 - \text{recall}$
+%    \end{itemize}
+%  \end{itemize}
+%  \begin{definition}
+%    For an algorithm $A$, \emph{recall} (sensitivity) is
+%    \[ \frac{\text{the number of instances that were correctly predicted as
+%          $A$}}{\text{the number of instances where $A$ is the correct
+%          prediction}}. \]
+%  \end{definition}
+%\end{frame}
 
-\begin{frame}{Errors (\%)}
-  \centering
-  \begin{tabular}{l c c c}
-    \toprule
-    \multirow{2}{*}{Error} & \multicolumn{3}{c}{Labelling} \\
-    \cmidrule(lr){2-4}
-                           & no & vertex & both \\
-    \midrule
-    out-of-bag & 17 & 13 & 14 \\
-    clique & 30 & 8 & 7 \\
-    \textsc{McSplit} & 29 & 22 & 29 \\
-    $\textsc{McSplit}\downarrow$ & 11 & 11 & 11 \\
-    $k\downarrow$ & 80 & & \\
-    \bottomrule
-  \end{tabular}
-\end{frame}
+%\begin{frame}{Errors (\%)}
+%  \centering
+%  \begin{tabular}{l c c c}
+%    \toprule
+%    \multirow{2}{*}{Error} & \multicolumn{3}{c}{Labelling} \\
+%    \cmidrule(lr){2-4}
+%                           & no & vertex & both \\
+%    \midrule
+%    out-of-bag & 17 & 13 & 14 \\
+%    clique & 30 & 8 & 7 \\
+%    \textsc{McSplit} & 29 & 22 & 29 \\
+%    $\textsc{McSplit}\downarrow$ & 11 & 11 & 11 \\
+%    $k\downarrow$ & 80 & & \\
+%    \bottomrule
+%  \end{tabular}
+%\end{frame}
 
-\begin{frame}{Convergence of Errors for Unlabelled Graphs}
-  \begin{figure}
-    \centering
-    \includegraphics[scale=0.5]{../dissertation/images/unlabelled_forest_errors.png}
-  \end{figure}
-\end{frame}
+%\begin{frame}{Convergence of Errors for Unlabelled Graphs}
+%  \begin{figure}
+%    \centering
+%    \includegraphics[scale=0.5]{../dissertation/images/unlabelled_forest_errors.png}
+%  \end{figure}
+%\end{frame}
 
-\section{Observations and Insights}
+\section{Lessons Learned}
 
-\begin{frame}{Overview}
+\begin{frame}{Lessons Learned}
   \begin{itemize}
   \item Most important features:
     \begin{itemize}
@@ -600,7 +604,6 @@
   \item $k{\downarrow}$ is no longer competitive
   \item Unclear when \textsc{McSplit} outperforms $\textsc{McSplit}{\downarrow}$
     \pause
-  \item Benchmarking algorithms with just a few different labels is important
   \item No work has ben done on non-uniform distributions of labels
   \end{itemize}
 \end{frame}
@@ -620,98 +623,98 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}{Margins}
-  \begin{definition}
-    Let $c_1, \dots, c_n$ be $n$ \alert{classes} and let $p$ be a \alert{data point} that belongs
-    to class $c_p$. Let $v_1, \dots, v_n$ denote the \alert{number of votes} for each
-    class when given $p$ as input. The \alert{\emph{margin}} of $p$ is
-    \[ \frac{v_p}{\sum_{i=1}^n v_i} - \max_{i \ne p} \frac{v_i}{\sum_{j=1}^n v_j}, \]
-    which is a number in $[-1, 1]$.
-  \end{definition}
-\end{frame}
+%\begin{frame}{Margins}
+%  \begin{definition}
+%    Let $c_1, \dots, c_n$ be $n$ \alert{classes} and let $p$ be a \alert{data point} that belongs
+%    to class $c_p$. Let $v_1, \dots, v_n$ denote the \alert{number of votes} for each
+%    class when given $p$ as input. The \alert{\emph{margin}} of $p$ is
+%    \[ \frac{v_p}{\sum_{i=1}^n v_i} - \max_{i \ne p} \frac{v_i}{\sum_{j=1}^n v_j}, \]
+%    which is a number in $[-1, 1]$.
+%  \end{definition}
+%\end{frame}
 
-\begin{frame}{Margins: Unlabelled Graphs}
-  \begin{columns}[t]
-    \begin{column}{0.5\textwidth}
-      \centering
-      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/mcsplit_hist.png}
-      \includegraphics[width=0.9\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/clique_hist.png}
-    \end{column}
-    \begin{column}{0.5\textwidth}
-      \centering
-      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/mcsplitdown_hist.png}
-      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/kdown_hist.png}
-    \end{column}
-  \end{columns}
-\end{frame}
+%\begin{frame}{Margins: Unlabelled Graphs}
+%  \begin{columns}[t]
+%    \begin{column}{0.5\textwidth}
+%      \centering
+%      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/mcsplit_hist.png}
+%      \includegraphics[width=0.9\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/clique_hist.png}
+%    \end{column}
+%    \begin{column}{0.5\textwidth}
+%      \centering
+%      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/mcsplitdown_hist.png}
+%      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/kdown_hist.png}
+%    \end{column}
+%  \end{columns}
+%\end{frame}
 
-\begin{frame}{Margins: Vertex and Edge Labels}
-  \begin{columns}[t]
-    \begin{column}{0.5\textwidth}
-      \centering
-      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/both_labels_mcsplit_hist.png}
-      \includegraphics[width=0.9\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/both_labels_clique_hist.png}
-    \end{column}
-    \begin{column}{0.5\textwidth}
-      \centering
-      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/both_labels_mcsplitdown_hist.png}
-    \end{column}
-  \end{columns}
-\end{frame}
+%\begin{frame}{Margins: Vertex and Edge Labels}
+%  \begin{columns}[t]
+%    \begin{column}{0.5\textwidth}
+%      \centering
+%      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/both_labels_mcsplit_hist.png}
+%      \includegraphics[width=0.9\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/both_labels_clique_hist.png}
+%    \end{column}
+%    \begin{column}{0.5\textwidth}
+%      \centering
+%      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/both_labels_mcsplitdown_hist.png}
+%    \end{column}
+%  \end{columns}
+%\end{frame}
 
-\begin{frame}{Partial Dependence: Unlabelled Graphs}
-  \begin{columns}
-    \begin{column}{0.5\textwidth}
-      \centering
-      \includegraphics[width=0.8\textwidth,height=0.8\textheight,keepaspectratio]{../dissertation/images/mcsplit_partial.png}
-    \end{column}
-    \begin{column}{0.5\textwidth}
-      \centering
-      \includegraphics[width=0.8\textwidth,height=0.8\textheight,keepaspectratio]{../dissertation/images/clique_partial.png}
-    \end{column}
-  \end{columns}
-  \begin{block}{Defined as}
-    \[ f(x) = \log{p_k(x)} - \frac{1}{K} \sum_{i=1}^K \log{p_i(x)} \]
-    \begin{itemize}
-    \item $p_i(x)$ is the proportion of votes for class $i$
-    \item $K$ is the number of different classes
-    \item $k$ is the class under consideration
-    \end{itemize}
-  \end{block}
-\end{frame}
+%\begin{frame}{Partial Dependence: Unlabelled Graphs}
+%  \begin{columns}
+%    \begin{column}{0.5\textwidth}
+%      \centering
+%      \includegraphics[width=0.8\textwidth,height=0.8\textheight,keepaspectratio]{../dissertation/images/mcsplit_partial.png}
+%    \end{column}
+%    \begin{column}{0.5\textwidth}
+%      \centering
+%      \includegraphics[width=0.8\textwidth,height=0.8\textheight,keepaspectratio]{../dissertation/images/clique_partial.png}
+%    \end{column}
+%  \end{columns}
+%  \begin{block}{Defined as}
+%    \[ f(x) = \log{p_k(x)} - \frac{1}{K} \sum_{i=1}^K \log{p_i(x)} \]
+%    \begin{itemize}
+%    \item $p_i(x)$ is the proportion of votes for class $i$
+%    \item $K$ is the number of different classes
+%    \item $k$ is the class under consideration
+%    \end{itemize}
+%  \end{block}
+%\end{frame}
 
-\begin{frame}{Partial Dependence: Vertex and Edge Labels}
-  \begin{columns}
-    \begin{column}{0.5\textwidth}
-      \centering
-      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/both_labels_mcsplitdown_stddeg.png}
-      \visible<2->{\includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/both_labels_mcsplitdown_labelling.png}}
-    \end{column}
-    \begin{column}{0.5\textwidth}
-      \centering
-      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/both_labels_clique_stddeg.png}
-      \visible<2->{\includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/both_labels_clique_labelling.png}}
-    \end{column}
-  \end{columns}
-\end{frame}
+%\begin{frame}{Partial Dependence: Vertex and Edge Labels}
+%  \begin{columns}
+%    \begin{column}{0.5\textwidth}
+%      \centering
+%      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/both_labels_mcsplitdown_stddeg.png}
+%      \visible<2->{\includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/both_labels_mcsplitdown_labelling.png}}
+%    \end{column}
+%    \begin{column}{0.5\textwidth}
+%      \centering
+%      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/both_labels_clique_stddeg.png}
+%      \visible<2->{\includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/both_labels_clique_labelling.png}}
+%    \end{column}
+%  \end{columns}
+%\end{frame}
 
 \section{Switching Algorithms Mid-Execution}
 
-\begin{frame}{Some Preliminary Analysis}
-  \pause
-  \begin{columns}
-    \begin{column}{0.5\textwidth}
-      \centering
-      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/density_bins.png}
-      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/vertices_bins.png}
-    \end{column}
-    \begin{column}{0.5\textwidth}
-      \centering
-      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/meandeg_bins.png}
-      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/edges_bins.png}
-    \end{column}
-  \end{columns}
-\end{frame}
+%\begin{frame}{Some Preliminary Analysis}
+%  \pause
+%  \begin{columns}
+%    \begin{column}{0.5\textwidth}
+%      \centering
+%      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/density_bins.png}
+%      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/vertices_bins.png}
+%    \end{column}
+%    \begin{column}{0.5\textwidth}
+%      \centering
+%      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/meandeg_bins.png}
+%      \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{../dissertation/images/edges_bins.png}
+%    \end{column}
+%  \end{columns}
+%\end{frame}
 
 \begin{frame}{Idea 1: Switch After a Fixed Number of Decisions}
   \pause
@@ -723,8 +726,7 @@
       |\textit{incumbent}_{\text{\textsc{McSplit}}}| - |M| \]
     and then
     \[ \textit{incumbent}_{\textsc{McSplit}} \gets
-      \textit{incumbent}_{\textsc{McSplit}} \cup
-      \textit{incumbent}_{\text{clique}} \]
+      M \cup \textit{incumbent}_{\text{clique}} \]
   \end{itemize}
 \end{frame}
 
