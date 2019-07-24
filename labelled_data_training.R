@@ -1,13 +1,13 @@
-library(parallelMap)
+#library(parallelMap)
 library(llama)
-parallelStartSocket(64)
-parallelLibrary("llama")
+#parallelStartSocket(64)
+#parallelLibrary("llama")
 source("common.R")
 
 labelling <- "both" # "vertex" or "both"
 type <- "both_labels"
 p_values <- c(5, 10, 15, 20, 25, 33, 50)
-filtered_instances <- readLines("results/filtered_instances")
+filtered_instances <- readLines("results/filtered_instances3")
 algorithms <- c("clique", "mcsplit", "mcsplitdown")
 
 costs <- get_costs(filtered_instances, p_values)
@@ -60,11 +60,11 @@ answers$all_finished <- apply(success[, -1], 1, all)
 answers <- answers[answers$all_finished, ]
 
 # All should be true
-all(answers$mcsplit == answers$mcsplitdown)
-all(answers$mcsplit == answers$kdown)
-all(answers$clique == answers$mcsplit)
-all(answers$clique == answers$fusion1)
-all(answers$clique == answers$fusion2)
+#all(answers$mcsplit == answers$mcsplitdown)
+#all(answers$mcsplit == answers$kdown)
+#all(answers$clique == answers$mcsplit)
+#all(answers$clique == answers$fusion1)
+#all(answers$clique == answers$fusion2)
 
 data <- input(features, performance, success,
               list(groups = list(group1 = colnames(features)[-1]),
@@ -74,65 +74,65 @@ data <- input(features, performance, success,
 model <- classify(makeLearner("classif.randomForest"),
                   cvFolds(data, stratify = TRUE))
 saveRDS(model, sprintf("models/%s_labels.rds", labelling))
-parallelStop()
+#parallelStop()
 
 # ECDF plot for fusion
 
-library(lattice)
-library(latticeExtra)
-library(RColorBrewer)
+#library(lattice)
+#library(latticeExtra)
+#library(RColorBrewer)
 
-png("text/dissertation/images/fusion_ecdf.png", width = 480, height = 320)
-plt <- ecdfplot(~ clique + mcsplit + mcsplitdown + fusion1 + fusion2,
-                data = performance,
-#                data = performance[startsWith(as.character(performance$ID),
-#                                              "50"), ],
-               auto.key = list(space = "right",
-                               text = c("clique", "McSplit", "McSplit\u2193",
-                                        "Fusion 1", "Fusion 2")),
-               xlab = "Runtime (ms)", ylim = c(0.8, 1), xlim = c(0, 999999))
-update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8,
-                                                          name = "Dark2")))
-dev.off()
+# png("text/dissertation/images/fusion_ecdf.png", width = 480, height = 320)
+# plt <- ecdfplot(~ clique + mcsplit + mcsplitdown + fusion1 + fusion2,
+#                 data = performance,
+# #                data = performance[startsWith(as.character(performance$ID),
+# #                                              "50"), ],
+#                auto.key = list(space = "right",
+#                                text = c("clique", "McSplit", "McSplit\u2193",
+#                                         "Fusion 1", "Fusion 2")),
+#                xlab = "Runtime (ms)", ylim = c(0.8, 1), xlim = c(0, 999999))
+# update(plt, par.settings = custom.theme(fill = brewer.pal(n = 8,
+#                                                           name = "Dark2")))
+# dev.off()
 
 # Cumulative runtime dependence on the labelling percentage
-colours <- rainbow(length(algorithms))
-cumulative <- expand.grid(algorithm = algorithms, labelling = p_values)
-cumulative$time <- apply(cumulative, 1, function(row)
-  sum(performance[startsWith(as.character(performance$ID),
-                             sprintf("%02d", as.numeric(row[2]))), row[1]]))
-png(paste0("text/dissertation/images/fusion_linechart.png"), width = 480,
-    height = 320)
-plot(range(cumulative$labelling), range(cumulative$time),
-     xlab = "Labelling (%)", ylab = "Total runtime (ms)", type = "n",
-     main = "Both labels")
-for (i in 1:length(algorithms)) {
-  individual_results <- subset(cumulative,
-                               cumulative$algorithm == algorithms[i])
-  lines(individual_results$labelling, individual_results$time,
-        col = colours[i])
-}
-legend("topright", c("clique", "McSplit", "McSplit\u2193", "Fusion 1",
-                     "Fusion 2"), fill = colours)
-dev.off()
+# colours <- rainbow(length(algorithms))
+# cumulative <- expand.grid(algorithm = algorithms, labelling = p_values)
+# cumulative$time <- apply(cumulative, 1, function(row)
+#   sum(performance[startsWith(as.character(performance$ID),
+#                              sprintf("%02d", as.numeric(row[2]))), row[1]]))
+# png(paste0("text/dissertation/images/fusion_linechart.png"), width = 480,
+#     height = 320)
+# plot(range(cumulative$labelling), range(cumulative$time),
+#      xlab = "Labelling (%)", ylab = "Total runtime (ms)", type = "n",
+#      main = "Both labels")
+# for (i in 1:length(algorithms)) {
+#   individual_results <- subset(cumulative,
+#                                cumulative$algorithm == algorithms[i])
+#   lines(individual_results$labelling, individual_results$time,
+#         col = colours[i])
+# }
+# legend("topright", c("clique", "McSplit", "McSplit\u2193", "Fusion 1",
+#                      "Fusion 2"), fill = colours)
+# dev.off()
 
 # llama metrics
 
-sum(successes(data, model))
-sum(successes(data, vbs))
-sum(successes(data, singleBest))
-sum(misclassificationPenalties(data, model))
-mean(parscores(data, model))
-mean(parscores(data, vbs))
-mean(parscores(data, singleBest))
-contributions(data)
-png("dissertation/images/unlabelled_scatterplot1.png", width = 480,
-    height = 320)
-(perfScatterPlot(parscores, model, vbs, cvFolds(data, stratify = TRUE), data) +
-    xlab("Llama") + ylab("VBS"))
-dev.off()
-png("dissertation/images/unlabelled_scatterplot2.png", width = 480,
-    height = 320)
-(perfScatterPlot(parscores, model, singleBest, data) + xlab("Llama") +
-    ylab("McSplit\u2193"))
-dev.off()
+# sum(successes(data, model))
+# sum(successes(data, vbs))
+# sum(successes(data, singleBest))
+# sum(misclassificationPenalties(data, model))
+# mean(parscores(data, model))
+# mean(parscores(data, vbs))
+# mean(parscores(data, singleBest))
+# contributions(data)
+# png("dissertation/images/unlabelled_scatterplot1.png", width = 480,
+#     height = 320)
+# (perfScatterPlot(parscores, model, vbs, cvFolds(data, stratify = TRUE), data) +
+#     xlab("Llama") + ylab("VBS"))
+# dev.off()
+# png("dissertation/images/unlabelled_scatterplot2.png", width = 480,
+#     height = 320)
+# (perfScatterPlot(parscores, model, singleBest, data) + xlab("Llama") +
+#     ylab("McSplit\u2193"))
+# dev.off()

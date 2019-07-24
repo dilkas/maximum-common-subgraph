@@ -12,12 +12,14 @@ MEMORY_LIMIT := 7340032
 define run_sip
 #echo $1, `./algorithms/mcsplit/mcsp --timeout=$(TIMEOUT) -l -q $(MCSPLIT_HEURISTIC)$1` >> results/mcsplit.csv
 #echo $1, `./algorithms/kdown/solve_subgraph_isomorphism sequentialix --timeout $(TIMEOUT) --format lad --induced $1` >> results/kdown.csv
-size=$(shell echo $(shell head -n 1 $(firstword $1)) \* $(shell head -n 1 $(word 2,$1)) | bc) ; \
-if [ $${size} -lt $(MAX_SIZE) -a $${size} -ge $(MIN_SIZE) ] ; then \
-	echo $1, `ulimit -v $(MEMORY_LIMIT) ; ./algorithms/clique/solve_max_common_subgraph --unlabelled --undirected --lad --timeout $(TIMEOUT) $1` >> results/clique.csv ;\
-fi
+#size=$(shell echo $(shell head -n 1 $(firstword $1)) \* $(shell head -n 1 $(word 2,$1)) | bc) ; \
+#if [ $${size} -lt $(MAX_SIZE) -a $${size} -ge $(MIN_SIZE) ] ; then \
+#	echo $1, `ulimit -v $(MEMORY_LIMIT) ; ./algorithms/clique/solve_max_common_subgraph --unlabelled --undirected --lad --timeout $(TIMEOUT) $1` >> results/clique.csv ;\
+#fi
 #echo $1 `./graph_stats/graph_stats --distances $(firstword $1)` `./graph_stats/graph_stats --distances $(word 2,$1)` >> results/features.csv
 #echo $1 >> results/sip_instances
+-/usr/bin/time -v ./graph_stats/graph_stats --distances $(firstword $1) 2>> results/graph_stats_sip.csv; printf "\n" >> results/graph_stats_sip.csv; /usr/bin/time -v ./graph_stats/graph_stats --distances $(word 2,$1) 2>> results/graph_stats_sip.csv; printf "\n" >> results/graph_stats_sip.csv;
+
 endef
 
 define run_mcs
@@ -26,27 +28,28 @@ define run_mcs
 #echo $1, `ulimit -v $(MEMORY_LIMIT) ; ./algorithms/clique/solve_max_common_subgraph --undirected --timeout $(TIMEOUT) $1` >> results/clique.csv
 #echo $1 `./graph_stats/graph_stats --vf --distances $(firstword $1)` `./graph_stats/graph_stats --distances $(word 2,$1)` >> results/features.csv
 #echo $1 >> results/mcs_instances
-for l in $(LABELLINGS) ; do \
-    echo $1,`ulimit -v $(MEMORY_LIMIT) ; ./algorithms/fusion/mcsp -a -e 1 -n $$l -q -t $(TIMEOUT) $(MCSPLIT_HEURISTIC)$1` >> results/fusion2.both.labels.$$l.csv ; \
-done
+#for l in $(LABELLINGS) ; do \
+#    echo $1,`ulimit -v $(MEMORY_LIMIT) ; ./algorithms/fusion/mcsp -a -e 1 -n $$l -q -t $(TIMEOUT) $(MCSPLIT_HEURISTIC)$1` >> results/fusion2.both.labels.$$l.csv ; \
+#done
 #echo $1,`ulimit -v $(MEMORY_LIMIT) ; ./algorithms/clique/solve_max_common_subgraph --undirected --unlabelled $1` >> results/association.mcs.csv
+-/usr/bin/time -v ./graph_stats/graph_stats --vf --distances $(firstword $1) 2>> results/graph_stats_mcs.csv; printf "\n" >> results/graph_stats_mcs.csv; /usr/bin/time -v ./graph_stats/graph_stats --vf --distances $(word 2,$1) 2>> results/graph_stats_mcs.csv; printf "\n" >> results/graph_stats_mcs.csv;
 endef
 
 define generate_pairs
 $(foreach p,$(wildcard $(1)),$(foreach t,$(wildcard $(2)),$(subst /,_,$(3).$p.$t)))
 endef
 
-filtered: $(foreach f,$(shell cat results/filtered_instances2), $f/TRGT)
+#filtered: $(foreach f,$(shell cat results/filtered_instances2), $f/TRGT)
 #while read -r line; do \ echo $${line}, `./algorithms/mcsplit/mcsp --timeout=$(TIMEOUT) -q $(MCSPLIT_HEURISTIC) $${line}` >> results/mcsplit.csv ; \ done < results/filtered_instances
 
-#main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/si/*/*))
-#main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/scalefree/*))
-#main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/phase/*-target))
-#main: $(call generate_pairs,data/sip-instances/meshes-CVIU11/patterns/*,data/sip-instances/meshes-CVIU11/targets/*,MESH)
-#main: $(call generate_pairs,data/sip-instances/LV/*,data/sip-instances/LV/*,LV)
-#main: $(call generate_pairs,data/sip-instances/largerGraphs/*,data/sip-instances/largerGraphs/*,LARGER)
-#main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/images-PR15/pattern*))
-#main: $(call generate_pairs,data/sip-instances/images-CVIU11/patterns/*,data/sip-instances/images-CVIU11/targets/*,IMAGE)
+main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/si/*/*))
+main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/scalefree/*))
+main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/phase/*-target))
+main: $(call generate_pairs,data/sip-instances/meshes-CVIU11/patterns/*,data/sip-instances/meshes-CVIU11/targets/*,MESH)
+main: $(call generate_pairs,data/sip-instances/LV/*,data/sip-instances/LV/*,LV)
+main: $(call generate_pairs,data/sip-instances/largerGraphs/*,data/sip-instances/largerGraphs/*,LARGER)
+main: $(addsuffix /MAKE_TARGET,$(wildcard data/sip-instances/images-PR15/pattern*))
+main: $(call generate_pairs,data/sip-instances/images-CVIU11/patterns/*,data/sip-instances/images-CVIU11/targets/*,IMAGE)
 
 #main: $(addsuffix /TRGT,$(foreach f,$(wildcard data/mcs-instances/*/*/*),$(wildcard $f/*A*)))
 #main: $(addsuffix /TRGT,$(wildcard data/mcs-instances/*/*/*/*))
