@@ -1,13 +1,13 @@
 # Algorithm Selection for Maximum Common Subgraph
 
-NOTE: the `models` directory is too large to be on GitHub, and (for a while) can be downloaded from [Google Drive](https://drive.google.com/drive/folders/1YKQlTZPxYIHjLtq1-tq2fdtiy7NYf3ua?usp=sharing).
+NOTE: the `models` directory (which contains the trained machine learning models) is too big to be on GitHub and needs to be recreated when needed.
 
 ## Directories and Files
 
 * `algorithms`: the three original algorithms (clique, kdown, McSplit), and a combination of McSplit and clique called Fusion.
 * `data`: two databases of graphs for MCS and SIP algorithms, and an AIDS dataset, which was never used.
 * `gnuplot`: gnuplot scripts and generated cumulative plots
-* `graph_stats`: a graph feature extractor taken from Kotthoff, McCreesh, and Solnon, 2016. Portfolios of subgraph isomorphism algorithms.
+* `graph_stats`: a graph feature extractor taken from *Portfolios of subgraph isomorphism algorithms* (Kotthoff, McCreesh and Solnon, LION 2016)
 * `results`: all (mostly CSV) data that was generated during this project.
   * `.mcs.` and `.sip.` denote which database the data came from.
   * a number between dots denotes the labelling percentage.
